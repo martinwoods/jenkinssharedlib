@@ -22,10 +22,16 @@ package com.retailinmotion;
 def getServer(jenkinsURL){
 	def octopus=[:]
 	
-	if ( jenkinsURL.contains("10.25.1.200") ){
-		
-		
+	if ( jenkinsURL.contains("10.25.1.200") ){	
 		octopus['url']="http://10.25.1.200"
+		octopus['credentialsId']="OctopusAPIKey"
+		octopus['toolName']="Octo CLI"
+	} else if ( jenkinsURL.contains("rim-build-05") ){	
+		octopus['url']="http://rim-build-05"
+		octopus['credentialsId']="OctopusAPIKey"
+		octopus['toolName']="Octo CLI"
+	} else if ( jenkinsURL.contains("rimdub-esb-01") ){	
+		octopus['url']="http://rim-build-05"
 		octopus['credentialsId']="OctopusAPIKey"
 		octopus['toolName']="Octo CLI"
 	}
