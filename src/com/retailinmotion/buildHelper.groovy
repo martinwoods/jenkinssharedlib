@@ -125,7 +125,7 @@ def getAssemblyInfo(filePath){
 			# output as a service message for team city to parse
 			"Major:$($fileVersion.Major)" | Set-Content $env:propsFile
 			"Minor:$($fileVersion.Minor)" | Add-Content $env:propsFile
-			"Build:$($fileVersion.s)" | Add-Content $env:propsFile
+			"Build:$($fileVersion.Build)" | Add-Content $env:propsFile
 			"Revision:$($fileVersion.Revision)" | Add-Content $env:propsFile
 		} 
 	}
