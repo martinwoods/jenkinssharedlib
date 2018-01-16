@@ -74,7 +74,7 @@ def getBranchInfo(branchName){
 
 // Assemble the package string and strip out any characters not allowed in a SemVer 2.0.0 compatible version, as required by Octopus (https://semver.org/spec/v2.0.0.html)
 def getPackageName (assemblyInfo, buildInfo, gitHashes, buildNumber ){
-	def packageString="${assemblyInfo.Major}.${assemblyInfo.Minor}.$buildNumber-${buildInfo.buildType}+Branch.${buildInfo.featureName}.Sha.${gitHashes.full}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
+	def packageString="${assemblyInfo.Major}.${assemblyInfo.Minor}.${assemblyInfo.Build}.$buildNumber-${buildInfo.buildType}+Branch.${buildInfo.featureName}.Sha.${gitHashes.full}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
 	
 	return packageString
 }
