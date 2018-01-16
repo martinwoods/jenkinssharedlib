@@ -78,3 +78,139 @@ def getPackageName (assemblyInfo, buildInfo, gitHashes, buildNumber ){
 	
 	return packageString
 }
+
+/*
+* 	Name: 		getAsssemblyInfo
+*	Purpose: 	Reads version information from given assemblyinfo.cs file
+* 	Parameters:	
+				filePath - Path to the assemblyinfo.cs file to read version info from
+*	Returns:	Hashmap containing;
+					Major
+					Minor
+					Build
+					Revision
+					
+	Keith Douglas
+	Dec 2017
+	keith.douglas@retailinmotion.com
+*/
+def getAssemblyInfo(filePath){
+
+	echo "Reading assembly version info from ${filePath}"
+	
+	// Store the info in a timestamped file so that we don't clash with other build files
+	Date d=new Date();
+	def propsFile="versioninfo." + d.getTime() + ".properties"
+	
+	withEnv(["filePath=${filePath}", "propsFile=$propsFile"]) {
+	// Get current version info from assemblyinfo.cs
+	powershell '''# Read the current values set in the assemblyinfo
+	# This can be then be modified/reused in Jenkins as required
+	# Major Ver and Minor Ver will likely always come from AssemblyInfo, with Build and revision being overwritten at build time
+
+	$filePath="$env:filePath"
+	# Look for the assembly file version 
+	$pattern = \'\\[assembly: AssemblyVersion\\("(.*)"\\)\\]\'
+	# ignore lines that are commented out
+	$commentpattern= \'\\/\\/.*\' 
+	
+	Get-Content $filePath | ForEach-Object{
+		if($_ -match $pattern -and $_ -notmatch $commentpattern ){
+			# We have found the matching line
+			# Parse the version number
+			$versionString=$matches[1]
+			
+			$fileVersion = [version]($versionString -replace "\\.\\*", "")
+			\'AssemblyVersion("{0}")\' -f $fileVersion
+			# output as a service message for team city to parse
+			"Major:$($fileVersion.Major)" | Set-Content $env:propsFile
+			"Minor:$($fileVersion.Minor)" | Add-Content $env:propsFile
+			"Build:$($fileVersion.s)" | Add-Content $env:propsFile
+			"Revision:$($fileVersion.Revision)" | Add-Content $env:propsFile
+		} 
+	}
+	EXIT 0'''
+	}
+	
+	// read the contents of the properties file into a map
+	textProps=readFile "$propsFile"
+	props=readProperties text: "$textProps"				
+	// clean up the temp file
+	fileOperations([fileDeleteOperation(excludes: '', includes: "$propsFile")])
+
+	
+	return props
+	
+}
+
+
+/*
+* 	Name: 		updateAssemblyInfo
+*	Purpose: 	Update all assemblyinfo.cs files under the given path with the specified version strings
+*	Parameters:	
+				versionPath - Path under which to recursively update assemblyinfo.cs files
+				newVersion - String to use for the AssemblyVersion and AssemblyFileVersion parameters
+				newInfoVersion - String to use for the AssemblyInformationalVersion parameter
+				
+	Keith Douglas
+	Dec 2017
+	keith.douglas@retailinmotion.com
+*/
+def updateAssemblyInfo (versionPath, newVersion, newInfoVersion) {
+	
+	echo "Updating assembly info at ${versionPath} to ${newVersion} / ${newInfoVersion}"
+	
+	withEnv(["assemblyVersion=${newVersion}",
+			"assemblyInfoVersion=${newInfoVersion}", 
+			"versionPath=${versionPath}"]) {
+			
+		powershell '''
+			function Update-SourceVersion
+			{
+				Param ([string]$Version, 
+					[string]$InfoVersion
+				)
+			   
+
+				foreach ($o in $input) 
+				{
+					Write-Host "Updating  \'$($o.FullName)\' -> $Version"
+				
+					$assemblyVersionPattern = \'AssemblyVersion\\("[0-9]+(\\.([0-9]+|\\*)){1,3}"\\)\'
+					$fileVersionPattern = \'AssemblyFileVersion\\("[0-9]+(\\.([0-9]+|\\*)){1,3}"\\)\'
+					$infoVersionPattern = \'AssemblyInformationalVersion\\(".*"\\)\'
+					$assemblyVersion = \'AssemblyVersion("\' + $version + \'")\';
+					$fileVersion = \'AssemblyFileVersion("\' + $version + \'")\';
+					$newInfoVersion = \'AssemblyInformationalVersion("\' + $InfoVersion + \'")\';
+
+					# Update the file, check whether or not we need to update the info version too
+					if( [string]::IsNullOrEmpty($InfoVersion)){
+						(Get-Content $o.FullName) | ForEach-Object  { 
+						   % {$_ -replace $assemblyVersionPattern, $assemblyVersion } |
+						   % {$_ -replace $fileVersionPattern, $fileVersion }
+						} | Out-File $o.FullName -encoding UTF8 -force
+					} else {
+						  (Get-Content $o.FullName) | ForEach-Object  { 
+						   % {$_ -replace $assemblyVersionPattern, $assemblyVersion } |
+						   % {$_ -replace $fileVersionPattern, $fileVersion } |
+						   % {$_ -replace $infoVersionPattern, $newInfoVersion }
+						} | Out-File $o.FullName -encoding UTF8 -force
+					}
+				}
+			}
+			function Update-AllAssemblyInfoFiles ( $version, $infoVersion, $path )
+			{
+				Write-Host "Searching \'$path\'"
+			   foreach ($file in "AssemblyInfo.cs", "AssemblyInfo.vb" ) 
+			   {
+					get-childitem $path -recurse |? {$_.Name -eq $file} | Update-SourceVersion $version $infoVersion;
+			   }
+			}
+
+			
+			
+			Update-AllAssemblyInfoFiles $env:assemblyVersion $env:assemblyInfoVersion $env:versionPath
+			
+		'''	
+	}
+}
