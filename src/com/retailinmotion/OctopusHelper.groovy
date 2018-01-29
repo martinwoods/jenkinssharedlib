@@ -53,12 +53,12 @@ def pushPackage (jenkinsURL, packageFile){
 	}
 }
 
-def deploy(jenkinsURL, project, packageString, deployTo, tenant){
+def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --waitfordeployment --progress --project "$project" --packageversion $packageString --version $packageString --deployTo "$deployTo" --tenant "$tenant" --server ${octopusServer.url} --apiKey ${APIKey}
+				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --waitfordeployment --progress --project "$project" --packageversion $packageString --version $packageString --deployTo "$deployTo" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
 				"""
 	}
 }
