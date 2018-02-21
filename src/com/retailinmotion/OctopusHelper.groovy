@@ -38,6 +38,10 @@ def getServer(jenkinsURL){
 		octopus['url']="http://rim-build-05"
 		octopus['credentialsId']="OctopusAPIKey"
 		octopus['toolName']="Octo CLI"
+	} else if ( jenkinsURL.contains("rimdub-jen-01") ){	
+		octopus['url']="http://octopus.rim.local"
+		octopus['credentialsId']="OctopusAPIKey"
+		octopus['toolName']="Octo CLI"
 	}
 	println "Selected Octopus at ${octopus.url} for build server $jenkinsURL"
 	return octopus
