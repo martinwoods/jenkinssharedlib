@@ -221,6 +221,6 @@ def bumpVersion(filePath){
 		buildString=readFile "$filePath"
 		buildNumber=buildString.toInteger()
 		buildNumber++
-		writeFile "$filePath" buildNumber
+		writeFile file: "$filePath" , text: "$buildNumber"
 	}
 }
