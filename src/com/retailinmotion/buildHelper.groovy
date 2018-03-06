@@ -221,7 +221,7 @@ def bumpVersion(filePath){
 	lock("$JOB_NAME-version-lock"){
 		buildString=readFile "$filePath"
 		oldBuildNumber=buildString.toInteger()
-		newBuildNumber=oldBuildNumber++
+		newBuildNumber=oldBuildNumber+1
 		writeFile file: "$filePath" , text: "$newBuildNumber"
 	}
 	echo "Old build number was: $oldBuildNumber, bumped to: $newBuildNumber"
