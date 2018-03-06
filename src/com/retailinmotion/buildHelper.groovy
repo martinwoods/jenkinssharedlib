@@ -225,5 +225,5 @@ def bumpVersion(filePath){
 		writeFile file: "$filePath" , text: "$newBuildNumber"
 	}
 	echo "Old build number was: $oldBuildNumber, bumped to: $newBuildNumber"
-	return buildNumber
+	return newBuildNumber
 }
