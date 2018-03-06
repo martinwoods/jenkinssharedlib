@@ -217,10 +217,13 @@ def updateAssemblyInfo (versionPath, newVersion, newInfoVersion) {
 
 
 def bumpVersion(filePath){
+	echo "Bumping version at $filePath"
 	lock("$JOB_NAME-version-lock"){
 		buildString=readFile "$filePath"
-		buildNumber=buildString.toInteger()
-		buildNumber++
-		writeFile file: "$filePath" , text: "$buildNumber"
+		oldBuildNumber=buildString.toInteger()
+		newBuildNumber=oldBuildNumber++
+		writeFile file: "$filePath" , text: "$newBuildNumber"
 	}
+	echo "Old build number was: $oldBuildNumber, bumped to: $newBuildNumber"
+	return buildNumber
 }
