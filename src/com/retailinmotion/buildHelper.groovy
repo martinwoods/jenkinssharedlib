@@ -214,3 +214,13 @@ def updateAssemblyInfo (versionPath, newVersion, newInfoVersion) {
 		'''	
 	}
 }
+
+
+def bumpVersion(filePath){
+	lock("$JOB_NAME-version-lock"){
+		buildString=readFile "$filePath"
+		buildNumber=buildString.toInteger()
+		buildNumber++
+		writeFile "$filePath" buildNumber
+	}
+}
