@@ -215,7 +215,11 @@ def updateAssemblyInfo (versionPath, newVersion, newInfoVersion) {
 	}
 }
 
-
+/*
+* Get the version number from the given file
+* Increments the version number in the file using a file lock
+* and returns the incremented version number
+*/
 def bumpVersion(filePath){
 	echo "Bumping version at $filePath"
 	lock("$filePath-lock"){
@@ -226,4 +230,32 @@ def bumpVersion(filePath){
 	}
 	echo "Old build number was: $oldBuildNumber, bumped to: $newBuildNumber"
 	return newBuildNumber
+}
+
+
+/*
+* Get the list of changes for the build
+*/
+def getChangeString() {
+	def changeString=""
+	def changeLogSets = currentBuild.changeSets
+	for (int i = 0; i < changeLogSets.size(); i++) {
+		def entries = changeLogSets[i].items
+		for (int j = 0; j < entries.length; j++) {
+			def entry = entries[j]
+			echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+			changeString+=entry.msg
+			
+			def files = new ArrayList(entry.affectedFiles)
+			for (int k = 0; k < files.size(); k++) {
+				def file = files[k]
+				echo "  ${file.editType.name} ${file.path}"
+			}
+		}
+	}
+	
+	if (!changeString) {
+        changeString = " - No new changes"
+    }
+    return changeString
 }
