@@ -71,12 +71,18 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 	}
 }
 
-def createRelease(jenkinsURL, project, packageString, extraArgs){
+def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", extraArgs = ""){
 
 	def octopusServer=getServer(jenkinsURL)
+	def versionArgs=""
+	if ( packageArg != "" ){
+		versionArgs = " --package $packageArg"
+	} else {
+		versionArgs = " --packageversion $releaseVersion"
+	}
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" --packageversion $packageString --version $packageString $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
+				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" $versionArgs --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
 				"""
 	}
 }
