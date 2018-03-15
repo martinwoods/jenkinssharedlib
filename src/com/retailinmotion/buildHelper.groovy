@@ -99,6 +99,7 @@ def getXMLNodeValue(filePath, nodeName){
 def getCSProjVersion(filePath){
   
   def nodeName='Version'
+  echo "Reading version from $filePath"
   def version=getXMLNodeValue(filePath, nodeName)
   
   def vers = version.tokenize('.')
