@@ -85,6 +85,7 @@ def getPackageName (assemblyInfo, buildInfo, gitHashes, buildNumber ){
 */
 def getXMLNodeValue(filePath, nodeName){
     def xml=new XmlSlurper().parse(filePath)
+	println "Looking for $nodeName in $filePath"
 	print xml.PropertyGroup
     def data=xml.PropertyGroup.children().find{ node ->
       node.name() == nodeName
