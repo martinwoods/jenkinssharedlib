@@ -80,6 +80,39 @@ def getPackageName (assemblyInfo, buildInfo, gitHashes, buildNumber ){
 }
 
 /*
+* getXMLNodeValue - Utility function to get the value of an xml node from a given xml file
+*
+*/
+def getXMLNodeValue(filePath, nodeName){
+    def xml=new XmlSlurper().parse(filePath)
+    def data=xml.PropertyGroup.children().find{ node ->
+      node.name() == nodeName
+    }
+
+	return data.text()
+}
+
+/*
+* getCSProjVersion
+* Read the version string from a csproj file and return a map containing the Major/Minor/Build version
+*/
+def getCSProjVersion(filePath){
+  
+  def nodeName='Version'
+  def version=getXMLNodeValue(filePath, nodeName)
+  
+  def vers = version.tokenize('.')
+  
+  def versionInfo = [:]
+  versionInfo.Major = vers[0].toString();
+  versionInfo.Minor = vers[1].toString();
+  versionInfo.Build = vers[2].toString();
+  
+  return versionInfo
+}
+
+
+/*
 * 	Name: 		getAsssemblyInfo
 *	Purpose: 	Reads version information from given assemblyinfo.cs file
 * 	Parameters:	
