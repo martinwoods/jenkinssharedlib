@@ -85,13 +85,18 @@ def getPackageName (assemblyInfo, buildInfo, gitHashes, buildNumber ){
 */
 def getXMLNodeValue(filePath, nodeName){
     def xml=new XmlSlurper().parse(filePath)
-	println "Looking for $nodeName in $filePath"
-	xml.PropertyGroup.children().each { node -> println node.name()}
-    def data=xml.PropertyGroup.children().find{ node ->
-      node.name() == nodeName
+  	def data=false
+	xml.PropertyGroup.children().each { node -> 
+		if(node.name() == nodeName) 
+		{ 
+		  data=node.text();  
+		} 
     }
+    //def data=xml.PropertyGroup.children().find{ node ->
+    //  node.name() == nodeName
+    //}
 
-	return data.text()
+	return data
 }
 
 /*
@@ -101,16 +106,21 @@ def getXMLNodeValue(filePath, nodeName){
 def getCSProjVersion(filePath){
   
   def nodeName='Version'
+  def versionInfo = [:]
   echo "Reading version from $filePath"
   def version=getXMLNodeValue(filePath, nodeName)
-  
-  def vers = version.tokenize('.')
-  
-  def versionInfo = [:]
-  versionInfo.Major = vers[0].toString();
-  versionInfo.Minor = vers[1].toString();
-  versionInfo.Build = vers[2].toString();
-  
+  if(version != false) {
+	def vers = version.tokenize('.')
+	
+	versionInfo.Major = vers[0].toString();
+	versionInfo.Minor = vers[1].toString();
+	versionInfo.Build = vers[2].toString();
+  } else {
+	println "Warning: No version found in $filePath, defaulting to 1.0.0"
+	versionInfo.Major = "1"
+	versionInfo.Minor = "0"
+	versionInfo.Build = "0"
+  }
   return versionInfo
 }
 
