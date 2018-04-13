@@ -122,7 +122,7 @@ def getXMLPathValue(filePath, xpathQuery){
 def getAntBuildXMLVersion(filePath) {
 	def xPath='//project/property[@name="version"]/@value';
 	def version=getXMLPathValue(filePath, xPath);
-	
+	def versionInfo = [:]
 	if(version != false) {
 		def vers = version.tokenize('.')
 		
