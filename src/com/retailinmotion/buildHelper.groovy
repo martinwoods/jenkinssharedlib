@@ -1,4 +1,7 @@
 package com.retailinmotion;
+
+import javax.xml.xpath.*
+import javax.xml.parsers.DocumentBuilderFactory
 /*
 * 	Class Name: Builder Helper
 *	Purpose: 	Provides helper functions for Jenkins pipeline scripts
@@ -74,10 +77,18 @@ def getBranchInfo(branchName){
 
 // Assemble the package string and strip out any characters not allowed in a SemVer 2.0.0 compatible version, as required by Octopus (https://semver.org/spec/v2.0.0.html)
 def getPackageName (assemblyInfo, buildInfo, gitHashes, buildNumber ){
-	def packageString="${assemblyInfo.Major}.${assemblyInfo.Minor}.${assemblyInfo.Build}.$buildNumber-${buildInfo.buildType}+Branch.${buildInfo.featureName}.Sha.${gitHashes.short}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
+	def packageSuffix=getPackageSuffix(buildInfo, gitHashes);
+	def packageString="${assemblyInfo.Major}.${assemblyInfo.Minor}.${assemblyInfo.Build}.$buildNumber${packageSuffix}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
 	
 	return packageString
 }
+
+def getPackageSuffix (buildInfo, gitHashes){
+	def packageSuffix="-${buildInfo.buildType}+Branch.${buildInfo.featureName}.Sha.${gitHashes.short}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
+	
+	return packageSuffix
+}
+
 
 /*
 * getXMLNodeValue - Utility function to get the value of an xml node from a given xml file
@@ -92,11 +103,39 @@ def getXMLNodeValue(filePath, nodeName){
 		  data=node.text();  
 		} 
     }
-    //def data=xml.PropertyGroup.children().find{ node ->
-    //  node.name() == nodeName
-    //}
-
 	return data
+}
+/*
+* Get the value at the given xPath
+*/
+def getXMLPathValue(filePath, xpathQuery){	
+    def xpath = XPathFactory.newInstance().newXPath()
+	def builder     = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+	def inputStream = new FileInputStream(filePath)
+	def records     = builder.parse(inputStream).documentElement
+	return xpath.evaluate( xpathQuery, records )
+}
+
+/* 
+* Get the version property in build.xml
+*/
+def getAntBuildXMLVersion(filePath) {
+	def xPath='//project/property[@name="version"]/@value';
+	def version=getXMLPathValue(filePath, xPath);
+	
+	if(version != false) {
+		def vers = version.tokenize('.')
+		
+		versionInfo.Major = vers[0].toString();
+		versionInfo.Minor = vers[1].toString();
+		versionInfo.Build = vers[2].toString();
+	  } else {
+		println "Warning: No version found in $filePath, defaulting to 1.0.0"
+		versionInfo.Major = "1"
+		versionInfo.Minor = "0"
+		versionInfo.Build = "0"
+	  }
+	return versionInfo
 }
 
 /*
