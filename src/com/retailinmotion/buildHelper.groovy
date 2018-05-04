@@ -47,6 +47,7 @@ def getGitHashes (){
 			 feature/VECTWO-14795-vpos-dashboard-1
 			 bugfix/VECTWO-15215-tcx-mastercontrol-containers
 			 release/RC_20171106
+			 VECTWO-19157-new-adjustment-reason-as-supplier (Branch containing VECTWO will be set to buildType of 'feature')
 			 AirAsia_Branch (Default buildType of 'branch' will be set in this instance)
 */
 def getBranchInfo(branchName){
@@ -59,6 +60,17 @@ def getBranchInfo(branchName){
 
 		buildInfo['buildType']=branchInfo[0][1]
 		def longFeatureName=branchInfo[0][3]
+
+		def featureInfo = longFeatureName =~ /([A-Z]*\-{1}[0-9]*)(.*)/
+		if ( featureInfo ) {
+			buildInfo['featureName'] = featureInfo[0][1]
+		} else {
+			buildInfo['featureName'] = longFeatureName
+		}
+		buildInfo['longFeatureName']= longFeatureName
+    } else if(branchName.contains("VECTWO")){ // sometimes, feature branches are created without feature/ prefix by mistake
+      	buildInfo['buildType']="feature"
+		def longFeatureName=branchName
 
 		def featureInfo = longFeatureName =~ /([A-Z]*\-{1}[0-9]*)(.*)/
 		if ( featureInfo ) {
@@ -149,7 +161,7 @@ def getCSProjVersion(filePath){
   def versionInfo = [:]
   echo "Reading version from $filePath"
   def version=getXMLNodeValue(filePath, nodeName)
-  if(version != false) {
+  if(version != false && version != "") {
 	def vers = version.tokenize('.')
 	
 	versionInfo.Major = vers[0].toString();
