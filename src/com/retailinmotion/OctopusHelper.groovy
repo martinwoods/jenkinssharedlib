@@ -61,6 +61,9 @@ def pushPackage (jenkinsURL, packageFile){
 	}
 }
 
+/*
+* Create a release and deploy it 
+*/
 def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 
 	def octopusServer=getServer(jenkinsURL)
@@ -71,6 +74,9 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 	}
 }
 
+/*
+* Create an octopus release based on package strings
+*/
 def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel="", extraArgs = ""){
 
 	def octopusServer=getServer(jenkinsURL)
@@ -91,4 +97,20 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 				"""
 	}
 }
+
+/*
+* Create an octopus release, reading the package versions from the packages found in the given folder
+*/
+def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder, extraArgs = ""){
+
+	def octopusServer=getServer(jenkinsURL)
+	
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
+		powershell """
+				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" --packagesFolder "$packagesFolder" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
+				"""
+	}
+}
+
+
 
