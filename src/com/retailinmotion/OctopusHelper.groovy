@@ -22,25 +22,13 @@ package com.retailinmotion;
 def getServer(jenkinsURL){
 	def octopus=[:]
 	
-	if ( jenkinsURL.contains("10.25.1.200") ){	
-		octopus['url']="http://10.25.1.200"
-		octopus['credentialsId']="OctopusAPIKey"
-		octopus['toolName']="Octo CLI"
-	} else if ( jenkinsURL.contains("rim-build-05") ){	
-		octopus['url']="http://rim-build-05"
-		octopus['credentialsId']="OctopusAPIKey"
-		octopus['toolName']="Octo CLI"
-	} else if ( jenkinsURL.contains("rimdub-esb-01") ){	
-		octopus['url']="http://rim-build-05"
-		octopus['credentialsId']="OctopusAPIKey"
-		octopus['toolName']="Octo CLI"
-	} else if ( jenkinsURL.contains("rimdev-build-06") ){	
-		octopus['url']="http://rim-build-05"
-		octopus['credentialsId']="OctopusAPIKey"
-		octopus['toolName']="Octo CLI"
-	} else if ( jenkinsURL.contains("rimdub-jen-01") ){	
+	if ( jenkinsURL.contains("rimdub-jen-01") ){	
 		octopus['url']="http://octopus.rim.local"
 		octopus['credentialsId']="OctopusRimLocalAPIKey"
+		octopus['toolName']="Octo CLI"
+	} else {
+		octopus['url']="http://rim-build-05"
+		octopus['credentialsId']="OctopusAPIKey"
 		octopus['toolName']="Octo CLI"
 	}
 	println "Selected Octopus at ${octopus.url} for build server $jenkinsURL"
