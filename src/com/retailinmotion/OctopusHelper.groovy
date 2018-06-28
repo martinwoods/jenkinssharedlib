@@ -28,7 +28,7 @@ def getServer(jenkinsURL){
 		octopus['toolName']="Octo CLI"
 	} else {
 		octopus['url']="http://rim-build-05"
-		octopus['credentialsId']="OctopusAPIKey"
+		octopus['credentialsId']="OctopusRimLocalAPIKey"
 		octopus['toolName']="Octo CLI"
 	}
 	println "Selected Octopus at ${octopus.url} for build server $jenkinsURL"
