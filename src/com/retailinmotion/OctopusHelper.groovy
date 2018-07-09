@@ -39,12 +39,12 @@ def getServer(jenkinsURL){
 *	Push the given package to the correct Octopus deploy server for this Jenkins build server
 */
 
-def listDeployments (jenkinsURL, tenant){
+def listDeployments (jenkinsURL, tenant, environment=null){
 	
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		powershell """
-					&'${tool("${octopusServer.toolName}")}\\Octo.exe' list-deployments --tenant=${tenant} --server ${octopusServer.url} --apiKey ${APIKey}
+					&'${tool("${octopusServer.toolName}")}\\Octo.exe' list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey}
 				"""
 	}
 }
