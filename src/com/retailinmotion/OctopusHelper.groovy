@@ -39,7 +39,7 @@ def getServer(jenkinsURL){
 *	Push the given package to the correct Octopus deploy server for this Jenkins build server
 */
 
-def listDeployments (jenkinsURL, tenant, environment=null){
+def listDeployments (jenkinsURL, tenant, environment="production"){
 	
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
