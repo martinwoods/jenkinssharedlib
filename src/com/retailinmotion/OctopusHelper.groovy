@@ -57,7 +57,7 @@ def pushPackage (jenkinsURL, packageFile){
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		powershell """
-					&'${tool("${octopusServer.toolName}")}\\Octo.exe' push --package $packageFile --replace-existing --server ${octopusServer.url} --apiKey ${APIKey}
+					&'${tool("${octopusServer.toolName}")}\\Octo.exe' push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey}
 				"""
 	}
 }
