@@ -79,9 +79,10 @@ def getBranchInfo(branchName){
 			buildInfo['featureName'] = longFeatureName
 		}
 		buildInfo['longFeatureName']= longFeatureName
-	} else { // otherwise, it's a branch build
+	} else { // otherwise, it's a mainline branch build
 		buildInfo['buildType'] = "branch"
 		buildInfo['featureName'] = branchName
+		buildInfo['longFeatureName'] = branchName
 	}
 
 	return buildInfo
