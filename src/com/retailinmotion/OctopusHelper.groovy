@@ -28,7 +28,7 @@ def getServer(jenkinsURL){
 		octopus['toolName']="Octo CLI"
 	} else {
 		octopus['url']="http://rim-build-05"
-		octopus['credentialsId']="OctopusAPIKey"
+		octopus['credentialsId']="sandBoxOctopus"
 		octopus['toolName']="Octo CLI"
 	}
 	println "Selected Octopus at ${octopus.url} for build server $jenkinsURL"
@@ -38,13 +38,26 @@ def getServer(jenkinsURL){
 /*
 *	Push the given package to the correct Octopus deploy server for this Jenkins build server
 */
+
+def listDeployments (jenkinsURL, tenant, environment){
+	
+	def octopusServer=getServer(jenkinsURL)
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
+		powershell """
+					&'${tool("${octopusServer.toolName}")}\\Octo.exe' list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey}
+				"""
+	}
+}
+
+
+
 def pushPackage (jenkinsURL, packageFile){
 	
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		powershell """
-					&'${tool("${octopusServer.toolName}")}\\Octo.exe' push --package $packageFile  --server ${octopusServer.url} --apiKey ${APIKey}
+					&'${tool("${octopusServer.toolName}")}\\Octo.exe' push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey}
 				"""
 	}
 }
@@ -81,7 +94,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" $optionString --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
+				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
 				"""
 	}
 }
