@@ -2,6 +2,8 @@ package com.retailinmotion;
 
 import javax.xml.xpath.*
 import javax.xml.parsers.DocumentBuilderFactory
+import groovy.json.JsonSlurperClassic
+
 /*
 * 	Class Name: Builder Helper
 *	Purpose: 	Provides helper functions for Jenkins pipeline scripts
@@ -28,11 +30,32 @@ class buildHelper implements Serializable {
 	*
 	*/
 	def getGitVersionInfo(dockerImage, subPath =null, variable=null){
+		def args
+		
+		echo "Class is" + dockerImage.getClass()
+		if(subPath != null){
+			subPath=subPath.toString().replaceAll('\', '/')
+			if(!subPath.startsWith("/")){
+				subPath="/" + subPath
+			}
+		}
+		if(variable != null){
+			args="/showvariable $variable"
+		}
 		script.echo "Workspace is $script.WORKSPACE"
-		script.docker.image(dockerImage).inside('-v "$WORKSPACE:/src"'){
+		script.docker.image(dockerImage).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 			script.sh '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src
+				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt
 			'''
+		}
+		
+		def output = readFile(file:'gitversion.txt')
+		
+		if(variable != null){
+			return output
+		} else {
+			def json = new JsonSlurperClassic().parseText(output)
+			return json
 		}
 	}
 	/*
