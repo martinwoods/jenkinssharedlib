@@ -32,17 +32,20 @@ class buildHelper implements Serializable {
 	def getGitVersionInfo(dockerImage, subPath =null, variable=null){
 		def args
 		
-		echo "Class is" + dockerImage.getClass()
+		script.echo "Class is" + dockerImage.getClass()
+		// Parse the subPath argument
 		if(subPath != null){
 			subPath=subPath.toString().replaceAll('\\', '/')
 			if(!subPath.startsWith("/")){
 				subPath="/" + subPath
 			}
 		}
+		// Check if we need to query a specific variable from gitversion
 		if(variable != null){
 			args="/showvariable $variable"
 		}
 		script.echo "Workspace is $script.WORKSPACE"
+		// Execute the command inside the given docker image
 		script.docker.image(dockerImage).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 			script.sh '''
 				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt
