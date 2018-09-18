@@ -46,7 +46,7 @@ class buildHelper implements Serializable {
 		}
 		script.echo "Workspace is $script.WORKSPACE"
 		// Execute the command inside the given docker image
-		script.docker.image(dockerImage).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
+		script.docker.image(dockerImage).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 			script.sh '''
 				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt
 			'''
