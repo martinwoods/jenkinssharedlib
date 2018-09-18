@@ -28,7 +28,7 @@ class buildHelper implements Serializable {
 	*
 	*/
 	def getGitVersionInfo(dockerImage, subPath =null, variable=null){
-		echo "Workspace is $script.WORKSPACE"
+		script.echo "Workspace is $script.WORKSPACE"
 		script.docker.image(dockerImage).inside('-v "$WORKSPACE:/src"'){
 			mono /usr/lib/GitVersion/tools/GitVersion.exe /src
 		}
