@@ -34,7 +34,7 @@ class buildHelper implements Serializable {
 		
 		echo "Class is" + dockerImage.getClass()
 		if(subPath != null){
-			subPath=subPath.toString().replaceAll('\', '/')
+			subPath=subPath.toString().replaceAll('\\', '/')
 			if(!subPath.startsWith("/")){
 				subPath="/" + subPath
 			}
