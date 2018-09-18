@@ -56,7 +56,7 @@ class buildHelper implements Serializable {
 			'''
 		}
 		
-		def output = readFile(file:'gitversion.txt')
+		def output = script.readFile(file:'gitversion.txt')
 		
 		if(variable != null){
 			return output
