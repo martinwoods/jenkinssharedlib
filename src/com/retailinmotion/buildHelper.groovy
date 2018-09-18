@@ -11,6 +11,28 @@ import javax.xml.parsers.DocumentBuilderFactory
 */
 
 class buildHelper implements Serializable {
+
+	def script
+	
+	buildHelper(){
+		this.script=null 
+	}
+	buildHelper(script){
+		this.script=script
+	}
+
+	
+	
+	/*
+	* Get output of GitVersion command and 
+	*
+	*/
+	def getGitVersionInfo(dockerImage, subPath =null, variable=null){
+		echo "Workspace is $WORKSPACE"
+		script.docker.image(dockerImage).inside('-v "$WORKSPACE:/src"'){
+			mono /usr/lib/GitVersion/tools/GitVersion.exe /src
+		}
+	}
 	/*
 	* 	Name: 		getGitHash
 	*	Purpose: 	Gets current git hash, both full version and short
