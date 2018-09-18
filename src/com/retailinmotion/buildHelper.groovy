@@ -39,10 +39,14 @@ class buildHelper implements Serializable {
 			if(!subPath.startsWith("/")){
 				subPath="/" + subPath
 			}
+		} else {
+			subPath=""
 		}
 		// Check if we need to query a specific variable from gitversion
 		if(variable != null){
 			args="/showvariable $variable"
+		} else {
+			args=""
 		}
 		script.echo "Workspace is $script.WORKSPACE"
 		// Execute the command inside the given docker image
