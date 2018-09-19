@@ -76,7 +76,7 @@ class buildHelper implements Serializable {
 		if(useTool){
 			// call the tool directly (intended for use on windows systems)
 			script.echo "Command is $gitVersionExe /src${subPath} ${args} > gitversion.txt"
-			script.sh '''
+			script.bat '''
 				$gitVersionExe /src${subPath} ${args} > gitversion.txt
 			'''
 		} else if (useDocker){
