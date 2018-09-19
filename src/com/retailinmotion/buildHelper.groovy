@@ -26,13 +26,38 @@ class buildHelper implements Serializable {
 	
 	
 	/*
-	* Get output of GitVersion command and 
-	*
+	* Name: getGitVersionInfo
+	* Purpose: Get output of GitVersion command 
+	* Parameters: 	dockerImageOrToolPath - can be either a path to gitversion.exe, or the name of a docker image to use
+	*					if the given path exists, it will be called directly, otherwise, try to run a docker image
+	* 				subPath - allows specifying a subfolder in the repo to run gitversion (e.g. when there are multiple projects in a repo)
+	* 				variable - takes the name of a single variable to be returned from GitVersion, if omitted, a JSON object is returned
 	*/
-	def getGitVersionInfo(dockerImage, subPath =null, variable=null){
+	def getGitVersionInfo(dockerImageOrToolPath, subPath =null, variable=null){
 		def args
+		def gitVersionExe
+		def useTool=false
+        def useDocker=false
+		// Check if we were given a path to the gitversion.exe
+        if (!dockerImageOrToolPath.toString().endsWith(".exe")){
+			    gitVersionExe=new File(dockerImageOrToolPath, "GitVersion.exe") 
+		} else {
+			gitVersionExe= new File(dockerImageOrToolPath)
+		}
 		
-		script.echo "Class is" + dockerImage.getClass()
+		// If the exe exists and is a real path, use that, if not, assume the given string is a docker image to run
+		try {
+           gitVersionExe.getCanonicalPath();
+           useTool=true
+           useDocker=false
+		   script.echo "Found $gitVersionExe, will call tool directly"
+        }
+        catch (IOException e) {
+           useTool=false
+           useDocker=true
+		   script.echo "Couldn't find direct path to exe, will try to call docker image using $dockerImageOrToolPath"
+        }
+		
 		// Parse the subPath argument
 		if(subPath != null){
 			subPath=subPath.toString().replaceAll('\\', '/')
@@ -48,19 +73,30 @@ class buildHelper implements Serializable {
 		} else {
 			args=""
 		}
-		script.echo "Workspace is $script.WORKSPACE"
-		// Execute the command inside the given docker image
-		script.docker.image(dockerImage).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
+		if(useTool){
+			// call the tool directly (intended for use on windows systems)
+			script.echo "Command is $gitVersionExe /src${subPath} ${args} > gitversion.txt"
 			script.sh '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt
+				$gitVersionExe /src${subPath} ${args} > gitversion.txt
 			'''
+		} else if (useDocker){
+			// Execute the command inside the given docker image (intended for use on linux systems)
+			script.docker.image(dockerImage).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
+				script.sh '''
+					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt
+				'''
+			}
+		} else {
+			script.echo "Both useTool and useDocker are false, this shouldn't be possible, something has gone wrong in getGitVersionInfo"
+			exit 1
 		}
 		
 		def output = script.readFile(file:'gitversion.txt')
 		
+		// If a single variable was specified, return the output directly
 		if(variable != null){
 			return output
-		} else {
+		} else { // otherwise, return a json object
 			def json = new JsonSlurperClassic().parseText(output)
 			return json
 		}
@@ -68,7 +104,7 @@ class buildHelper implements Serializable {
 	/*
 	* 	Name: 		getGitHash
 	*	Purpose: 	Gets current git hash, both full version and short
-	*	Parameters:	
+	*	 :	
 					workingDir - Path of git repo we are working in
 	*	Returns:	Hashmap containing;
 						full
