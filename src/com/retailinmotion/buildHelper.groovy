@@ -76,9 +76,11 @@ class buildHelper implements Serializable {
 		if(useTool){
 			// call the tool directly (intended for use on windows systems)
 			script.echo "Command is $gitVersionExe /src${subPath} ${args} > gitversion.txt"
-			script.powershell '''
-				&"$gitVersionExe" "/src$($subPath)" $($args) > gitversion.txt
-			'''
+			script.withEnv(["gitVersionExe=${gitVersionExe}", "subPath=$subPath", "args=$args"]) {
+				script.powershell '''
+					&"$env:gitVersionExe" "/src$($env:subPath)" $($args) > gitversion.txt
+				'''
+			}
 		} else if (useDocker){
 			// Execute the command inside the given docker image (intended for use on linux systems)
 			script.docker.image(dockerImageOrToolPath).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
