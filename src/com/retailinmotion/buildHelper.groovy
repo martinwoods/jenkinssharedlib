@@ -76,8 +76,8 @@ class buildHelper implements Serializable {
 		if(useTool){
 			// call the tool directly (intended for use on windows systems)
 			script.echo "Command is $gitVersionExe /src${subPath} ${args} > gitversion.txt"
-			script.bat '''
-				$gitVersionExe /src${subPath} ${args} > gitversion.txt
+			script.powershell '''
+				$gitVersionExe /src$($subPath) $($args) > gitversion.txt
 			'''
 		} else if (useDocker){
 			// Execute the command inside the given docker image (intended for use on linux systems)
@@ -114,11 +114,11 @@ class buildHelper implements Serializable {
 		def hashes=[:]
 		// Get the short and long git hashes for this build
 		
-		hashes['short'] = powershell(returnStdout: true, script: '''
+		hashes['short'] = script.powershell(returnStdout: true, script: '''
 		git log -n 1 --pretty=format:'%h'
 		''').trim()
 		
-		hashes['full'] = powershell(returnStdout: true, script: '''
+		hashes['full'] = script.powershell(returnStdout: true, script: '''
 		git log -n 1 --pretty=format:'%H'
 		''').trim()
 
@@ -354,7 +354,7 @@ class buildHelper implements Serializable {
 				"assemblyInfoVersion=${newInfoVersion}", 
 				"versionPath=${versionPath}"]) {
 				
-			powershell '''
+			script.powershell '''
 				function Update-SourceVersion
 				{
 					Param ([string]$Version, 
