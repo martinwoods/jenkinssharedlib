@@ -81,7 +81,7 @@ class buildHelper implements Serializable {
 			'''
 		} else if (useDocker){
 			// Execute the command inside the given docker image (intended for use on linux systems)
-			script.docker.image(dockerImage).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
+			script.docker.image(dockerImageOrToolPath).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 				script.sh '''
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt
 				'''
@@ -292,9 +292,9 @@ class buildHelper implements Serializable {
 		Date d=new Date();
 		def propsFile="versioninfo." + d.getTime() + ".properties"
 		
-		withEnv(["filePath=${filePath}", "propsFile=$propsFile"]) {
+		script.withEnv(["filePath=${filePath}", "propsFile=$propsFile"]) {
 		// Get current version info from assemblyinfo.cs
-		powershell '''# Read the current values set in the assemblyinfo
+		script.powershell '''# Read the current values set in the assemblyinfo
 		# This can be then be modified/reused in Jenkins as required
 		# Major Ver and Minor Ver will likely always come from AssemblyInfo, with Build and revision being overwritten at build time
 
@@ -323,8 +323,8 @@ class buildHelper implements Serializable {
 		}
 		
 		// read the contents of the properties file into a map
-		textProps=readFile "$propsFile"
-		props=readProperties text: "$textProps"				
+		textProps=script.readFile "$propsFile"
+		props=script.readProperties text: "$textProps"				
 		// clean up the temp file
 		fileOperations([fileDeleteOperation(excludes: '', includes: "$propsFile")])
 
