@@ -78,7 +78,7 @@ class buildHelper implements Serializable {
 			script.echo "Command is $gitVersionExe /src${subPath} ${args} > gitversion.txt"
 			script.withEnv(["gitVersionExe=${gitVersionExe}", "subPath=$subPath", "args=$args"]) {
 				script.powershell '''
-					&"$env:gitVersionExe" "/src$($env:subPath)" $($args) > gitversion.txt
+					&"$env:gitVersionExe" "/$($env:WORKSPACE)$($env:subPath)" $($args) > gitversion.txt
 				'''
 			}
 		} else if (useDocker){
