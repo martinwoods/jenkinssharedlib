@@ -74,7 +74,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	}
 	// Check if we need to query a specific variable from gitversion
 	if(variable != null){
-		args="/showvariable $variable"
+		args="/output json /showvariable $variable"
 	} else {
 		args=""
 	}
@@ -83,6 +83,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		
 		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}", "args=${args}"]) {
 			powershell '''
+			Write-Output "Command is &\"$env:gitVersionExe\" \"$($env:WORKSPACE)$($env:subPath)\" $($env:args) | Out-File \"gitversion.txt\" -Encoding ASCII -Force"
 				&"$env:gitVersionExe" "$($env:WORKSPACE)$($env:subPath)" $($env:args) | Out-File "gitversion.txt" -Encoding ASCII -Force
 			'''
 		}
