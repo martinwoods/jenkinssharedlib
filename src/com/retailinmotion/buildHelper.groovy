@@ -43,8 +43,6 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 		gitVersionExe= new File(dockerImageOrToolPath)
 	}
 	
-	echo "subPath is: $subPath"
-	echo "variable is: $variable"
 	
 	// If the exe exists and is a real path, use that, if not, assume the given string is a docker image to run
 	try {
@@ -72,12 +70,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	} else {
 		subPath=""
 	}
-	// Check if we need to query a specific variable from gitversion
-	if(variable != null){
-		args="/output json /showvariable $variable"
-	} else {
-		args=""
-	}
+	
 	if(useTool){
 		// call the tool directly (intended for use on windows systems)
 		
