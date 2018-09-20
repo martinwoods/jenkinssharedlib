@@ -19,9 +19,9 @@ import groovy.json.JsonSlurperClassic
 *					if the given path exists, it will be called directly, otherwise, try to run a docker image
 				dockerContext - If the command is to be run using docker, pass in the docker global variable from Jenkins pipeline
 * 				subPath - allows specifying a subfolder in the repo to run gitversion (e.g. when there are multiple projects in a repo)
-* 				variable - takes the name of a single variable to be returned from GitVersion, if omitted, a JSON object is returned
-* Returns:		If no variable parameter is defined, returns a JSON object containing the full output from gitversion
-*				If a named variable parameter is defined, returns a string containing just the output for that variable from gitversion
+* 			
+* Returns:		returns a JSON object containing the full output from gitversion
+*				
 * Examples:
 				To call this function and use a docker image (typically on linux build agents)
 					def versionInfo=buildHelper.getGitVersionInfo(env.GitVersionImage, docker)
@@ -31,7 +31,7 @@ import groovy.json.JsonSlurperClassic
 					def gitVersionTool=tool name: 'GitVersion', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
 					def versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
 */
-def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, variable=null){
+def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	def args
 	def gitVersionExe
 	def useTool=false
@@ -81,14 +81,14 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	if(useTool){
 		// call the tool directly (intended for use on windows systems)
 		
-		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}", "args=${args}"]) {
-			powershell '&"$($env:gitVersionExe)" /targetpath '"$($env:WORKSPACE)$($env:subPath)"' $($env:args) '
+		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}") {
+			powershell '&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force'
 		}
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
 		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 			sh '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt 
+				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt 
 			'''
 		}
 	} else {
