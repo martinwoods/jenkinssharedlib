@@ -82,7 +82,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		// call the tool directly (intended for use on windows systems)
 		
 		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}", "args=${args}"]) {
-			powershell '&"$env:gitVersionExe" /targetpath '"$($env:WORKSPACE)$($env:subPath)"' $($env:args) '
+			powershell '&"$($env:gitVersionExe)" /targetpath '"$($env:WORKSPACE)$($env:subPath)"' $($env:args) '
 		}
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
