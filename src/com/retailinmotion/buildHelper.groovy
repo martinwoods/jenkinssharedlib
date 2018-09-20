@@ -84,7 +84,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}", "args=${args}"]) {
 			powershell '''
 			Write-Output "Command is &\"$env:gitVersionExe\" \"$($env:WORKSPACE)$($env:subPath)\" $($env:args) | Out-File \"gitversion.txt\" -Encoding ASCII -Force"
-				&"$env:gitVersionExe" ""$($env:WORKSPACE)$($env:subPath)"" $($env:args) | Out-File gitversion.txt -Encoding ASCII -Force
+				&"$env:gitVersionExe" '$($env:WORKSPACE)$($env:subPath)' $($env:args) | Out-File gitversion.txt -Encoding ASCII -Force
 			'''
 		}
 	} else if (useDocker){
