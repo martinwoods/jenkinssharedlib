@@ -5,7 +5,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import groovy.json.JsonSlurperClassic
 
 /*
-* 	Class Name: Builder Helper
+* 	Class Name: BuildHelper
 *	Purpose: 	Provides helper functions for Jenkins pipeline scripts
 	Keith Douglas
 	Dec 2017
@@ -20,6 +20,16 @@ import groovy.json.JsonSlurperClassic
 				dockerContext - If the command is to be run using docker, pass in the docker global variable from Jenkins pipeline
 * 				subPath - allows specifying a subfolder in the repo to run gitversion (e.g. when there are multiple projects in a repo)
 * 				variable - takes the name of a single variable to be returned from GitVersion, if omitted, a JSON object is returned
+* Returns:		If no variable parameter is defined, returns a JSON object containing the full output from gitversion
+*				If a named variable parameter is defined, returns a string containing just the output for that variable from gitversion
+* Examples:
+				To call this function and use a docker image (typically on linux build agents)
+					def versionInfo=buildHelper.getGitVersionInfo(env.GitVersionImage, docker)
+					Note: GitVersionImage should be a variable matching the name of a docker image which can exec GitVersion.exe using mono, e.g. nexus.retailinmotion.com:5100/rim-gitversion:4.0.0-beta.14
+					
+				To use a tool from configured Jenkins Custom Tools (typicall on windows build agents)
+					def gitVersionTool=tool name: 'GitVersion', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+					def versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
 */
 def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, variable=null){
 	def args
@@ -32,6 +42,9 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	} else {
 		gitVersionExe= new File(dockerImageOrToolPath)
 	}
+	
+	echo "subPath is: $subPath"
+	echo "variable is: $variable"
 	
 	// If the exe exists and is a real path, use that, if not, assume the given string is a docker image to run
 	try {
