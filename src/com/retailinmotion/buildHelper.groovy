@@ -33,7 +33,7 @@ class buildHelper implements Serializable {
 	* 				subPath - allows specifying a subfolder in the repo to run gitversion (e.g. when there are multiple projects in a repo)
 	* 				variable - takes the name of a single variable to be returned from GitVersion, if omitted, a JSON object is returned
 	*/
-	def getGitVersionInfo(dockerImageOrToolPath, dockerContext, subPath =null, variable=null){
+	def getGitVersionInfo(dockerImageOrToolPath, subPath =null, variable=null){
 		def args
 		def gitVersionExe
 		def useTool=false
