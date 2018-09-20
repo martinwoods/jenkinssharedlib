@@ -33,7 +33,7 @@ class buildHelper implements Serializable {
 	* 				subPath - allows specifying a subfolder in the repo to run gitversion (e.g. when there are multiple projects in a repo)
 	* 				variable - takes the name of a single variable to be returned from GitVersion, if omitted, a JSON object is returned
 	*/
-	def getGitVersionInfo(dockerImageOrToolPath, subPath =null, variable=null){
+	def getGitVersionInfo(dockerImageOrToolPath, dockerContext, subPath =null, variable=null){
 		def args
 		def gitVersionExe
 		def useTool=false
@@ -83,7 +83,7 @@ class buildHelper implements Serializable {
 			}
 		} else if (useDocker){
 			// Execute the command inside the given docker image (intended for use on linux systems)
-			script.docker.image(dockerImageOrToolPath).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
+			dockerContext.image(dockerImageOrToolPath).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 				script.sh '''
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt 
 				'''
@@ -94,8 +94,6 @@ class buildHelper implements Serializable {
 		}
 		
 		def output = script.readFile(file:'gitversion.txt')
-		script.echo "output is:"
-		script.echo output
 		// If a single variable was specified, return the output directly
 		if(variable != null){
 			return output
