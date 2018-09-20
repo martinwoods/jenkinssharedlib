@@ -97,13 +97,9 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	}
 	
 	def output = readFile(file:'gitversion.txt')
-	// If a single variable was specified, return the output directly
-	if(variable != null){
-		return output
-	} else { // otherwise, return a json object
-		def json = new JsonSlurperClassic().parseText(output)
-		return json
-	}
+	def json = new JsonSlurperClassic().parseText(output)
+	return json
+	
 }
 /*
 * 	Name: 		getGitHash
