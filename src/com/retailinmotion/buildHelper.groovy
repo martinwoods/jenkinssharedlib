@@ -63,7 +63,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	
 	// Parse the subPath argument
 	if(subPath != null){
-		subPath=subPath.toString().replaceAll('\\', '/')
+		subPath=subPath.toString().replaceAll("\\\\", "/")
 		if(!subPath.startsWith("/")){
 			subPath="/" + subPath
 		}
