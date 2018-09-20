@@ -75,7 +75,6 @@ class buildHelper implements Serializable {
 		}
 		if(useTool){
 			// call the tool directly (intended for use on windows systems)
-			script.echo "Command is &\"$gitVersionExe\" \"${WORKSPACE}${subPath}\" $args "
 			
 			script.withEnv(["gitVersionExe=${gitVersionExe}", "subPath=$subPath", "args=$args"]) {
 				script.powershell '''
