@@ -78,14 +78,14 @@ class buildHelper implements Serializable {
 			
 			script.withEnv(["gitVersionExe=${gitVersionExe}", "subPath=$subPath", "args=$args"]) {
 				script.powershell '''
-					&"$env:gitVersionExe" "$($env:WORKSPACE)$($env:subPath)" $($args) > gitversion.txt
+					&"$env:gitVersionExe" "$($env:WORKSPACE)$($env:subPath)" $($args) | Out-File "gitversion.txt" -Encoding ASCII -Force
 				'''
 			}
 		} else if (useDocker){
 			// Execute the command inside the given docker image (intended for use on linux systems)
 			script.docker.image(dockerImageOrToolPath).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 				script.sh '''
-					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} | Out-File "gitversion.txt" -Encoding utf8 -Force
+					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt 
 				'''
 			}
 		} else {
