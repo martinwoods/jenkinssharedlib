@@ -85,7 +85,7 @@ class buildHelper implements Serializable {
 			// Execute the command inside the given docker image (intended for use on linux systems)
 			script.docker.image(dockerImageOrToolPath).inside("-v \"$script.WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
 				script.sh '''
-					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} > gitversion.txt
+					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${args} | Out-File "gitversion.txt" -Encoding utf8 -Force
 				'''
 			}
 		} else {
