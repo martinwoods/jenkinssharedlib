@@ -78,14 +78,12 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	} else {
 		args=""
 	}
-	echo "Args is ${args}"
 	if(useTool){
 		// call the tool directly (intended for use on windows systems)
 		
 		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}", "args=${args}"]) {
 			powershell '''
-				Write-Output "Powershell Args is $args"
-				&"$env:gitVersionExe" "$($env:WORKSPACE)$($env:subPath)" $($args) | Out-File "gitversion.txt" -Encoding ASCII -Force
+				&"$env:gitVersionExe" "$($env:WORKSPACE)$($env:subPath)" $($env:args) | Out-File "gitversion.txt" -Encoding ASCII -Force
 			'''
 		}
 	} else if (useDocker){
@@ -448,7 +446,7 @@ def getChangeString() {
 	}
 	
 	if (!changeString) {
-		changeString = " - No new changes"
+		changeString = " - Jenkins was unable to read changes"
 	}
 	return changeString
 }
