@@ -36,31 +36,28 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	def gitVersionExe
 	def useTool=false
 	def useDocker=false
-	// Check if we were given a path to the gitversion.exe
-	if (!dockerImageOrToolPath.toString().endsWith(".exe")){
-			gitVersionExe=new File(dockerImageOrToolPath, "GitVersion.exe") 
+	if(dockerContext != null){
+		useTool=false
+		useDocker=true
 	} else {
-		gitVersionExe= new File(dockerImageOrToolPath)
+		useTool=true
+		useDocker=false
+		// Check the path if we are using the tool
+		if (!dockerImageOrToolPath.toString().endsWith(".exe")){
+			gitVersionExe=new File(dockerImageOrToolPath, "GitVersion.exe") 
+		} else {
+			gitVersionExe= new File(dockerImageOrToolPath)
+		}
+		
+		try {
+			gitVersionExe.getCanonicalPath();
+		}
+		catch (IOException e) {
+		   echo "Couldn't find direct path to exe, and no dockerContext was passed. Unable to call GitVersion"
+		   exit 1
+		}
 	}
-	
-	
-	// If the exe exists and is a real path, use that, if not, assume the given string is a docker image to run
-	try {
-	   gitVersionExe.getCanonicalPath();
-	   useTool=true
-	   useDocker=false
-	   echo "Found $gitVersionExe, will call tool directly"
-	}
-	catch (IOException e) {
-	   useTool=false
-	   useDocker=true
-	   if(dockerContext == null) {
-		echo "Error: $dockerImageOrToolPath appears to be a docker image, but docker context has not been passed, unable to execute."
-		exit 1
-	   }
-	   echo "Couldn't find direct path to exe, will try to call docker image using $dockerImageOrToolPath"
-	}
-	
+		
 	// Parse the subPath argument
 	if(subPath != null){
 		subPath=subPath.toString().replaceAll("\\\\", "/")
