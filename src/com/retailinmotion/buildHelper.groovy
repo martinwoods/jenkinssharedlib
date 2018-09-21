@@ -88,6 +88,13 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	
 	def output = readFile(file:'gitversion.txt')
 	def json = new JsonSlurperClassic().parseText(output)
+	// Add a helm-safe version for strings which can contain a + symbol
+	// This is due to https://github.com/helm/helm/issues/1698
+	// Not all charts (private and public) are calling replace when referencing .Chart.Version,
+	// so make it available here for use to avoid deploy time issues
+	json.HelmFullSemVer=json.FullSemVer.toString().replaceAll("\\+", "_")
+	json.HelmInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "_")
+	
 	return json
 	
 }
