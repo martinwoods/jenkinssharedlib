@@ -107,7 +107,9 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 				chartName - Name of chart to package, directory containing chart.yml must match this
 				srcDir 	-	Source directory for charts
 				targetDir -	Where to output packaged chart .tgz file
-				version -	Version number to pass to chart, this will be used for both appVersion and chart Version
+				version -	Version number to pass to chart, 
+							Note: This will be used for appVersion, Chart version and image tag inside values.yaml
+						
 				dockerContext - 	docker variable from jenkins pipeline
 				helmImage - Name of docker image to use containing helm and kubectl executables
 */
@@ -117,6 +119,7 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
 	dockerContext.image(helmImage).inside("-e targetDir=\"$targetDir\" -e srcDir=\"$srcDir\" -e chartName=\"$chartName\" -e version=\"$version\"" ) { 
 		sh '''
 			mkdir -p $targetDir/$chartName
+			sed -i s/"  tag: latest"/"  tag: $version"/ig "$targetDir/values.yaml"
 			helm package --version $version --app-version $version -d $targetDir/$chartName $srcDir/$chartName
 		'''
 		
