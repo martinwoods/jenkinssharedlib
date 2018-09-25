@@ -119,7 +119,7 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
 	dockerContext.image(helmImage).inside("-e targetDir=\"$targetDir\" -e srcDir=\"$srcDir\" -e chartName=\"$chartName\" -e version=\"$version\"" ) { 
 		sh '''
 			mkdir -p $targetDir/$chartName
-			sed -i s/"  tag: latest"/"  tag: $version"/ig "$targetDir/$chartName/values.yaml"
+			sed -i s/"  tag: latest"/"  tag: $version"/ig "$srcDir/$chartName/values.yaml"
 			helm package --version $version --app-version $version -d $targetDir/$chartName $srcDir/$chartName
 		'''
 		
