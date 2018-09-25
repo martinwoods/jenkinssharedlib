@@ -98,6 +98,30 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	return json
 	
 }
+
+/*
+*	Name: 		packageHelmChart
+*	Purpose: 	Uses helm builder docker image to package a given helm chart
+*	
+*	Parameters:
+				chartName - Name of chart to package, directory containing chart.yml must match this
+				srcDir 	-	Source directory for charts
+				targetDir -	Where to output packaged chart .tgz file
+				version -	Version number to pass to chart, this will be used for both appVersion and chart Version
+				dockerContext - 	docker variable from jenkins pipeline
+				helmImage - Name of docker image to use containing helm and kubectl executables
+*/
+def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmImage){
+	echo "Packaging $chartName"
+
+	dockerContext.image(helmImage).inside("-e targetDir=\"$targetDir\" -e srcDir=\"$srcDir\" -e chartName=\"$chartName\" -e version=\"$version\"" ) { 
+		sh '''
+			mkdir -p $targetDir/$chartName
+			helm package --version $version --app-version $version -d $targetDir/$chartName $srcDir/$chartName
+		'''
+		
+	}
+}
 /*
 * 	Name: 		getGitHash
 *	Purpose: 	Gets current git hash, both full version and short
