@@ -122,6 +122,37 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
 		
 	}
 }
+
+/*
+*	Name: 		pushHelmCharts
+*	Purpose:	Update helm repository with new charts in the specified directory
+*	
+*	Parameters:
+*				chartDir	-	Source directory containing packaged helm charts
+				helmRepo	-	URL for target helm repository
+				userColonPassword - username and password for helm repo in username:password format
+				dockerContext -	docker variable from Jenkins pipeline
+				helmImage - Name of docker image to use containing helm and kubectl executables
+*/
+def pushHelmCharts(chartDir, helmRepo, userColonPassword, dockerContext, helmImage){
+
+// use the helm client image to update the index file and push new charts to the repo
+	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e repoAuth=$userColonPassword -e chartDir=\"$chartDir\"" ) { 
+		sh '''
+			wget -q $HELMREPO/index.yaml
+			helm repo index --url $HELMREPO --merge index.yaml $chartDir
+			curl -s -u $repoAuth --upload-file $chartDir/index.yaml $HELMREPO/index.yaml
+  
+			for file in $(find $chartDir -name *.tgz)
+			do
+				chartFile=$(basename $file)
+				chartName=$(basename $(dirname $file))
+				curl -s -u $repoAuth --upload-file $file $HELMREPO/${chartName}/$chartFile
+			done
+		'''
+		
+	}
+}
 /*
 * 	Name: 		getGitHash
 *	Purpose: 	Gets current git hash, both full version and short
