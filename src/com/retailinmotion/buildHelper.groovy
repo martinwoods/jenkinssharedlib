@@ -70,7 +70,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	
 	if(useTool){
 		// call the tool directly (intended for use on windows systems)
-		
+		// set flag to prevent git tools error
+		env.IGNORE_NORMALISATION_GIT_HEAD_MOVE=1
 		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}"]) {
 			powershell '&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force'
 		}
