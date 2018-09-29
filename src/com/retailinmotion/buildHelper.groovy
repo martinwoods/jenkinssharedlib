@@ -93,8 +93,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	// This is due to https://github.com/helm/helm/issues/1698
 	// Not all charts (private and public) are calling replace when referencing .Chart.Version,
 	// so make it available here for use to avoid deploy time issues
-	json.SafeFullSemVer=json.FullSemVer.toString().replaceAll("\\+", "-")
-	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-")
+	json.SafeFullSemVer=json.FullSemVer.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-")
+	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-")
 	
 	return json
 	
