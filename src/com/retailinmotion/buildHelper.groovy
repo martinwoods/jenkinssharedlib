@@ -94,6 +94,15 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	// Not all charts (private and public) are calling replace when referencing .Chart.Version,
 	// so make it available here for use to avoid deploy time issues
 	json.SafeFullSemVer=json.FullSemVer.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-")
+	// The default informational version can be very long for feature branches, 
+	// so make a copy of the original as FullInformationalVersion and create a new version with a shorter format	
+	json.FullInformationalVersion=json.InformationalVersion
+	
+	// Replace the long git hash with the short version, and if the build metadata portion repeats the prereleaselabel, remove it
+	gitHashes=getGitHashes()
+	def preReleaseLabel=json.PreReleaseLabel
+	json.InformationalVersion=json.InformationalVersion.replace(gitHashes.long, gitHashes.short).replace("/${preReleaseLabel}", "")
+	
 	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-")
 	
 	return json
