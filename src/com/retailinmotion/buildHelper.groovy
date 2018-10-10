@@ -99,9 +99,9 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	json.FullInformationalVersion=json.InformationalVersion
 	
 	// Replace the long git hash with the short version, and if the build metadata portion repeats the prereleaselabel, remove it
-	gitHashes=getGitHashes()
+	def gitHashes=getGitHashes()
 	def preReleaseLabel=json.PreReleaseLabel
-	json.InformationalVersion=json.InformationalVersion.replace(gitHashes.long, gitHashes.short).replace("/${preReleaseLabel}", "")
+	json.InformationalVersion=json.InformationalVersion.replace(gitHashes.full, gitHashes.short).replace("/${preReleaseLabel}", "")
 	
 	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-")
 	
