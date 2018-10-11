@@ -178,15 +178,23 @@ def pushHelmCharts(chartDir, helmRepo, userColonPassword, dockerContext, helmIma
 def getGitHashes (){
 	def hashes=[:]
 	// Get the short and long git hashes for this build
-	
-	hashes['short'] = powershell(returnStdout: true, script: '''
+	if(isUnix()){
+		hashes['short'] = sh(returnStdout: true, script: '''
 	git log -n 1 --pretty=format:'%h'
 	''').trim()
 	
-	hashes['full'] = powershell(returnStdout: true, script: '''
+		hashes['full'] = sh(returnStdout: true, script: '''
 	git log -n 1 --pretty=format:'%H'
 	''').trim()
-
+	} else {
+		hashes['short'] = powershell(returnStdout: true, script: '''
+	git log -n 1 --pretty=format:'%h'
+	''').trim()
+	
+		hashes['full'] = powershell(returnStdout: true, script: '''
+	git log -n 1 --pretty=format:'%H'
+	''').trim()
+	}
 	return hashes
 }
 
