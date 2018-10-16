@@ -106,7 +106,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	// If the full branch name is too long, it can cause issues when octopus unpacks the archive due to path length restrictions in windows
 	// If this is a branch which references a JIRA VECTWO ticket, shorten the prereleaselabel to just the ticket number without any other decoration to keep the package name short
 	if( preReleaseLabel.contains("VECTWO")) {
-		def jiraRef=(preReleaseLabel =~ /(.*)(VECTWO\-{1}[0-9]*)(.*)/)		
+		def jiraRef=(preReleaseLabel =~ /(VECTWO\-{1}[0-9]*)(.*)/)		
 		json.InformationalVersion=json.InformationalVersion.replace(preReleaseLabel, jiraRef[0][1])
 	}
 	
