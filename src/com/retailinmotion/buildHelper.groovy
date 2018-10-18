@@ -31,7 +31,7 @@ import groovy.json.JsonSlurperClassic
 					def gitVersionTool=tool name: 'GitVersion', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
 					def versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
 */
-def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
+def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, remoteRepoArgs = null){
 	def args
 	def gitVersionExe
 	def useTool=false
@@ -72,14 +72,14 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 		// call the tool directly (intended for use on windows systems)
 		// set flag to prevent git tools error
 		env.IGNORE_NORMALISATION_GIT_HEAD_MOVE=1
-		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}"]) {
-			powershell '&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force'
+		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}", "remoteRepoArgs=${remoteRepoArgs}"]) {
+			powershell '&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" $($env:remoteRepoArgs | Out-File gitversion.txt -Encoding ASCII -Force'
 		}
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
-		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
+		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\" -e remoteRepoArgs=\"$remoteRepoArgs\""){
 			sh '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt 
+				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${remoteRepoArgs} > gitversion.txt 
 			'''
 		}
 	} else {
