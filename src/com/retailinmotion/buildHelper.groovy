@@ -67,7 +67,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	} else {
 		subPath=""
 	}
-	
+	def output
 	if(useTool){
 		// call the tool directly (intended for use on windows systems)
 		// set flag to prevent git tools error
@@ -78,8 +78,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
 		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\" -e remoteRepoArgs=\"$remoteRepoArgs\""){
-			sh '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${remoteRepoArgs} > gitversion.txt 
+			sh script: '''
+				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${remoteRepoArgs}
 			'''
 		}
 	} else {
@@ -87,7 +87,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		exit 1
 	}
 	
-	def output = readFile(file:'gitversion.txt')
+	output = readFile(file:'gitversion.txt')
 	def json = new JsonSlurperClassic().parseText(output)
 	// Add a helm-safe version for strings which can contain a + symbol
 	// This is due to https://github.com/helm/helm/issues/1698
