@@ -101,7 +101,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	// Replace the long git hash with the short version, and if the build metadata portion repeats the prereleaselabel, remove it
 	def gitHashes=getGitHashes()
 	def preReleaseLabel=json.PreReleaseLabel
-	json.InformationalVersion=json.InformationalVersion.replace(gitHashes.full, gitHashes.short)..replaceAll("_", "-").replace("/${preReleaseLabel}", "")
+	json.InformationalVersion=json.InformationalVersion.replace(gitHashes.full, gitHashes.short).replaceAll("_", "-").replace("/${preReleaseLabel}", "")
 	
 	// If the full branch name is too long, it can cause issues when octopus unpacks the archive due to path length restrictions in windows
 	// If this is a branch which references a JIRA VECTWO ticket, shorten the prereleaselabel to just the ticket number without any other decoration to keep the package name short
