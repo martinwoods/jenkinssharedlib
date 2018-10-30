@@ -114,7 +114,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	
 	// Since we are changing the tag in gitversion.yml for some repos, parse the prerelease label from the branchname 
 	if(json.BranchName.contains("/")){
-		json.PackagePreRelease=json.BranchName.substring(0, branchName.indexOf("/"))
+		json.PackagePreRelease=json.BranchName.substring(0, env.BRANCH_NAME.indexOf("/"))
 	} else {
 		json.PackagePreRelease=json.BranchName
 	}
