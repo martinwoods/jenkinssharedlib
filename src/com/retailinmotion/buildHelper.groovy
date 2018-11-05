@@ -112,7 +112,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	
 	// and if the branchname contains a VECTWO reference with a long name, shorten it to just the ticket number in the informational version
 	if (json.BranchName.contains("VECTWO")){
-		def match=(branchName =~ /(VECTWO\-{1}[0-9]*)(.*)/)
+		def match=(json.BranchName =~ /(VECTWO\-{1}[0-9]*)(.*)/)
 		json.InformationalVersion=json.InformationalVersion.replaceAll(/(VECTWO\-{1}[0-9]*)([A-Za-z0-9\-\_]*)/, match[0][1])
 	}
 	
