@@ -73,7 +73,12 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 		// set flag to prevent git tools error
 		env.IGNORE_NORMALISATION_GIT_HEAD_MOVE=1
 		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}"]) {
-			powershell '&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force'
+			powershell '''
+			&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force
+			If($LASTEXITCODE -ne 0){ 
+				Get-Content gitversion.txt
+			}
+			'''
 		}
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
