@@ -31,7 +31,7 @@ import groovy.json.JsonSlurperClassic
 					def gitVersionTool=tool name: 'GitVersion', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
 					def versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
 */
-def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, remoteRepoArgs = null){
+def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	def args
 	def gitVersionExe
 	def useTool=false
@@ -67,24 +67,24 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	} else {
 		subPath=""
 	}
-	def output
+	
 	if(useTool){
 		// call the tool directly (intended for use on windows systems)
 		// set flag to prevent git tools error
 		env.IGNORE_NORMALISATION_GIT_HEAD_MOVE=1
-		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}", "remoteRepoArgs=${remoteRepoArgs}"]) {
+		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}"]) {
 			powershell '''
-			&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" $($env:remoteRepoArgs) | Out-File gitversion.txt -Encoding ASCII -Force
-			If($LASTEXITCODE -ne 0){
+			&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force
+			If($LASTEXITCODE -ne 0){ 
 				Get-Content gitversion.txt
 			}
 			'''
 		}
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
-		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\" -e remoteRepoArgs=\"$remoteRepoArgs\""){
-			sh script: '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} ${remoteRepoArgs}
+		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\""){
+			sh '''
+				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt 
 			'''
 		}
 	} else {
@@ -92,7 +92,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		exit 1
 	}
 	
-	output = readFile(file:'gitversion.txt')
+	def output = readFile(file:'gitversion.txt')
 	def json = new JsonSlurperClassic().parseText(output)
 	// Add a helm-safe version for strings which can contain a + symbol
 	// This is due to https://github.com/helm/helm/issues/1698
