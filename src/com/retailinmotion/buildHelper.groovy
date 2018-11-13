@@ -522,6 +522,28 @@ def bumpVersion(filePath){
 	return newBuildNumber
 }
 
+/*
+*
+* Get the commit hash of the most recent succesful build
+* Borrowed from https://gist.github.com/ftclausen/8c46195ee56e48e4d01cbfab19c41fc0
+*/
+def getLastSuccessfulCommit() {
+  def lastSuccessfulHash = null
+  def lastSuccessfulBuild = currentBuild.rawBuild.getPreviousSuccessfulBuild()
+  if ( lastSuccessfulBuild ) {
+    lastSuccessfulHash = commitHashForBuild( lastSuccessfulBuild )
+  }
+  return lastSuccessfulHash
+}
+
+/**
+ * Gets the commit hash from a Jenkins build object, if any
+ */
+@NonCPS
+def commitHashForBuild( build ) {
+  def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
+  return scmAction?.revision?.hash
+}
 
 /*
 * Get the list of changes for the build
