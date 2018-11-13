@@ -253,7 +253,10 @@ def getBranchInfo(branchName){
 		def longFeatureName=branchInfo[0][3]
 
 		def featureInfo = longFeatureName =~ /([A-Z]*\-{1}[0-9]*)(.*)/
-		if ( featureInfo ) {
+		// During transition to gitversion, branches created in gitversion style, 
+  		// but still using the old incrementing number can end up just having a dash 
+  		// In this case, use the longFeatureName instead
+		if ( featureInfo && featureInfo[0][1] != "-") {
 			buildInfo['featureName'] = featureInfo[0][1]
 		} else {
 			buildInfo['featureName'] = longFeatureName
