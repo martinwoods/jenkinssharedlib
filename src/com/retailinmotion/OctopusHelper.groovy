@@ -98,7 +98,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 		
 		if(isUnix()){
 			ensureUnixOcto()
-			sh "octo ${commandOptions}"""
+			sh "octo ${commandOptions}"
 		} else {
 			powershell """
 				&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
@@ -109,7 +109,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 
 def ensureUnixOcto(){
 	sh '''
-		type octo
+		type octo > /dev/null 2>&1
 		if [ $? -ne 0 ]
 		then
 			echo 'Adding octo function to bashrc'
