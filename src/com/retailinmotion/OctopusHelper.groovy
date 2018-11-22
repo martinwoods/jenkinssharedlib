@@ -97,8 +97,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
 		
 		if(isUnix()){
-			ensureUnixOcto()
-			sh "octo ${commandOptions}"
+			sh "docker run --rm -v $(pwd):/src octopusdeploy/octo ${commandOptions}"
 		} else {
 			powershell """
 				&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
@@ -107,17 +106,6 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	}
 }
 
-def ensureUnixOcto(){
-	sh returnStatus: true, script: '''
-		type octo > /dev/null 2>&1
-		if [ $? -ne 0 ]
-		then
-			echo 'Adding octo function to bashrc'
-			echo 'function octo(){ docker run --rm -v $(pwd):/src octopusdeploy/octo "$@" ;}' >> ~/.bashrc
-			source ~/.bashrc
-		fi
-	'''
-}
 
 /*
 * Create an octopus release, reading the package versions from the packages found in the given folder
