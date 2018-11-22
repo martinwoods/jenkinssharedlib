@@ -93,9 +93,18 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	}
 	
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
+	
+		def fullCommand="--create-release --project "$project" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		
+		if(isUnix()){
+			sh """
+				'${tool("${octopusServer.toolName}")}/Octo' ${commandOptions}
+			"""
+		} else {
+			powershell """
+				&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
 				"""
+		}
 	}
 }
 
