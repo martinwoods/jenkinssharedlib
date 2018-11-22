@@ -98,7 +98,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 		
 		if(isUnix()){
 			sh """
-				function octo(){ docker run --rm -v $(pwd):/src octopusdeploy/octo "$@" ;}
+				function octo(){ docker run --rm -v $(pwd):/src octopusdeploy/octo \"$@\" ;}
 				octo ${commandOptions}
 			"""
 		} else {
