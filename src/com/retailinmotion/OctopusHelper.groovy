@@ -97,7 +97,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
 		
 		if(isUnix()){
-			sh "docker run --rm -v $(pwd):/src octopusdeploy/octo ${commandOptions}"
+			sh "docker run --rm -v \$(pwd):/src octopusdeploy/octo ${commandOptions}"
 		} else {
 			powershell """
 				&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
