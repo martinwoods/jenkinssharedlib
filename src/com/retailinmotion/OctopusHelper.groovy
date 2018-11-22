@@ -108,7 +108,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 }
 
 def ensureUnixOcto(){
-	sh '''
+	sh returnStatus: true, script: '''
 		type octo > /dev/null 2>&1
 		if [ $? -ne 0 ]
 		then
