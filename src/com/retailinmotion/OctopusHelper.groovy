@@ -97,16 +97,26 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
 		
 		if(isUnix()){
-			sh """
-				function octo(){ docker run --rm -v $(pwd):/src octopusdeploy/octo \"\$@\" ;}
-				octo ${commandOptions}
-			"""
+			ensureUnixOcto()
+			sh "octo ${commandOptions}"""
 		} else {
 			powershell """
 				&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
 				"""
 		}
 	}
+}
+
+def ensureUnixOcto(){
+	sh '''
+		type octo
+		if [ $? -ne 0 ]
+		then
+			echo 'Adding octo function to bashrc'
+			echo 'function octo(){ docker run --rm -v $(pwd):/src octopusdeploy/octo "$@" ;}' >> ~/.bashrc
+			source ~/.bashrc
+		fi
+	'''
 }
 
 /*
