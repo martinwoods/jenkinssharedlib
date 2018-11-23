@@ -26,6 +26,10 @@ def getServer(jenkinsURL){
 		octopus['url']="http://octopus.rim.local"
 		octopus['credentialsId']="OctopusRimLocalAPIKey"
 		octopus['toolName']="Octo CLI"
+	} else if ( jenkinsURL.contains("rimdev-build-06") ){	
+		octopus['url']="http://rim-build-05.rim.local"
+		octopus['credentialsId']="OctopusAPIKey"
+		octopus['toolName']="Octo CLI"
 	} else {
 		octopus['url']="http://rim-build-05"
 		octopus['credentialsId']="OctopusAPIKey"
@@ -94,10 +98,10 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 	
-		def commandOptions='--create-release --project \"' + project + '\" ' + optionString + ' --force --version ' + releaseVersion + ' ' + extraArgs + ' --server ' + octopusServer.url + ' --apiKey ' + APIKey
+		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
 		
 		if(isUnix()){
-			sh 'docker run --rm -v \$(pwd):/src octopusdeploy/octo ' + commandOptions
+			sh "docker run --rm -v \$(pwd):/src octopusdeploy/octo ${commandOptions}"
 		} else {
 			powershell """
 				&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
