@@ -73,9 +73,15 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --waitfordeployment --progress --project "$project" --packageversion $packageString --version $packageString --deployTo "$deployTo" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
+		def commandOptions=" --create-release --waitfordeployment --progress --project \"$project\" --packageversion $packageString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		
+		if(isUnix()){
+			sh "docker run --rm -v \$(pwd):/src octopusdeploy/octo ${commandOptions}"
+		} else {
+			powershell """
+				&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
 				"""
+		}
 	}
 }
 
