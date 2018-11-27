@@ -1,4 +1,5 @@
 package com.retailinmotion;
+
 /*
 * 	Class Name: Octopus Helper
 *	Purpose: 	Provides helper functions for communicating with Octopus deploy server
@@ -121,7 +122,7 @@ def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder,
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {		
-		def commandOptions="--create-release --project "$project" --packagesFolder "$packagesFolder" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		def commandOptions="--create-release --project \"$project\" --packagesFolder "$packagesFolder" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
 		execOcto(commandOptions)
 	}
 }
