@@ -1,4 +1,5 @@
 package com.retailinmotion;
+
 /*
 * 	Class Name: Octopus Helper
 *	Purpose: 	Provides helper functions for communicating with Octopus deploy server
@@ -26,6 +27,14 @@ def getServer(jenkinsURL){
 		octopus['url']="http://octopus.rim.local"
 		octopus['credentialsId']="OctopusRimLocalAPIKey"
 		octopus['toolName']="Octo CLI"
+	} else if ( jenkinsURL.contains("rimdev-build-06") &&  jenkinsURL.contains("LiveOctopus")){	 // allow manual override to the 'live' octopus server
+		octopus['url']="http://octopus.rim.local"
+		octopus['credentialsId']="OctopusRimLocalAPIKey"
+		octopus['toolName']="Octo CLI"
+	} else if ( jenkinsURL.contains("rimdev-build-06") ){	
+		octopus['url']="http://rim-build-05.rim.local"
+		octopus['credentialsId']="OctopusAPIKey"
+		octopus['toolName']="Octo CLI"
 	} else {
 		octopus['url']="http://rim-build-05"
 		octopus['credentialsId']="OctopusAPIKey"
@@ -35,6 +44,15 @@ def getServer(jenkinsURL){
 	return octopus
 }
 
+def execOcto(octopusServer, commandOptions){
+	if(isUnix()){
+		sh "docker run --rm -v \$(pwd):/src octopusdeploy/octo ${commandOptions}"
+	} else {
+		powershell """
+			&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
+			"""
+	}
+}
 /*
 *	Push the given package to the correct Octopus deploy server for this Jenkins build server
 */
@@ -43,9 +61,8 @@ def listDeployments (jenkinsURL, tenant, environment){
 	
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		powershell """
-					&'${tool("${octopusServer.toolName}")}\\Octo.exe' list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey}
-				"""
+		def commandOptions="list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey}"
+		execOcto(octopusServer, commandOptions)
 	}
 }
 
@@ -56,9 +73,8 @@ def pushPackage (jenkinsURL, packageFile){
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		powershell """
-					&'${tool("${octopusServer.toolName}")}\\Octo.exe' push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey}
-				"""
+		def commandOptions="push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey}"
+		execOcto(octopusServer, commandOptions)
 	}
 }
 
@@ -69,9 +85,9 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --waitfordeployment --progress --project "$project" --packageversion $packageString --version $packageString --deployTo "$deployTo" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
-				"""
+		def commandOptions=" --create-release --waitfordeployment --progress --project \"$project\" --packageversion $packageString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		
+		execOcto(octopusServer, commandOptions)
 	}
 }
 
@@ -82,22 +98,22 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 
 	def octopusServer=getServer(jenkinsURL)
 	def optionString=""
-	if ( packageArg != "" ){
+	if ( packageArg && packageArg != "" ){
 		optionString = " --package \"$packageArg\""
 	} else {
 		optionString = " --packageversion \"$releaseVersion\""
 	}
 	
-	if ( channel != ""){
+	if ( channel && channel != "" ){
 		optionString += " --channel \"$channel\""
 	}
 	
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
-				"""
+		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		execOcto(octopusServer, commandOptions)
 	}
 }
+
 
 /*
 * Create an octopus release, reading the package versions from the packages found in the given folder
@@ -105,11 +121,9 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder, extraArgs = ""){
 
 	def octopusServer=getServer(jenkinsURL)
-	
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		powershell """
-				&'${tool("${octopusServer.toolName}")}\\Octo.exe' --create-release --project "$project" --packagesFolder "$packagesFolder" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}
-				"""
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {		
+		def commandOptions="--create-release --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		execOcto(octopusServer, commandOptions)
 	}
 }
 
