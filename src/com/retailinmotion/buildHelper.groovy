@@ -589,13 +589,12 @@ def getLastCommitAuthor( ){
 /*
 * Send Notifications - with slack initially - only notify if job is 'FAILED'
 */
-def sendNotifications( buildStatus, tokenCredentialId ){
+def sendNotifications( buildStatus, tokenCredentialId, commitAuthor ){
 
 	def colorName = 'RED'
 	def colorCode = '#FF0000'
 	def subject = "Job '${env.JOB_NAME}: ${buildStatus}: '"
-	def gitCommitAuthor = getLastCommitAuthor()
-	def failureMessage = "${subject} (${env.BUILD_URL}) The latest build failed - the last commit was: ${env.GIT_COMMIT} by : ${gitCommitAuthor}"
+	def failureMessage = "${subject} (${env.BUILD_URL}) The latest build failed - the last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
 
 
 	if (buildStatus == 'FAILED') {
