@@ -588,6 +588,11 @@ def getLastCommitAuthor( ){
 }
 /*
 * Send Notifications - with slack initially - only notify if job is 'FAILED'
+* Purpose: 	Send slack notifications from jenkins pipelines
+*	Parameters:
+*				buildStatus - String representing the status of the build
+*				tokenCredentialId - String which identifies token to use - must match one avaiable token in jenkins
+*				commitAuthor - String to use for the author of the last commit
 */
 def sendNotifications( buildStatus, tokenCredentialId, commitAuthor ){
 
