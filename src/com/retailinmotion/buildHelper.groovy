@@ -587,7 +587,7 @@ def getLastCommitAuthor( ){
 	return gitCommitter
 }
 /*
-* Send Notifications - with slack initially
+* Send Notifications - with slack initially - only notify if job is 'FAILED'
 */
 def sendNotifications( buildStatus, tokenCredentialId ){
 
@@ -602,12 +602,7 @@ def sendNotifications( buildStatus, tokenCredentialId ){
 		color = 'RED'
 		colorCode = '#FF0000'
 		message = failureMessage
-	}
-	else {
-		color = 'YELLOW'
-		colorCode = '#FFFF00'
-		message = "${subject} (${env.BUILD_URL})"
+		slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
 	}
 
-	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
 }
