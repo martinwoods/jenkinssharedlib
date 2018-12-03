@@ -597,7 +597,7 @@ def sendNotifications( buildStatus, tokenCredentialId, commitAuthor ){
 	def failureMessage = "${subject} (${env.BUILD_URL}) The latest build failed - the last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
 
 
-	if (buildStatus == 'FAILED') {
+	if (buildStatus == 'FAILED' || 'FAILURE') {
 		color = 'RED'
 		colorCode = '#FF0000'
 		message = failureMessage
