@@ -569,3 +569,45 @@ def getChangeString() {
 	}
 	return changeString
 }
+
+/*
+*Get Git commit info that is not yet available in jenkins pipeline
+* /
+ */
+def getLastCommitAuthor( ){
+	if(isUnix()){
+		gitCommitter = sh(returnStdout: true, script: '''
+	git show -s --pretty=%an
+	''').trim()
+	} else {
+		gitCommitter = powershell(returnStdout: true, script: '''
+	git show -s --pretty=%an
+	''').trim()
+	}
+	return gitCommitter
+}
+/*
+* Send Notifications - with slack initially
+*/
+def sendNotifications( buildStatus, tokenCredentialId ){
+
+	def colorName = 'RED'
+	def colorCode = '#FF0000'
+	def subject = "Job '${env.JOB_NAME}: ${buildStatus}: '"
+	def gitCommitAuthor = getLastCommitAuthor()
+	def failureMessage = "${subject} (${env.BUILD_URL}) The latest build failed - the last commit was: ${env.GIT_COMMIT} by : ${gitCommitAuthor}"
+
+
+	if (buildStatus == 'FAILED') {
+		color = 'RED'
+		colorCode = '#FF0000'
+		message = failureMessage
+	}
+	else {
+		color = 'YELLOW'
+		colorCode = '#FFFF00'
+		message = "${subject} (${env.BUILD_URL})"
+	}
+
+	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
+}
