@@ -572,7 +572,6 @@ def getChangeString() {
 
 /*
 *Get Git commit info that is not yet available in jenkins pipeline
-* /
  */
 def getLastCommitAuthor( ){
 	if(isUnix()){
@@ -595,18 +594,28 @@ def getLastCommitAuthor( ){
 *				commitAuthor - String to use for the author of the last commit
 */
 def sendNotifications( buildStatus, tokenCredentialId, commitAuthor ){
-
-	def colorName = 'RED'
-	def colorCode = '#FF0000'
 	def subject = "Job '${env.JOB_NAME}: ${buildStatus}: '"
-	def failureMessage = "${subject} (${env.BUILD_URL}) The latest build failed - the last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
+	def message = "${subject} (${env.BUILD_URL}) The last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
 
+	buildStatus=buildStatus.toString().toUpperCase()
 
-	if (buildStatus == 'FAILED' || 'FAILURE') {
+	if (buildStatus == 'FAILED' || buildStatus == 'FAILURE') {
 		color = 'RED'
 		colorCode = '#FF0000'
-		message = failureMessage
-		slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
 	}
+	else if ( buildStatus == 'SUCCESS' ) {
+		color = 'GREEN'
+		colorCode = '#00FF00'
+	}
+	else if ( buildStatus == 'UNSTABLE' ) {
+		color = 'YELLOW'
+		colorCode  = '#FFF00'
+	}
+	else {
+		color = 'BLUE'
+		colorCode = '#008fff'
+	}
+
+	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
 
 }
