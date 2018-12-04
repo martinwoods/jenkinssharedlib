@@ -569,3 +569,53 @@ def getChangeString() {
 	}
 	return changeString
 }
+
+/*
+*Get Git commit info that is not yet available in jenkins pipeline
+ */
+def getLastCommitAuthor( ){
+	if(isUnix()){
+		gitCommitter = sh(returnStdout: true, script: '''
+	git show -s --pretty=%an
+	''').trim()
+	} else {
+		gitCommitter = powershell(returnStdout: true, script: '''
+	git show -s --pretty=%an
+	''').trim()
+	}
+	return gitCommitter
+}
+/*
+* Send Notifications - with slack initially - only notify if job is 'FAILED'
+* Purpose: 	Send slack notifications from jenkins pipelines
+*	Parameters:
+*				buildStatus - String representing the status of the build
+*				tokenCredentialId - String which identifies token to use - must match one avaiable token in jenkins
+*				commitAuthor - String to use for the author of the last commit
+*/
+def sendNotifications( buildStatus, tokenCredentialId, commitAuthor ){
+	def subject = "Job '${env.JOB_NAME}: ${buildStatus}: '"
+	def message = "${subject} (${env.BUILD_URL}) The last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
+
+	buildStatus=buildStatus.toString().toUpperCase()
+
+	if (buildStatus == 'FAILED' || buildStatus == 'FAILURE') {
+		color = 'RED'
+		colorCode = '#FF0000'
+	}
+	else if ( buildStatus == 'SUCCESS' ) {
+		color = 'GREEN'
+		colorCode = '#00FF00'
+	}
+	else if ( buildStatus == 'UNSTABLE' ) {
+		color = 'YELLOW'
+		colorCode  = '#FFF00'
+	}
+	else {
+		color = 'BLUE'
+		colorCode = '#008fff'
+	}
+
+	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
+
+}
