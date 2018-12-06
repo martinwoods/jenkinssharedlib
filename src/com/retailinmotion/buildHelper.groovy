@@ -545,7 +545,7 @@ def getLastSuccessfulCommit() {
 @NonCPS
 def commitHashForBuild( build ) {
   def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
-  return scmAction?.revision?.hash
+  return scmAction?.revision?.hash?
 }
 
 /*
