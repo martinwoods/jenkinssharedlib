@@ -545,7 +545,15 @@ def getLastSuccessfulCommit() {
 @NonCPS
 def commitHashForBuild( build ) {
   def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
-  return scmAction?.revision?.hash?
+  
+  def hash=null
+  
+  try {
+	hash=scmAction?.revision?.hash
+	}
+  catch (MissingPropertyException e){}
+  
+  return hash
 }
 
 /*
