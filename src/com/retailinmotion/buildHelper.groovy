@@ -601,9 +601,9 @@ def getLastCommitAuthor( ){
 *				tokenCredentialId - String which identifies token to use - must match one avaiable token in jenkins
 *				commitAuthor - String to use for the author of the last commit
 */
-def sendNotifications( buildStatus, tokenCredentialId, commitAuthor ){
+def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessage = null ){
 	def subject = "Job '${env.JOB_NAME}: ${buildStatus}: '"
-	def message = "${subject} (${env.BUILD_URL}) The last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
+	def message = customMessage ?: "${subject} (${env.BUILD_URL}) The last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
 
 	buildStatus=buildStatus.toString().toUpperCase()
 
