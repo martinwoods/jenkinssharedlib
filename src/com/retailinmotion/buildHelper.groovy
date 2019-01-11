@@ -601,7 +601,7 @@ def getLastCommitAuthor( ){
 *				tokenCredentialId - String which identifies token to use - must match one avaiable token in jenkins
 *				commitAuthor - String to use for the author of the last commit
 */
-def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessage = null ){
+def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessage = null, attachments = null ){
 	def subject = "Job '${env.JOB_NAME}: ${buildStatus}: '"
 	def message = customMessage ?: "${subject} (${env.BUILD_URL}) The last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
 
@@ -624,6 +624,6 @@ def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessa
 		colorCode = '#008fff'
 	}
 
-	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
+	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId, attachments: attachments.toString() )
 
 }

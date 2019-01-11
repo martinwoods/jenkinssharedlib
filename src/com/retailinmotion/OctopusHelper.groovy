@@ -45,13 +45,16 @@ def getServer(jenkinsURL){
 }
 
 def execOcto(octopusServer, commandOptions){
+	def output
 	if(isUnix()){
-		sh "docker run --rm -v \$(pwd):/src octopusdeploy/octo ${commandOptions}"
+		output=sh returnStdout: true, script: "docker run --rm -v \$(pwd):/src octopusdeploy/octo ${commandOptions}"
 	} else {
-		powershell """
+		output=powershell returnStdout: true, script: """
 			&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
 			"""
 	}
+	println output
+	return output.trim()
 }
 /*
 *	Push the given package to the correct Octopus deploy server for this Jenkins build server
@@ -62,7 +65,7 @@ def listDeployments (jenkinsURL, tenant, environment){
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey}"
-		execOcto(octopusServer, commandOptions)
+		return execOcto(octopusServer, commandOptions)
 	}
 }
 
@@ -74,7 +77,7 @@ def pushPackage (jenkinsURL, packageFile){
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey}"
-		execOcto(octopusServer, commandOptions)
+		return execOcto(octopusServer, commandOptions)
 	}
 }
 
@@ -87,7 +90,7 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions=" --create-release --waitfordeployment --progress --project \"$project\" --packageversion $packageString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
 		
-		execOcto(octopusServer, commandOptions)
+		return execOcto(octopusServer, commandOptions)
 	}
 }
 
@@ -110,7 +113,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
-		execOcto(octopusServer, commandOptions)
+		return execOcto(octopusServer, commandOptions)
 	}
 }
 
@@ -123,7 +126,7 @@ def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder,
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {		
 		def commandOptions="--create-release --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
-		execOcto(octopusServer, commandOptions)
+		return execOcto(octopusServer, commandOptions)
 	}
 }
 
