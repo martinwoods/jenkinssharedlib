@@ -1,5 +1,9 @@
 package com.retailinmotion;
 
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 /*
 * 	Class Name: Octopus Helper
 *	Purpose: 	Provides helper functions for communicating with Octopus deploy server
@@ -128,6 +132,22 @@ def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder,
 		def commandOptions="--create-release --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
 		return execOcto(octopusServer, commandOptions)
 	}
+}
+
+/*
+* Parse the output from a deployment to extract only relevant info 
+* Currently parses URL(s) from output of Bezier microservices deployment
+*/
+def parseDeployInfo(deployOutput){
+
+	Pattern urlPattern = Pattern.compile("\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",Pattern.CASE_INSENSITIVE);
+	String output=""
+	Matcher matcher = urlPattern.matcher(deployOutput);
+	while (matcher.find()) {
+		String address = matcher.group()
+		output += address + "\r\n"
+	}
+	return output
 }
 
 
