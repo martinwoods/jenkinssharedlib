@@ -3,6 +3,7 @@ package com.retailinmotion;
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import groovy.json.JsonSlurperClassic
 
 /*
 * 	Class Name: Octopus Helper
@@ -136,7 +137,8 @@ def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder,
 
 /*
 * Parse the output from a deployment to extract only relevant info 
-* Currently parses URL(s) from output of Bezier microservices deployment
+* by removing the line wrapping adding by octo.exe 
+* and extracting the JSON which follows the string '### Deployment Status JSON:'
 */
 def parseDeployInfo(deployOutput){
 
@@ -144,7 +146,14 @@ def parseDeployInfo(deployOutput){
 	Pattern urlPattern = Pattern.compile("(.*### Deployment Status JSON:)(.*)",Pattern.CASE_INSENSITIVE);
 	Matcher matcher = urlPattern.matcher(deployOutput);
 	
-	return matcher[0][2]
+	output=output.replaceAll(/\n             /, "").replaceAll(/\n/, "\\\\n")
+	Pattern urlPattern = Pattern.compile("(### Deployment Status JSON: )(\\{(.*)\\})",Pattern.CASE_INSENSITIVE);
+	Matcher matcher = urlPattern.matcher(deployOutput);
+	
+
+
+ 	def data = new JsonSlurperClassic().parseText(matcher[0][2])
+	return data
 }
 
 
