@@ -647,14 +647,14 @@ def generateSlackAttachments(fields){
 	
 	def fieldsArray=[]
 	fields.each{ field ->
-		def short=false
+		def sidebyside=false
 		if(field.short != null){
-			short=field.short
+			sidebyside=field.short
 		}
 		JSONObject attachmentObject = new JSONObject();
 		attachmentObject.put('title', field.title)
 		attachmentObject.put('value', field.value)
-		attachmentObject.put('short', short)
+		attachmentObject.put('short', sidebyside)
 		fieldsArray.add(attachmentObject)
 	}
 	
