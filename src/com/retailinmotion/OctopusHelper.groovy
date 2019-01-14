@@ -142,9 +142,9 @@ def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder,
 */
 def parseDeployInfo(deployOutput){
 
-	output=output.replaceAll(/\n             /, "").replaceAll(/\n/, "\\\\n")
+	output=deployOutput.replaceAll(/\n             /, "").replaceAll(/\n/, "\\\\n")
 	Pattern urlPattern = Pattern.compile("(### Deployment Status JSON: )(\\{(.*)\\})",Pattern.CASE_INSENSITIVE);
-	Matcher matcher = urlPattern.matcher(deployOutput);
+	Matcher matcher = urlPattern.matcher(output);
 
 	def data = new JsonSlurperClassic().parseText(matcher[0][2])
 	return data
