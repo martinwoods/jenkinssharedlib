@@ -3,6 +3,8 @@ package com.retailinmotion;
 import javax.xml.xpath.*
 import javax.xml.parsers.DocumentBuilderFactory
 import groovy.json.JsonSlurperClassic
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /*
 * 	Class Name: BuildHelper
@@ -601,7 +603,7 @@ def getLastCommitAuthor( ){
 *				tokenCredentialId - String which identifies token to use - must match one avaiable token in jenkins
 *				commitAuthor - String to use for the author of the last commit
 */
-def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessage = null ){
+def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessage = null, attachments = null ){
 	def subject = "Job '${env.JOB_NAME}: ${buildStatus}: '"
 	def message = customMessage ?: "${subject} (${env.BUILD_URL}) The last commit was: ${env.GIT_COMMIT} by : ${commitAuthor}"
 
@@ -624,6 +626,40 @@ def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessa
 		colorCode = '#008fff'
 	}
 
-	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId )
+	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId, attachments: attachments.toString() )
 
+}
+
+/*
+* Given an array of fields, populate a JSON array of objects,
+* which can be passed to sendNotifications to create an attachent in the slack notification
+*
+*/
+
+def generateSlackAttachments(fields){
+	JSONObject attachment = new JSONObject();
+	JSONArray attachments = new JSONArray();
+	attachment.put('author',"jenkins");
+	attachment.put('author_link', env.BUILD_URL);
+	attachment.put('title', env.JOB_NAME);
+	attachment.put('fallback', "Build output for ${env.JOB_NAME} Build #${env.BUILD_NUMBER}");
+	attachment.put('mrkdwn_in', ["fields"])
+	
+	def fieldsArray=[]
+	fields.each{ field ->
+		def sidebyside=false
+		if(field.short != null){
+			sidebyside=field.short
+		}
+		JSONObject attachmentObject = new JSONObject();
+		attachmentObject.put('title', field.title)
+		attachmentObject.put('value', field.value)
+		attachmentObject.put('short', sidebyside)
+		fieldsArray.add(attachmentObject)
+	}
+	
+	attachment.put('fields', fieldsArray);
+	attachments.add(attachment);
+	
+	return attachments;
 }
