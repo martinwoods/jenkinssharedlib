@@ -3,6 +3,8 @@ package com.retailinmotion;
 import javax.xml.xpath.*
 import javax.xml.parsers.DocumentBuilderFactory
 import groovy.json.JsonSlurperClassic
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /*
 * 	Class Name: BuildHelper
@@ -626,4 +628,38 @@ def sendNotifications( buildStatus, tokenCredentialId, commitAuthor, customMessa
 
 	slackSend (color: colorCode, message: message, tokenCredentialId: tokenCredentialId, attachments: attachments.toString() )
 
+}
+
+/*
+* Given an array of fields, populate a JSON array of objects,
+* which can be passed to sendNotifications to create an attachent in the slack notification
+*
+*/
+
+def generateSlackAttachments(fields){
+	JSONObject attachment = new JSONObject();
+	JSONArray attachments = new JSONArray();
+	attachment.put('author',"jenkins");
+	attachment.put('author_link', env.BUILD_URL);
+	attachment.put('title', env.JOB_NAME);
+	attachment.put('fallback', "Build output for ${env.JOB_NAME} Build #${env.BUILD_NUMBER}");
+	attachment.put('mrkdwn_in', ["fields"])
+	
+	def fieldsArray=[]
+	fields.each{ field ->
+		def short=false
+		if(field.short != null){
+			short=field.short
+		}
+		JSONObject attachmentObject = new JSONObject();
+		attachmentObject.put('title', field.title)
+		attachmentObject.put('value', field.value)
+		attachmentObject.put('short', short)
+		fieldsArray.add(attachmentObject)
+	}
+	
+	attachment.put('fields', fieldsArray);
+	attachments.add(attachment);
+	
+	return attachments;
 }
