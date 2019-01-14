@@ -140,14 +140,11 @@ def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder,
 */
 def parseDeployInfo(deployOutput){
 
-	Pattern urlPattern = Pattern.compile("\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",Pattern.CASE_INSENSITIVE);
-	String output=""
+	
+	Pattern urlPattern = Pattern.compile("(.*### Deployment Status JSON:)(.*)",Pattern.CASE_INSENSITIVE);
 	Matcher matcher = urlPattern.matcher(deployOutput);
-	while (matcher.find()) {
-		String address = matcher.group()
-		output += address + "\r\n"
-	}
-	return output
+	
+	return matcher[0][2]
 }
 
 
