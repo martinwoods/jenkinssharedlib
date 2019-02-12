@@ -27,14 +27,13 @@ import groovy.json.JsonSlurperClassic
 */ 
 def getServer(jenkinsURL){
 	def octopus=[:]
-	
-	if ( jenkinsURL.contains("rimdub-jen-01") ){	
-		octopus['url']="http://octopus.rim.local"
-		octopus['credentialsId']="OctopusRimLocalAPIKey"
-		octopus['toolName']="Octo CLI"
-	} else if ( jenkinsURL.contains("rimdev-build-06") &&  jenkinsURL.contains("sandbox") ){	 // allow manual override to the 'sandbox' octopus server
+	if ( jenkinsURL.contains("sandbox") ){	 // allow manual override to the 'sandbox' octopus server
 		octopus['url']="http://rim-build-05.rim.local"
 		octopus['credentialsId']="OctopusAPIKey"
+		octopus['toolName']="Octo CLI"
+	} else	if ( jenkinsURL.contains("rimdub-jen-01") ){	
+		octopus['url']="http://octopus.rim.local"
+		octopus['credentialsId']="OctopusRimLocalAPIKey"
 		octopus['toolName']="Octo CLI"
 	} else if ( jenkinsURL.contains("rimdev-build-06") ){	
 		octopus['url']="http://octopus.rim.local"
