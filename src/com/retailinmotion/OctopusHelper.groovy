@@ -69,23 +69,23 @@ def execOcto(octopusServer, commandOptions){
 *	Push the given package to the correct Octopus deploy server for this Jenkins build server
 */
 
-def listDeployments (jenkinsURL, tenant, environment){
+def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 	
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions="list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey}"
+		def commandOptions="list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
 }
 
 
 
-def pushPackage (jenkinsURL, packageFile){
+def pushPackage (jenkinsURL, packageFile, space="Default"){
 	
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions="push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey}"
+		def commandOptions="push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
 }
@@ -93,11 +93,11 @@ def pushPackage (jenkinsURL, packageFile){
 /*
 * Create a release and deploy it 
 */
-def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
+def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Default"){
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions=" --create-release --waitfordeployment --progress --project \"$project\" --packageversion $packageString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		def commandOptions=" --create-release --waitfordeployment --progress --project \"$project\" --packageversion $packageString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		
 		return execOcto(octopusServer, commandOptions)
 	}
@@ -106,7 +106,7 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs){
 /*
 * Create an octopus release based on package strings
 */
-def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel="", extraArgs = ""){
+def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel="", extraArgs = "", space="Default"){
 
 	def octopusServer=getServer(jenkinsURL)
 	def optionString=""
@@ -121,7 +121,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	}
 	
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
 }
@@ -130,11 +130,11 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 /*
 * Create an octopus release, reading the package versions from the packages found in the given folder
 */
-def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder, extraArgs = ""){
+def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder, extraArgs = "", space="Default"){
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {		
-		def commandOptions="--create-release --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey}"
+		def commandOptions="--create-release --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" "
 		return execOcto(octopusServer, commandOptions)
 	}
 }
