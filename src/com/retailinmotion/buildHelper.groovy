@@ -33,15 +33,13 @@ import net.sf.json.JSONObject;
 					def gitVersionTool=tool name: 'GitVersion', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
 					def versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
 */
-def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
+def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, changeBranch=null){
 	def args
 	def gitVersionExe
 	def useTool=false
 	def useDocker=false
 	
-	echo ("FOO: ${CHANGE_BRANCH}")
-    echo ("FOO:"+env.CHANGE_BRANCH)
-	
+
 	if(dockerContext != null){
 		useTool=false
 		useDocker=true
@@ -136,7 +134,18 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 		json.PackagePreRelease=json.BranchName
 	}
 	
-	
+	// If this was a Pull Request branch, we lose a lot of information in the version string
+	// So the changeBranch argument allows passing in the original branch path (e.g. feature/JIRA-1234-dosomething), which we can then add to the version info
+	if (changeBranch != null) {
+      def jsoncopy = json.getClass().newInstance(json) // make a copy to use for the iterator 
+      preReleaseLabel=json.PreReleaseLabel
+      branchName=changeBranch.substring(changeBranch.indexOf("/")+1, changeBranch.length())
+      println "branchName is $branchName"
+      jsoncopy.each { key, value ->
+        	def newvalue=value.toString().replace(preReleaseLabel, branchName)
+  			json."$key"=newvalue
+		}
+	}
 	
 	return json
 	
