@@ -38,6 +38,10 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null){
 	def gitVersionExe
 	def useTool=false
 	def useDocker=false
+	
+	echo ("FOO: ${CHANGE_BRANCH}")
+    echo ("FOO:"+env.CHANGE_BRANCH)
+	
 	if(dockerContext != null){
 		useTool=false
 		useDocker=true
