@@ -136,11 +136,10 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	
 	// If this was a Pull Request branch, we lose a lot of information in the version string
 	// So the changeBranch argument allows passing in the original branch path (e.g. feature/JIRA-1234-dosomething), which we can then add to the version info
-	if (changeBranch != null) {
+	if (changeBranch != null && changeBranch != "") {
       def jsoncopy = json.getClass().newInstance(json) // make a copy to use for the iterator 
       preReleaseLabel=json.PreReleaseLabel
       branchName=changeBranch.substring(changeBranch.indexOf("/")+1, changeBranch.length())
-      println "branchName is $branchName"
       jsoncopy.each { key, value ->
         	def newvalue=value.toString().replace(preReleaseLabel, branchName)
   			json."$key"=newvalue
