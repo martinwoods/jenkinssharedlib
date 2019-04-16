@@ -149,9 +149,16 @@ def parseDeployInfo(deployOutput){
 	output=deployOutput.replaceAll(/\n             /, "").replaceAll(/\n/, "\\\\n")
 	Pattern urlPattern = Pattern.compile("(### Deployment Status JSON: )(\\{(.*)\\})",Pattern.CASE_INSENSITIVE);
 	Matcher matcher = urlPattern.matcher(output);
-
-	def data = new JsonSlurperClassic().parseText(matcher[0][2])
-	return data
+	
+  def data
+  if(matcher.getCount() > 0){
+    // Return the helm notes json object if we matched the pattern
+	data = new JsonSlurperClassic().parseText(matcher[0][2])
+  } else {
+    // otherwise, return a JSON object of the same format with a message
+    data = new JsonSlurperClassic().parseText('{"name": "","info": {"status": {"resources": "","notes": "Unable to parse deployment status."},"first_deployed": {"seconds": 0,"nanos": 0},"last_deployed": {"seconds": 0,"nanos": 0},"Description": ""},"namespace": ""}')
+  }
+  return data
 }
 
 
