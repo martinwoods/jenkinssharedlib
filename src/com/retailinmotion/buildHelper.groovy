@@ -52,14 +52,6 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		} else {
 			gitVersionExe= new File(dockerImageOrToolPath)
 		}
-		
-		try {
-			gitVersionExe.getCanonicalPath();
-		}
-		catch (IOException e) {
-		   echo "Couldn't find direct path to exe, and no dockerContext was passed. Unable to call GitVersion"
-		   exit 1
-		}
 	}
 		
 	// Parse the subPath argument
