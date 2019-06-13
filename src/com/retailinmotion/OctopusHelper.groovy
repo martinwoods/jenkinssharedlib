@@ -56,7 +56,7 @@ def getServer(jenkinsURL){
 def execOcto(octopusServer, commandOptions){
 	def output
 	if(isUnix()){
-		output=sh returnStdout: true, script: "docker run --rm -v \$(pwd):/src octopusdeploy/octo ${commandOptions}"
+		output=sh returnStdout: true, script: "docker run --rm -v \"\$(pwd)\":/src octopusdeploy/octo ${commandOptions}"
 	} else {
 		output=powershell returnStdout: true, script: """
 			&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
