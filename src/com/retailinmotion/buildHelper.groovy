@@ -166,6 +166,7 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
 		sh '''
 			mkdir -p $targetDir/$chartName
 			sed -i s/"  tag: latest"/"  tag: $version"/ig "$srcDir/$chartName/values.yaml"
+			helm lint $srcDir/$chartName
 			helm package --version $version --app-version $version -d $targetDir/$chartName $srcDir/$chartName
 		'''
 		
