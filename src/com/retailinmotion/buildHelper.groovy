@@ -175,6 +175,7 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
     dockerContext.image(helmImage).inside("-e targetDir=\"$targetDir\" -e srcDir=\"$srcDir\" -e chartName=\"$chartName\" -e version=\"$version\"" ) { 
 		sh '''
 			mkdir -p $targetDir/$chartName
+			helm lint $srcDir/$chartName
 			helm package -d $targetDir/$chartName $srcDir/$chartName
 		'''
 		
