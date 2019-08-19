@@ -161,7 +161,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 */
 def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmImage){
 	echo "Packaging $chartName"
-
+  if ( version != null ){
 	dockerContext.image(helmImage).inside("-e targetDir=\"$targetDir\" -e srcDir=\"$srcDir\" -e chartName=\"$chartName\" -e version=\"$version\"" ) { 
 		sh '''
 			mkdir -p $targetDir/$chartName
@@ -171,6 +171,15 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
 		'''
 		
 	}
+  } else {
+    dockerContext.image(helmImage).inside("-e targetDir=\"$targetDir\" -e srcDir=\"$srcDir\" -e chartName=\"$chartName\" -e version=\"$version\"" ) { 
+		sh '''
+			mkdir -p $targetDir/$chartName
+			helm package -d $targetDir/$chartName $srcDir/$chartName
+		'''
+		
+	}
+  }
 }
 
 /*
