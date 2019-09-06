@@ -96,7 +96,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	if (changeBranch != null && changeBranch != "") {
       def jsoncopy = json.getClass().newInstance(json) // make a copy to use for the iterator 
       preReleaseLabel=json.PreReleaseLabel
-      branchName=changeBranch.substring(changeBranch.indexOf("/")+1, changeBranch.length())
+	  prBranch=json.BranchName
+      branchName=changeBranch.substring(changeBranch.indexOf("/")+1, changeBranch.length()) + ".${prBranch}"
       jsoncopy.each { key, value ->
         	def newvalue=value.toString().replace(preReleaseLabel, branchName)
   			json."$key"=newvalue
