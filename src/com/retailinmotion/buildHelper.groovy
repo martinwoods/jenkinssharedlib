@@ -199,18 +199,20 @@ def pushHelmCharts(chartDir, helmRepo, userColonPassword, dockerContext, helmIma
 
 // use the helm client image to update the index file and push new charts to the repo
 	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e repoAuth=$userColonPassword -e chartDir=\"$chartDir\"" ) { 
-		sh '''
-			wget -q $HELMREPO/index.yaml
-			helm repo index --url $HELMREPO --merge index.yaml $chartDir
-			curl -s -u $repoAuth --upload-file $chartDir/index.yaml $HELMREPO/index.yaml
-  
-			for file in $(find $chartDir -name *.tgz)
-			do
-				chartFile=$(basename $file)
-				chartName=$(basename $(dirname $file))
-				curl -s -u $repoAuth --upload-file $file $HELMREPO/${chartName}/$chartFile
-			done
-		'''
+		lock("${helmRepo}/index.yaml"){
+			sh '''
+				wget -q $HELMREPO/index.yaml
+				helm repo index --url $HELMREPO --merge index.yaml $chartDir
+				curl -s -u $repoAuth --upload-file $chartDir/index.yaml $HELMREPO/index.yaml
+	  
+				for file in $(find $chartDir -name *.tgz)
+				do
+					chartFile=$(basename $file)
+					chartName=$(basename $(dirname $file))
+					curl -s -u $repoAuth --upload-file $file $HELMREPO/${chartName}/$chartFile
+				done
+			'''
+		}
 		
 	}
 }
