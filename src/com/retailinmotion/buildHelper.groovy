@@ -43,6 +43,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	if(dockerContext != null){
 		useTool=false
 		useDocker=true
+		echo "Using gitversion docker image ${dockerImageOrToolPath}"
 	} else {
 		useTool=true
 		useDocker=false
@@ -52,6 +53,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		} else {
 			gitVersionExe= new File(dockerImageOrToolPath)
 		}
+		echo "Using gitversionexe at ${gitVersionExe}"
 	}
 		
 	// Parse the subPath argument
