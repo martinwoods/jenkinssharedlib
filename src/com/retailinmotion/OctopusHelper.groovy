@@ -76,7 +76,7 @@ def execOcto(octopusServer, commandOptions){
 		output=sh returnStdout: true, script: "docker run --rm -v \"\$(pwd)\":/src octopusdeploy/octo ${commandOptions}"
 	} else if (os == "macos"){
 		output=sh returnStdout: true, script: """
-			'${tool("${octopusServer.toolName}")}\\Octo' ${commandOptions}
+			'${tool("${octopusServer.toolName}")}/Octo' ${commandOptions}
 			"""
 	} else if (os == "windows") {
 		output=powershell returnStdout: true, script: """
