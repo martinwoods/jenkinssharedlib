@@ -53,14 +53,38 @@ def getServer(jenkinsURL){
 	return octopus
 }
 
+def checkOs(){
+    if (isUnix()) {
+        def uname = sh script: 'uname', returnStdout: true
+        if (uname.startsWith("Darwin")) {
+            return "macos"
+        }
+        // Optionally add 'else if' for other Unix OS  
+        else {
+            return "linux"
+        }
+    }
+    else {
+        return "windows"
+    }
+}
+
 def execOcto(octopusServer, commandOptions){
 	def output
-	if(isUnix()){
+	def os=checkOs()
+	if(os == "linux"){
 		output=sh returnStdout: true, script: "docker run --rm -v \"\$(pwd)\":/src octopusdeploy/octo ${commandOptions}"
-	} else {
+	} else if (os == "macos"){
+		output=sh returnStdout: true, script: """
+			&'${tool("${octopusServer.toolName}")}\\Octo' ${commandOptions}
+			"""
+	} else if (os == "windows") {
 		output=powershell returnStdout: true, script: """
 			&'${tool("${octopusServer.toolName}")}\\Octo.exe' ${commandOptions}
 			"""
+	} else {
+		println "Unable to run octo for unrecognised OS $os"
+		exit 1
 	}
 	println output
 	return output.trim()
