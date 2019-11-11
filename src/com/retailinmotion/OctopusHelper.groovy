@@ -141,7 +141,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 	packageId = packageFileName(${packageFileRegex})
 
 	def octopusServer=getServer(jenkinsURL)
-	println "Pushing package $packageFile to ${octopusServer.url}"
+	println "Pushing package metadata $outputFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
       	def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\${outputFile}\" --space \"$space\""
       
