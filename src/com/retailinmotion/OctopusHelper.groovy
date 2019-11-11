@@ -4,6 +4,9 @@ package com.retailinmotion;
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import groovy.json.JsonSlurperClassic
+import groovy.json.JsonOutput
+import java.io.File
+import java.io.FileWriter
 
 /*
 * 	Class Name: Octopus Helper
@@ -102,7 +105,48 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 	}
 }
 
+// Push job metadata to Octopus Deploy for the given package
+def pushMetadata (jenkinsURL, packageFile, space="Default"){
 
+	def map = [
+		BuildEnvironment: "Jenkins",
+		BuildNumber: "${env.BUILD_NUMBER}",
+		BuildUrl: "${env.BUILD_URL}",
+		VcsType: "Bitbucket",
+		VcsRoot: "${env.GIT_URL}",
+		VcsCommitNumber: "${env.GIT_COMMIT}",
+		Commits: [
+			Id: "${env.GIT_COMMIT}",
+			Comment: ""
+		]
+	]
+
+	def jsonStr = JsonOutput.toJson(map)
+	println(jsonStr)
+
+	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
+	println(jsonBeauty)
+
+	String outputFile = 'octopusMetadata.json'
+	def fileWriter = new FileWriter(outputFile)
+
+	jsonBeauty.writeTo(fileWriter)
+	fileWriter.flush()
+
+  	def packageFileName = (packageFile.getName())
+	println packageFileName
+
+	packageFileRegex = ~/\..*/
+
+	packageId = packageFileName(${packageFileRegex})
+
+	def octopusServer=getServer(jenkinsURL)
+	println "Pushing package $packageFile to ${octopusServer.url}"
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
+      	def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\${outputFile}\" --space \"$space\""
+      
+    	return execOcto(octopusServer, commandOptions)
+}
 
 def pushPackage (jenkinsURL, packageFile, space="Default"){
 	
@@ -110,7 +154,10 @@ def pushPackage (jenkinsURL, packageFile, space="Default"){
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
+
 		return execOcto(octopusServer, commandOptions)
+
+		pushMetadata(jenkinsURL, packageFile)
 	}
 }
 
