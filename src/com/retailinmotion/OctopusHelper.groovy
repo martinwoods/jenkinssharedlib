@@ -167,9 +167,9 @@ def pushPackage (jenkinsURL, packageFile, space="Default"){
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="push --package $packageFile --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 
-		return execOcto(octopusServer, commandOptions)
-
 		pushMetadata(jenkinsURL, packageFile)
+
+		return execOcto(octopusServer, commandOptions)
 	}
 }
 
