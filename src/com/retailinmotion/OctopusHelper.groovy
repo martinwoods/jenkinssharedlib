@@ -144,6 +144,9 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 
 	writeFile(file:'metadata.json', text: jsonBeauty)
 
+	echo bat(returnStdout: true, script: 'dir')
+    echo bat(returnStdout: true, script: "type testFile.json")
+
 	// pkgStringZipRegex = ~/\..*/
 	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
 	// println rmPackageStringZip
