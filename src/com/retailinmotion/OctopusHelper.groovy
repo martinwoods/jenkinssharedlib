@@ -106,7 +106,23 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 }
 
 // Push job metadata to Octopus Deploy for the given package
-def pushMetadata (jenkinsURL, packageFile, space="Default"){
+def pushMetadata (jenkinsURL, packageFile, space="Default")
+
+	def changeString=""
+	def changeLogSets = currentBuild.changeSets
+	for (int i = 0; i < changeLogSets.size(); i++) {
+    	def entries = changeLogSets[i].items
+    	for (int j = 0; j < entries.length; j++) {
+        	def entry = entries[j]
+        	changeString+=entry.commitId + "\n"
+    	}
+	}
+
+	if (!changeString) {
+		changeString = " - Jenkins was unable to read changes"
+	}
+
+	println "Change String is equal to: ${changeString}"
 
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -116,34 +132,30 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 		VcsRoot: "${env.GIT_URL}",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
 		Commits: [
-			Id: "${env.GIT_COMMIT}",
+			Id: "${changeString}",
 			Comment: ""
 		]
 	]
 
 	def jsonStr = JsonOutput.toJson(map)
-	println(jsonStr)
 
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
 	println(jsonBeauty)
 
-	String outputFile = 'octopusMetadata.json'
-	def fileWriter = new FileWriter(outputFile)
+	writeFile(file:'metadata.json', text: jsonBeauty)
 
-	jsonBeauty.writeTo(fileWriter)
-	fileWriter.flush()
-
-  	def packageFileName = (packageFile.getName())
-	println packageFileName
-
-	packageFileRegex = ~/\..*/
-
-	packageId = packageFileName(${packageFileRegex})
+	pkgStringZipRegex = ~/\..*/
+	rmPackageStringZip = packageFile(${pkgStringZipRegex})
+	println rmPackageStringZip
+	
+	pkgFolderBeforeIdRegex = ~/\b(\w+)\\\\/  	
+	packageId = rmPackageStringZip(${pkgFolderBeforeIdRegex})
+	println packageId
 
 	def octopusServer=getServer(jenkinsURL)
-	println "Pushing package metadata $outputFile to ${octopusServer.url}"
+	println "Pushing package metadata to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-      	def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\${outputFile}\" --space \"$space\""
+      	def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\""
       
     	return execOcto(octopusServer, commandOptions)
 }
