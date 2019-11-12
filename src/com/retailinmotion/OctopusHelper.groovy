@@ -144,9 +144,9 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 
 	writeFile(file:'metadata.json', text: jsonBeauty)
 
-	pkgStringZipRegex = ~/\..*/
-	rmPackageStringZip = packageFile(${pkgStringZipRegex})
-	println rmPackageStringZip
+	// pkgStringZipRegex = ~/\..*/
+	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
+	// println rmPackageStringZip
 	
 	// pkgFolderBeforeIdRegex = ~/\b(\w+)\\\\/  	
 	// packageId = rmPackageStringZip(${pkgFolderBeforeIdRegex})
