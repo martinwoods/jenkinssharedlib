@@ -145,7 +145,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	}
 	
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions="--create-release --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
+		def commandOptions="--create-release --ignoreexisting --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
 }
@@ -158,7 +158,7 @@ def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder,
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {		
-		def commandOptions="--create-release --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" "
+		def commandOptions="--create-release --ignoreexisting --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" "
 		return execOcto(octopusServer, commandOptions)
 	}
 }
