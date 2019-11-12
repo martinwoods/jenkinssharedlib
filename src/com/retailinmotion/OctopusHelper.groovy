@@ -106,24 +106,28 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 }
 
 // Push job metadata to Octopus Deploy for the given package
-@NonCPS
 def pushMetadata (jenkinsURL, packageFile, space="Default"){
 
-	def changeString=""
-	def changeLogSets = currentBuild.changeSets
-	for (int i = 0; i < changeLogSets.size(); i++) {
-    	def entries = changeLogSets[i].items
-    	for (int j = 0; j < entries.length; j++) {
-        	def entry = entries[j]
-        	changeString+=entry.commitId + "\n"
-    	}
-	}
+	@NonCPS
+	def getChangeString() {
+		def changeString=""
+		def changeLogSets = currentBuild.changeSets
+		for (int i = 0; i < changeLogSets.size(); i++) {
+			def entries = changeLogSets[i].items
+			for (int j = 0; j < entries.length; j++) {
+				def entry = entries[j]
+				changeString+=entry.commitId + "\n"
+			}
+		}
 
-	if (!changeString) {
-		changeString = " - Jenkins was unable to read changes"
+		if (!changeString) {
+			changeString = " - Jenkins was unable to read changes"
+		}
+		return changeString
 	}
-
-	println "Change String is equal to: ${changeString}"
+	
+	commitIds = getChangeString()
+	println "Change String is equal to: ${commitIds}"
 
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -133,7 +137,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 		VcsRoot: "${env.GIT_URL}",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
 		Commits: [
-			Id: "${changeString}",
+			Id: "${commitIds}",
 			Comment: ""
 		]
 	]
