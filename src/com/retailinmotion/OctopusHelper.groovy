@@ -154,7 +154,11 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 	println "TEST TEXT 3"
 	
 	println "${packageFile}"
-	pkgStringZipRegex = ~/\..*/
+
+	def match = (packageFile =~ /\..*/)
+    println match
+
+	// pkgStringZipRegex = ~/\..*/
 	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
 	// println rmPackageStringZip
 	
