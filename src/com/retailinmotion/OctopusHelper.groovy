@@ -135,7 +135,11 @@ def getPackageId(packageFile) {
 	println nextMatch[0]
 	nextMatch.group()
 	def packageId = nextMatch.group()
-	def packageString = matchGroup1
+
+	def newMatch = (packageFile =~ /(?<=\.)\s*(.*)/)
+	newMatch[0]
+	newMatch.group()
+	def packageString = newMatch.group()
 	return [packageId, packageString]
 }
 
