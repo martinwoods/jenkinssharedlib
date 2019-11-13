@@ -155,10 +155,14 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 	
 	println "${packageFile}"
 
-	def match = (packageFile - ~ /\..*/)
+	def match = (packageFile - ~/^(.*?)\..*/)
 	println match[0]
 
-
+	// packageFile = 'artifacts\\vPack2Codebase.2.1909.1.323-DEVOPS-141.15-Branch.feature-DEVOPS-141.Sha.f1fe8bb5a.zip'
+	// def match = (packageFile =~ /\..*/)
+	// def firstMatch = match[0]
+	// def nextMatch = (packageFile =~ /^(.*?)\${firstMatch}/)
+	// println nextMatch[0]
 
 	// pkgStringZipRegex = ~/\..*/
 	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
