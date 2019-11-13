@@ -105,6 +105,7 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 	}
 }
 
+// Get Commit Ids from Current Build Change Log
 @NonCPS
 def getChangeString() {
 	def changeString=""
@@ -129,6 +130,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 	def commitIds = getChangeString()
 	println "Change String is equal to: ${commitIds}"
 
+	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
 		BuildNumber: "${env.BUILD_NUMBER}",
@@ -142,42 +144,35 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 		]
 	]
 
+	// Convert groovy map to json
 	def jsonStr = JsonOutput.toJson(map)
 
+	// Make json pretty
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
 	println(jsonBeauty)
-	println "TEST TEXT 1"
+
+	// Create json file containing pretty json text
 	writeFile(file:'metadata.json', text: jsonBeauty)
-	println "TEST TEXT 2"
 	echo bat(returnStdout: true, script: 'dir')
     echo bat(returnStdout: true, script: "type metadata.json")
-	println "TEST TEXT 3"
 	
 	println "${packageFile}"
 
+	// Regex to filter packageId from packageFile name
 	def match = (packageFile  =~ /^(.*?)\..*/)
-	println match[0]
+	def matchGroup1 = match.group(1)
+	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
+	println nextMatch[0]
+	def packageId = nextMatch.group()
 
-	// packageFile = 'artifacts\\vPack2Codebase.2.1909.1.323-DEVOPS-141.15-Branch.feature-DEVOPS-141.Sha.f1fe8bb5a.zip'
-	// def match = (packageFile =~ /\..*/)
-	// def firstMatch = match[0]
-	// def nextMatch = (packageFile =~ /^(.*?)\${firstMatch}/)
-	// println nextMatch[0]
+	println packageId
 
-	// pkgStringZipRegex = ~/\..*/
-	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
-	// println rmPackageStringZip
-	
-	// pkgFolderBeforeIdRegex = ~/\b(\w+)\\\\/  	
-	// packageId = rmPackageStringZip(${pkgFolderBeforeIdRegex})
-	// println packageId
-
-	// def octopusServer=getServer(jenkinsURL)
-	// println "Pushing package metadata to ${octopusServer.url}"
-	// withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-    // 		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\""
+	def octopusServer=getServer(jenkinsURL)
+	println "Pushing package metadata to ${octopusServer.url}"
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
+     		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\""
       
-    //	return execOcto(octopusServer, commandOptions)
+    return execOcto(octopusServer, commandOptions)
 }
 
 def pushPackage (jenkinsURL, packageFile, space="Default"){
