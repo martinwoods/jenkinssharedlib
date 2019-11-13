@@ -145,7 +145,6 @@ def getPackageId(packageFile) {
 	return [packageId, packageString]
 }
 
-
 // Push job metadata to Octopus Deploy for the given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
@@ -155,10 +154,11 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
+		CommentParser: "Jira",
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Bitbucket",
-		VcsRoot: "${env.GIT_URL}",
+		VcsRoot: "http://bitbucket.rim.local:7990/projects/DEVOPS/repos/terraform-eks/",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
 		Commits: [[
 			Id: "${commitIds}",
@@ -171,22 +171,18 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 
 	// Make json pretty
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
-	println(jsonBeauty)
-
+	
 	// Create json file containing pretty json text
 	writeFile(file:'metadata.json', text: jsonBeauty)
-	echo bat(returnStdout: true, script: 'dir')
-    echo bat(returnStdout: true, script: "type metadata.json")
 	
-	println "${packageFile}"
-
+	// get packageId and packageString from getPackageId method
 	def (packageId, packageString)  = getPackageId(packageFile)
 
+	// Constuct push-metadata octo command 
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package metadata to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
      		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\" --logLevel=verbose --overwrite-mode=OverwriteExisting"
-			println "Are command options are: ${commandOptions}" // TEST PRINT LINE
     return execOcto(octopusServer, commandOptions)
 	}
 }
