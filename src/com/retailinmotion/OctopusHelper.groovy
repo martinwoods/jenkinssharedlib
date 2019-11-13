@@ -153,9 +153,10 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
     echo bat(returnStdout: true, script: "type metadata.json")
 	println "TEST TEXT 3"
 	
+	println "${packageFile}"
 	pkgStringZipRegex = ~/\..*/
-	rmPackageStringZip = packageFile(${pkgStringZipRegex})
-	println rmPackageStringZip
+	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
+	// println rmPackageStringZip
 	
 	// pkgFolderBeforeIdRegex = ~/\b(\w+)\\\\/  	
 	// packageId = rmPackageStringZip(${pkgFolderBeforeIdRegex})
