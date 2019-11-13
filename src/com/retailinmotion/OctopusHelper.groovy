@@ -154,10 +154,10 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsType: "Bitbucket",
 		VcsRoot: "${env.GIT_URL}",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
-		Commits: [
+		Commits: [[
 			Id: "${commitIds}",
 			Comment: ""
-		]
+		]]
 	]
 
 	// Convert groovy map to json
