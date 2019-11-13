@@ -160,9 +160,12 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 
 	// Regex to filter packageId from packageFile name
 	def match = (packageFile  =~ /^(.*?)\..*/)
+	println match[0]
 	def matchGroup1 = match.group(1)
+	println matchGroup1
 	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
 	println nextMatch[0]
+	nextMatch.group()
 	def packageId = nextMatch.group()
 
 	println packageId
