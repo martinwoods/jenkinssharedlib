@@ -599,7 +599,10 @@ def getChangeString() {
 	if (!changeString) {
 		changeString = " - Jenkins was unable to read changes"
 	}
-	// return changeString
+	
+	changeString =""
+
+	return changeString
 }
 
 /*
