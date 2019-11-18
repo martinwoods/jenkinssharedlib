@@ -160,8 +160,8 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Bitbucket",
-		VcsRoot: "http://bitbucket.rim.local:7990/projects/DEVOPS/repos/terraform-eks/",
-		VcsCommitNumber: "${env.GIT_COMMIT}",
+		VcsRoot: "",
+		VcsCommitNumber: "",
 		Commits: [[
 			Id: "${commitIds}",
 			Comment: "${comment}"
