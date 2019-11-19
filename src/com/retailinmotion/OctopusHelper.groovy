@@ -184,7 +184,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package metadata to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-     		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\" --logLevel=verbose --overwrite-mode=OverwriteExisting"
+     		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\" --overwrite-mode=OverwriteExisting"
     return execOcto(octopusServer, commandOptions)
 	}
 }
