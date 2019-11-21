@@ -105,7 +105,7 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 	}
 }
 
-// Get Commit Ids from Current Build Change Log
+// Get Commit Ids and Comments from Current Build Change Log
 @NonCPS
 def getChangeString() {
 	def changeCommitId=""
