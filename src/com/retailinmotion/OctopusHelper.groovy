@@ -125,7 +125,7 @@ def getChangeString() {
 }
 
 @NonCPS
-def getPackageId {
+def getPackageId() {
 	// Regex to filter packageId from packageFile name
 	def match = (packageFile  =~ /^(.*?)\..*/)
 	println match[0]
