@@ -106,7 +106,7 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 }
 
 // Push job metadata to Octopus Deploy for the given package
-def pushMetadata (jenkinsURL, packageFile, space="Default")
+def pushMetadata (jenkinsURL, packageFile, space="Default"){
 
 	def changeString=""
 	def changeLogSets = currentBuild.changeSets
