@@ -105,28 +105,28 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 	}
 }
 
+@NonCPS
+def getChangeString() {
+	def changeString=""
+	def changeLogSets = currentBuild.changeSets
+	for (int i = 0; i < changeLogSets.size(); i++) {
+		def entries = changeLogSets[i].items
+		for (int j = 0; j < entries.length; j++) {
+			def entry = entries[j]
+			changeString+=entry.commitId + "\n"
+		}
+	}
+
+	if (!changeString) {
+		changeString = " - Jenkins was unable to read changes"
+	}
+	return changeString
+}
+
 // Push job metadata to Octopus Deploy for the given package
 def pushMetadata (jenkinsURL, packageFile, space="Default"){
-
-	@NonCPS
-	def getChangeString() {
-		def changeString=""
-		def changeLogSets = currentBuild.changeSets
-		for (int i = 0; i < changeLogSets.size(); i++) {
-			def entries = changeLogSets[i].items
-			for (int j = 0; j < entries.length; j++) {
-				def entry = entries[j]
-				changeString+=entry.commitId + "\n"
-			}
-		}
-
-		if (!changeString) {
-			changeString = " - Jenkins was unable to read changes"
-		}
-		return changeString
-	}
 	
-	commitIds = getChangeString()
+	def commitIds = getChangeString()
 	println "Change String is equal to: ${commitIds}"
 
 	def map = [
