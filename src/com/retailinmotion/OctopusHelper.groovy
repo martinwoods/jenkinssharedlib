@@ -124,6 +124,22 @@ def getChangeString() {
 	return changeString
 }
 
+@NonCPS
+def getPackageId {
+	// Regex to filter packageId from packageFile name
+	def match = (packageFile  =~ /^(.*?)\..*/)
+	println match[0]
+	def matchGroup1 = match.group(1)
+	println matchGroup1
+	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
+	println nextMatch[0]
+	nextMatch.group()
+	def packageId = nextMatch.group()
+
+	return packageId
+}
+
+
 // Push job metadata to Octopus Deploy for the given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
@@ -158,17 +174,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
 	println "${packageFile}"
 
-	// Regex to filter packageId from packageFile name
-	def match = (packageFile  =~ /^(.*?)\..*/)
-	println match[0]
-	def matchGroup1 = match.group(1)
-	println matchGroup1
-	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
-	println nextMatch[0]
-	nextMatch.group()
-	def packageId = nextMatch.group()
-
-	println packageId
+	def packageId = getPackageId()
 
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package metadata to ${octopusServer.url}"
