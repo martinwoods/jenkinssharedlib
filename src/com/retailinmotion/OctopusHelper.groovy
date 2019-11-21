@@ -106,6 +106,7 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 }
 
 // Push job metadata to Octopus Deploy for the given package
+@NonCPS
 def pushMetadata (jenkinsURL, packageFile, space="Default"){
 
 	def changeString=""
@@ -141,12 +142,12 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
 
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
 	println(jsonBeauty)
-
+	println "TEST TEXT 1"
 	writeFile(file:'metadata.json', text: jsonBeauty)
-
+	println "TEST TEXT 2"
 	echo bat(returnStdout: true, script: 'dir')
     echo bat(returnStdout: true, script: "type testFile.json")
-
+	println "TEST TEXT 3"
 	// pkgStringZipRegex = ~/\..*/
 	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
 	// println rmPackageStringZip
