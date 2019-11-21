@@ -115,7 +115,7 @@ def getChangeString() {
 		def entries = changeLogSets[i].items
 		for (int j = 0; j < entries.length; j++) {
 			def entry = entries[j]
-			changeString+=entry.commitId + "\n"
+			changeCommitId+=entry.commitId + "\n"
 			changeComment+=entry.comment + "\n"
 		}
 	}
