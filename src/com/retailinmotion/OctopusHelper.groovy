@@ -196,7 +196,7 @@ def pushPackage (jenkinsURL, packageFile, space="Default"){
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="push --package $packageFile --overwrite-mode=OverwriteExisting --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
-
+		
 		pushMetadata(jenkinsURL, packageFile)
 
 		return execOcto(octopusServer, commandOptions)
