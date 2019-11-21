@@ -142,20 +142,20 @@ def pushMetadata (jenkinsURL, packageFile, space="Default")
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
 	println(jsonBeauty)
 
-	writeFile(file:'metadata.json', text: jsonBeauty)
+	// writeFile(file:'metadata.json', text: jsonBeauty)
 
-	pkgStringZipRegex = ~/\..*/
-	rmPackageStringZip = packageFile(${pkgStringZipRegex})
-	println rmPackageStringZip
+	// pkgStringZipRegex = ~/\..*/
+	// rmPackageStringZip = packageFile(${pkgStringZipRegex})
+	// println rmPackageStringZip
 	
-	pkgFolderBeforeIdRegex = ~/\b(\w+)\\\\/  	
-	packageId = rmPackageStringZip(${pkgFolderBeforeIdRegex})
-	println packageId
+	// pkgFolderBeforeIdRegex = ~/\b(\w+)\\\\/  	
+	// packageId = rmPackageStringZip(${pkgFolderBeforeIdRegex})
+	// println packageId
 
-	def octopusServer=getServer(jenkinsURL)
-	println "Pushing package metadata to ${octopusServer.url}"
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-      	def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\""
+	// def octopusServer=getServer(jenkinsURL)
+	// println "Pushing package metadata to ${octopusServer.url}"
+	// withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
+    // 		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\""
       
     	return execOcto(octopusServer, commandOptions)
 }
