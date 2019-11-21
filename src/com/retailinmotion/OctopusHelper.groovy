@@ -164,6 +164,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsCommitNumber: "",
 		Commits: [[
 			Id: "${commitIds}",
+			LinkUrl: "http://bitbucket.rim.local:7990/projects/LOGISTICS/repos/vpack2client/commits/f9ded23b0cf171a15856214464baa517752680d2" ,
 			Comment: "${comment}"
 		]]
 	]
