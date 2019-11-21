@@ -125,7 +125,7 @@ def getChangeString() {
 }
 
 // Push job metadata to Octopus Deploy for the given package
-def pushMetadata (jenkinsURL, packageFile, space="Default"){
+def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
 	def commitIds = getChangeString()
 	println "Change String is equal to: ${commitIds}"
@@ -173,6 +173,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default"){
      		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\""
       
     return execOcto(octopusServer, commandOptions)
+	}
 }
 
 def pushPackage (jenkinsURL, packageFile, space="Default"){
