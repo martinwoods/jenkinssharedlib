@@ -108,20 +108,23 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 // Get Commit Ids from Current Build Change Log
 @NonCPS
 def getChangeString() {
-	def changeString=""
+	def changeCommitId=""
+	def changeComment=""
 	def changeLogSets = currentBuild.changeSets
 	for (int i = 0; i < changeLogSets.size(); i++) {
 		def entries = changeLogSets[i].items
 		for (int j = 0; j < entries.length; j++) {
 			def entry = entries[j]
 			changeString+=entry.commitId + "\n"
+			changeComment+=entry.comment + "\n"
 		}
 	}
 
-	if (!changeString) {
-		changeString = " - Jenkins was unable to read changes"
+	if (!changeString && !changeString) {
+		changeCommitId = " - Jenkins was unable to read CommitId changes"
+		changeComment = " - Jenkins was unable to read comment changes"
 	}
-	return changeString
+	return [changeCommitId, changeComment]
 }
 
 // Regex to filter packageId & packageString from packageFile name
@@ -148,9 +151,8 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for the given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	def commitIds = getChangeString()
-	println "Change String is equal to: ${commitIds}"
-
+	def (commitIds, comment)  = getChangeString()
+	
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -162,7 +164,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsCommitNumber: "${env.GIT_COMMIT}",
 		Commits: [[
 			Id: "${commitIds}",
-			Comment: ""
+			Comment: "${comment}"
 		]]
 	]
 
