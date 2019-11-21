@@ -140,8 +140,8 @@ def getPackageId(packageFile) {
 	newMatch[0]
 	newMatch.group()
 	def newStringZip = newMatch.group()
-	def packageString newStringZip.replaceAll(/\.[^.]*$/,"")
-	
+	def packageString = newStringZip.replaceAll(/\.[^.]*$/,"")
+
 	return [packageId, packageString]
 }
 
