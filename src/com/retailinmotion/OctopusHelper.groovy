@@ -120,7 +120,7 @@ def getChangeString() {
 		}
 	}
 
-	if (!changeString && !changeString) {
+	if (!changeCommitId && !changeComment) {
 		changeCommitId = " - Jenkins was unable to read CommitId changes"
 		changeComment = " - Jenkins was unable to read comment changes"
 	}
