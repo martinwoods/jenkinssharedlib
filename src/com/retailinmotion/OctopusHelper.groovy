@@ -107,7 +107,7 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 
 // Get Commit Ids and Comments from Current Build Change Log
 @NonCPS
-def getChangeString() {
+def getCommitIdComment() {
 	def changeCommitId=""
 	def changeComment=""
 	def changeLogSets = currentBuild.changeSets
@@ -148,10 +148,10 @@ def getPackageId(packageFile) {
 	return [packageId, packageString]
 }
 
-// Push job metadata to Octopus Deploy for the given package
+// Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	def (commitIds, comment)  = getChangeString()
+	def (commitIds, comment)  = getCommitIdComment()
 	
 	// Define metadata groovy map
 	def map = [
@@ -164,7 +164,6 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsCommitNumber: "",
 		Commits: [[
 			Id: "${commitIds}",
-			LinkUrl: "http://bitbucket.rim.local:7990/projects/LOGISTICS/repos/vpack2client/commits/f9ded23b0cf171a15856214464baa517752680d2",
 			Comment: "${comment}"
 		]]
 	]
@@ -186,7 +185,8 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	println "Pushing package metadata to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
      		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\" --overwrite-mode=OverwriteExisting"
-    return execOcto(octopusServer, commandOptions)
+    
+	return execOcto(octopusServer, commandOptions)
 	}
 }
 
