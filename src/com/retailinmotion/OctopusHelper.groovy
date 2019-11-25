@@ -107,7 +107,7 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 
 // Get Commit Ids and Comments from Current Build Change Log
 @NonCPS
-def getCommitIdComment() {
+def getCommitData() {
 	def changeCommitId=""
 	def changeComment=""
 	def changeLogSets = currentBuild.changeSets
@@ -120,30 +120,20 @@ def getCommitIdComment() {
 		}
 	}
 
-	if (!changeCommitId && !changeComment) {
-		changeCommitId = " - Jenkins was unable to read CommitId changes"
-		changeComment = " - Jenkins was unable to read comment changes"
-	}
+	println "**** TEST ==================================== TEST ****"
+	println changeCommitId
+	println changeComment
+	println "**** TEST ==================================== TEST ****"
+
 	return [changeCommitId, changeComment]
 }
 
 // Regex to filter packageId & packageString from packageFile name
 @NonCPS
 def getPackageId(packageFile) {
-	def match = (packageFile  =~ /^(.*?)\..*/)
-	println match[0]
-	def matchGroup1 = match.group(1)
-	println matchGroup1
-	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
-	println nextMatch[0]
-	nextMatch.group()
-	def packageId = nextMatch.group()
-
-	def newMatch = (packageFile =~ /(?<=\.)\s*(.*)/)
-	newMatch[0]
-	newMatch.group()
-	def newStringZip = newMatch.group()
-	def packageString = newStringZip.replaceAll(/\.[^.]*$/,"")
+	def match = (packageFile  =~ /^(\w*)\.(.*)\.zip$/)
+	def packageId=match[0][1]
+	def packageString=match[0][2]
 
 	return [packageId, packageString]
 }
@@ -151,7 +141,7 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	def (commitIds, comment)  = getCommitIdComment()
+	def (commitIds, comment)  = getCommitData()
 	
 	// Define metadata groovy map
 	def map = [
@@ -159,7 +149,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		CommentParser: "Jira",
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
-		VcsType: "Bitbucket",
+		VcsType: "Git",
 		VcsRoot: "",
 		VcsCommitNumber: "",
 		Commits: [[
