@@ -131,10 +131,20 @@ def getCommitData() {
 // Regex to filter packageId & packageString from packageFile name
 @NonCPS
 def getPackageId(packageFile) {
-	def match = (packageFile  =~ /^(\w*)\.(.*)\.zip$/)
-	match[0]
-	def packageId = match.group(1)
-	def packageString=match[0][2]
+	def match = (packageFile  =~ /^(.*?)\..*/)
+	println match[0]
+	def matchGroup1 = match.group(1)
+	println matchGroup1
+	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
+	println nextMatch[0]
+	nextMatch.group()
+	def packageId = nextMatch.group()
+
+	def newMatch = (packageFile =~ /(?<=\.)\s*(.*)/)
+	newMatch[0]
+	newMatch.group()
+	def newStringZip = newMatch.group()
+	def packageString = newStringZip.replaceAll(/\.[^.]*$/,"")
 
 	return [packageId, packageString]
 }
