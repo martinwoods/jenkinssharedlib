@@ -132,7 +132,8 @@ def getCommitData() {
 @NonCPS
 def getPackageId(packageFile) {
 	def match = (packageFile  =~ /^(\w*)\.(.*)\.zip$/)
-	def packageId=match[0][1]
+	match[0]
+	def packageId = match.group(1)
 	def packageString=match[0][2]
 
 	return [packageId, packageString]
