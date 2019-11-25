@@ -132,11 +132,11 @@ def getCommitData() {
 @NonCPS
 def getPackageId(packageFile) {
 	def match = (packageFile  =~ /^(.*?)\..*/)
-	println match[0]
+	match[0]
 	def matchGroup1 = match.group(1)
-	println matchGroup1
+	matchGroup1
 	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
-	println nextMatch[0]
+	nextMatch[0]
 	nextMatch.group()
 	def packageId = nextMatch.group()
 
@@ -161,8 +161,8 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
-		VcsRoot: "",
-		VcsCommitNumber: "",
+		VcsRoot: "http://bitbucket.rim.local:7990",
+		VcsCommitNumber: "${env.GIT_COMMIT}",
 		Commits: [[
 			Id: "${commitIds}",
 			Comment: "${comment}"
