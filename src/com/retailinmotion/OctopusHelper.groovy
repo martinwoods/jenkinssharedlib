@@ -10,8 +10,6 @@ import java.io.FileWriter
 
 // test line 1
 // test line 2
-// test line 3
-
 
 /*
 * 	Class Name: Octopus Helper
