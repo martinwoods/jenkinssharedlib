@@ -109,15 +109,15 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 // Get Commit Ids and Comments from Current Build Change Log
 @NonCPS
 def getCommitData() {
-	def changeCommitId=""
-	def changeComment=""
+	def changeCommitId= []
+	def changeComment= []
 	def changeLogSets = currentBuild.changeSets
 	for (int i = 0; i < changeLogSets.size(); i++) {
 		def entries = changeLogSets[i].items
 		for (int j = 0; j < entries.length; j++) {
 			def entry = entries[j]
-			changeCommitId+=entry.commitId + "\n"
-			changeComment+=entry.comment + "\n"
+			changeCommitId.add(entry.commitId)
+			changeComment.add(entry.comment)
 		}
 	}
 
@@ -158,18 +158,18 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	println commitIds.getClass()
 	println comment.getClass()
 
-/* 	Map commit = [
+	Map commit = [
     	commitId: "", 
     	comment: ""
 	]
 
 	List commitList = []
 
-	for (int i = 0; i < commitId.size(); i++) {
-		commit.commitId = "${commitIds}" 
-		commit.comment = "${comment}"
+	for (int i = 0; i < commitIds.size(); i++) {
+		commit.commitId = "${commitIds[i]}" 
+		commit.comment = "${comment[i]}"
 		commitList.add(commit)
-	} */
+	}
 
 	// Define metadata groovy map
 	def map = [
@@ -180,10 +180,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsType: "Git",
 		VcsRoot: "http://bitbucket.rim.local:7990",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
-		Commits: [[
-			Id: "${commitIds}",
-			Comment: "${comment} \n"
-		]]
+		Commits: commitList
 	]
 
 	// Convert groovy map to json
