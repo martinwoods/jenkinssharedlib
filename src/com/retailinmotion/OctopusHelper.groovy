@@ -123,17 +123,17 @@ def getCommitData() {
 	return [changeCommitId, changeComment]
 }
 
-// Create Map from getCommitData
+// Create Map for commit data
 def getCommitDataMap() {
 
 	def (commitId, comment)  = getCommitData()
 
-	Map commit = [
+	def commit = [
 		commitId: "",
 		comment: ""
 	]
 
-	List commitList = []
+	def commitList = []
 	
 	for (int i = 0; i < commitId.size(); i++) {
 
