@@ -186,6 +186,8 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		Commits: getCommitDataMap()
 	]
 
+	println new JsonBuilder(map).toPrettyString();
+
 	// Convert groovy map to json
 	def jsonStr = JsonOutput.toJson(map)
 
