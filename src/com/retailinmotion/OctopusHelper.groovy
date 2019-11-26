@@ -129,8 +129,8 @@ def getCommitDataMap() {
 	def (commitId, msg)  = getCommitData()
 
 	def commit = [
-		commitId: "",
-		comment: ""
+		Id: "",
+		Comment: ""
 	]
 
 	def commitList = []
@@ -138,12 +138,12 @@ def getCommitDataMap() {
 	for (int i = 0; i < commitId.size(); i++) {
 
 		commit = [
-			commitId: "",
-			comment: ""
+			Id: "",
+			Comment: ""
 		]
 
-		commit.commitId = "${commitId[i]}"
-		commit.comment = "${msg[i]}"
+		commit.Id = "${commitId[i]}"
+		commit.Comment = "${msg[i]}"
 		commitList.add(commit)
 	}
 
@@ -184,7 +184,6 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
 		VcsRoot: "http://bitbucket.rim.local:7990",
-		VcsCommitNumber: commitId.toString(),
 		Commits: getCommitDataMap()
 	]
 
