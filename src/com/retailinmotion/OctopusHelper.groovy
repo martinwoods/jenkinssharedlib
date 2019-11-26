@@ -122,12 +122,34 @@ def getCommitData() {
 		}
 	}
 
-	println "**** TEST ==================================== TEST ****"
-	println changeCommitId
-	println changeComment
-	println "**** TEST ==================================== TEST ****"
-
 	return [changeCommitId, changeComment]
+}
+
+// Create Map from getCommitData
+def getCommitDataMap() {
+
+	def (commitId, comment)  = getCommitData()
+
+	Map commit = [
+		commitId: "",
+		comment: ""
+	]
+
+	List commitList = []
+	
+	for (int i = 0; i < commitId.size(); i++) {
+
+		commit = [
+			commitId: "",
+			comment: ""
+		]
+
+		commit.commitId = "${commitId[i]}"
+		commit.comment = "${comment[i]}"
+		commitList.add(commit)
+	}
+
+	return commitList
 }
 
 // Regex to filter packageId & packageString from packageFile name
@@ -154,24 +176,6 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	def (commitIds, comment)  = getCommitData()
-	
-	println commitIds.getClass()
-	println comment.getClass()
-
-	Map commit = [
-    	commitId: "", 
-    	comment: ""
-	]
-
-	List commitList = []
-
-	for (int i = 0; i < commitIds.size(); i++) {
-		commit.commitId = "${commitIds[i]}" 
-		commit.comment = "${comment[i]}"
-		commitList.add(commit)
-	}
-
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -181,8 +185,10 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsType: "Git",
 		VcsRoot: "http://bitbucket.rim.local:7990",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
-		Commits: commitList
+		Commits: getCommitDataMap
 	]
+
+	println new JsonBuilder(map).toPrettyString();
 
 	// Convert groovy map to json
 	def jsonStr = JsonOutput.toJson(map)
