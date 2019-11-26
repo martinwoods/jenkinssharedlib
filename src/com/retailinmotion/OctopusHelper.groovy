@@ -154,6 +154,22 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
 	def (commitIds, comment)  = getCommitData()
 	
+	println commitIds.getClass()
+	println comment.getClass()
+
+/* 	Map commit = [
+    	commitId: "", 
+    	comment: ""
+	]
+
+	List commitList = []
+
+	for (int i = 0; i < commitId.size(); i++) {
+		commit.commitId = "${commitIds}" 
+		commit.comment = "${comment}"
+		commitList.add(commit)
+	} */
+
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -164,8 +180,8 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsRoot: "http://bitbucket.rim.local:7990",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
 		Commits: [[
-			Id: "${commitIds}",
-			Comment: "${comment}"
+			Id: "${commtIds}",
+			Comment: "${comment} \n"
 		]]
 	]
 
