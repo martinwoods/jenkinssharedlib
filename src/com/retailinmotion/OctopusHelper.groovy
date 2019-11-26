@@ -183,7 +183,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsType: "Git",
 		VcsRoot: "http://bitbucket.rim.local:7990",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
-		Commits: getCommitDataMap
+		Commits: getCommitDataMap()
 	]
 
 	// Convert groovy map to json
