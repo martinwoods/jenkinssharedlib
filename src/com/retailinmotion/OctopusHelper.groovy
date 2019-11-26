@@ -185,7 +185,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		VcsRoot: "http://bitbucket.rim.local:7990",
 		VcsCommitNumber: "${env.GIT_COMMIT}",
 		Commits: [[
-			Id: "${commtIds}",
+			Id: "${commitIds}",
 			Comment: "${comment} \n"
 		]]
 	]
