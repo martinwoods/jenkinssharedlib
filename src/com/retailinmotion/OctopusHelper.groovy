@@ -4,6 +4,9 @@ package com.retailinmotion;
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import groovy.json.JsonSlurperClassic
+import groovy.json.JsonOutput
+import java.io.File
+import java.io.FileWriter
 
 /*
 * 	Class Name: Octopus Helper
@@ -102,7 +105,107 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 	}
 }
 
+// Get Commit Ids and Comments from Current Build Change Log
+@NonCPS
+def getCommitData() {
+	def changeCommitId= []
+	def changeMsg= []
+	def changeLogSets = currentBuild.changeSets
+	for (int i = 0; i < changeLogSets.size(); i++) {
+		def entries = changeLogSets[i].items
+		for (int j = 0; j < entries.length; j++) {
+			def entry = entries[j]
+			changeCommitId.add(entry.commitId)
+			changeMsg.add(entry.msg)
+		}
+	}
 
+	return [changeCommitId, changeMsg]
+}
+
+// Create Map for commit data
+def getCommitDataMap() {
+
+	def (commitId, msg)  = getCommitData()
+
+	def commit = [
+		Id: "",
+		Comment: ""
+	]
+
+	def commitList = []
+	
+	for (int i = 0; i < commitId.size(); i++) {
+
+		commit = [
+			Id: "",
+			Comment: ""
+		]
+
+		commit.Id = "${commitId[i]}"
+		commit.Comment = "${msg[i]}"
+		commitList.add(commit)
+	}
+
+	return commitList
+}
+
+// Regex to filter packageId & packageString from packageFile name
+@NonCPS
+def getPackageId(packageFile) {
+	def match = (packageFile  =~ /^(.*?)\..*/)
+	match[0]
+	def matchGroup1 = match.group(1)
+	matchGroup1
+	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
+	nextMatch[0]
+	nextMatch.group()
+	def packageId = nextMatch.group()
+
+	def newMatch = (packageFile =~ /(?<=\.)\s*(.*)/)
+	newMatch[0]
+	newMatch.group()
+	def newStringZip = newMatch.group()
+	def packageString = newStringZip.replaceAll(/\.[^.]*$/,"")
+
+	return [packageId, packageString]
+}
+
+// Push job metadata to Octopus Deploy for given package
+def pushMetadata (jenkinsURL, packageFile, space="Default") {
+	
+	// Define metadata groovy map
+	def map = [
+		BuildEnvironment: "Jenkins",
+		CommentParser: "Jira",
+		BuildNumber: "${env.BUILD_NUMBER}",
+		BuildUrl: "${env.BUILD_URL}",
+		VcsType: "Git",
+		VcsRoot: "http://bitbucket.rim.local:7990",
+		Commits: getCommitDataMap()
+	]
+
+	// Convert groovy map to json
+	def jsonStr = JsonOutput.toJson(map)
+
+	// Make json pretty
+	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
+	
+	// Create json file containing pretty json text
+	writeFile(file:'metadata.json', text: jsonBeauty)
+	
+	// get packageId and packageString from getPackageId method
+	def (packageId, packageString)  = getPackageId(packageFile)
+
+	// Constuct push-metadata octo command 
+	def octopusServer=getServer(jenkinsURL)
+	println "Pushing package metadata to ${octopusServer.url}"
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
+     		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"${env.WORKSPACE}\\metadata.json\" --space \"$space\" --overwrite-mode=OverwriteExisting"
+    
+	return execOcto(octopusServer, commandOptions)
+	}
+}
 
 def pushPackage (jenkinsURL, packageFile, space="Default"){
 	
@@ -110,6 +213,9 @@ def pushPackage (jenkinsURL, packageFile, space="Default"){
 	println "Pushing package $packageFile to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="push --package $packageFile --overwrite-mode=OverwriteExisting --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
+		
+		pushMetadata(jenkinsURL, packageFile)
+
 		return execOcto(octopusServer, commandOptions)
 	}
 }
@@ -184,6 +290,3 @@ def parseDeployInfo(deployOutput){
   }
   return data
 }
-
-
-

@@ -585,22 +585,8 @@ def commitHashForBuild( build ) {
 * Get the list of changes for the build
 */
 def getChangeString() {
-	def changeString=""
-	def changeLogSets = currentBuild.changeSets
-	for (int i = 0; i < changeLogSets.size(); i++) {
-		def entries = changeLogSets[i].items
-		for (int j = 0; j < entries.length; j++) {
-			def entry = entries[j]
-			echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
-			changeString+=entry.msg + "\n"
-			
-		}
-	}
-	
-	if (!changeString) {
-		changeString = " - Jenkins was unable to read changes"
-	}
-	return changeString
+  	echo "getChangeString no longer returns data, configure release notes template in Octopus instead."
+	return ""
 }
 
 /*
