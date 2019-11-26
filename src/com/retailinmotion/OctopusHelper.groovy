@@ -8,8 +8,6 @@ import groovy.json.JsonOutput
 import java.io.File
 import java.io.FileWriter
 
-//test line 1
-
 /*
 * 	Class Name: Octopus Helper
 *	Purpose: 	Provides helper functions for communicating with Octopus deploy server
@@ -149,8 +147,6 @@ def getCommitDataMap() {
 		commitList.add(commit)
 	}
 
-	println commitList //TESTING
-
 	return commitList
 }
 
@@ -194,8 +190,6 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 
 	// Make json pretty
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
-
-	println jsonBeauty
 	
 	// Create json file containing pretty json text
 	writeFile(file:'metadata.json', text: jsonBeauty)
