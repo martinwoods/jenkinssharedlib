@@ -148,6 +148,8 @@ def getCommitDataMap() {
 		commitList.add(commit)
 	}
 
+	println commitList //TESTING
+
 	return commitList
 }
 
@@ -175,8 +177,6 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	def (commitId, msg)  = getCommitData()
-
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
