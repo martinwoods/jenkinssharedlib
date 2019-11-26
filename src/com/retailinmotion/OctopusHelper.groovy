@@ -8,7 +8,7 @@ import groovy.json.JsonOutput
 import java.io.File
 import java.io.FileWriter
 
-// test line 1
+// test line 2
 
 /*
 * 	Class Name: Octopus Helper
