@@ -109,24 +109,24 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 @NonCPS
 def getCommitData() {
 	def changeCommitId= []
-	def changeComment= []
+	def changeMsg= []
 	def changeLogSets = currentBuild.changeSets
 	for (int i = 0; i < changeLogSets.size(); i++) {
 		def entries = changeLogSets[i].items
 		for (int j = 0; j < entries.length; j++) {
 			def entry = entries[j]
 			changeCommitId.add(entry.commitId)
-			changeComment.add(entry.comment)
+			changeMsg.add(entry.msg)
 		}
 	}
 
-	return [changeCommitId, changeComment]
+	return [changeCommitId, changeMsg]
 }
 
 // Create Map for commit data
 def getCommitDataMap() {
 
-	def (commitId, comment)  = getCommitData()
+	def (commitId, msg)  = getCommitData()
 
 	def commit = [
 		commitId: "",
@@ -143,7 +143,7 @@ def getCommitDataMap() {
 		]
 
 		commit.commitId = "${commitId[i]}"
-		commit.comment = "${comment[i]}"
+		commit.comment = "${msg[i]}"
 		commitList.add(commit)
 	}
 
@@ -174,6 +174,8 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
+	def (commitId, msg)  = getCommitData()
+
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -182,7 +184,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
 		VcsRoot: "http://bitbucket.rim.local:7990",
-		VcsCommitNumber: "",
+		VcsCommitNumber: "${commitId}",
 		Commits: getCommitDataMap()
 	]
 
