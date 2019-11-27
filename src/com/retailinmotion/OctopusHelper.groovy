@@ -191,6 +191,8 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	// Make json pretty
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
 	
+	println jsonBeauty // ADDING TO TROUBLESHOOT ISSUE
+
 	// Create json file containing pretty json text
 	writeFile(file:'metadata.json', text: jsonBeauty)
 	
@@ -201,8 +203,10 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package metadata to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-     		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"metadata.json\" --space \"$space\" --overwrite-mode=OverwriteExisting"
+     		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"metadata.json\" --space \"$space\"  --logLevel=verbose --overwrite-mode=OverwriteExisting"
     
+			println commandOptions // ADDING TO TROUBLESHOOT ISSUE
+
 	return execOcto(octopusServer, commandOptions)
 	}
 }
