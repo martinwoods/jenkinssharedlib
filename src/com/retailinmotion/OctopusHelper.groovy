@@ -154,20 +154,9 @@ def getCommitDataMap() {
 @NonCPS
 def getPackageId(packageFile) {
 	println "PackageFile is; ${packageFile}"
-	def match = (packageFile  =~ /^(.*?)\..*/)
-	match[0]
-	def matchGroup1 = match.group(1)
-	matchGroup1
-	def nextMatch = (matchGroup1 =~ /([^\\]+$)/)
-	nextMatch[0]
-	nextMatch.group()
-	def packageId = nextMatch.group()
-
-	def newMatch = (packageFile =~ /(?<=\.)\s*(.*)/)
-	newMatch[0]
-	newMatch.group()
-	def newStringZip = newMatch.group()
-	def packageString = newStringZip.replaceAll(/\.[^.]*$/,"")
+    def match = (packageFile  =~ /^(?:.*\\)*([a-zA-Z\.]+)(?:(?=\.\d\..*))\.(.*)\.zip/)
+	def packageId=match[0][1]
+	def packageString=match[0][2]
 
 	return [packageId, packageString]
 }
