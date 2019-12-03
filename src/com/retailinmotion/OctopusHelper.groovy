@@ -153,6 +153,7 @@ def getCommitDataMap() {
 // Regex to filter packageId & packageString from packageFile name
 @NonCPS
 def getPackageId(packageFile) {
+	println "PackageFile is; ${packageFile}"
 	def match = (packageFile  =~ /^(.*?)\..*/)
 	match[0]
 	def matchGroup1 = match.group(1)
