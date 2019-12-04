@@ -151,10 +151,24 @@ def getCommitDataMap() {
 }
 
 // Regex to filter packageId & packageString from packageFile name
+/*
+Example package paths that will be parsed as expected; 
+
+terraform_eks.261.1.1-DEVOPS-73.PR-86.97-Branch.PR-86.Sha.4a8b226.zip
+artifacts/KubisiOS.0.13.0-KUBIS-538-AircraftInfoBookingGrouping.PR-273.10-Branch.PR-273.Sha.0d8a4bd.zip
+artifacts\KubisiOS.0.13.0-KUBIS-538-AircraftInfoBookingGrouping.PR-273.10-Branch.PR-273.Sha.0d8a4bd.zip
+artifacts\VectorReports.2.1911.0-develop.174-Branch.develop.Sha.b150104015.zip
+some\long\path\artifacts\VectorReports.2.1911.0-develop.174-Branch.develop.Sha.b150104015.zip
+artifacts\vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
+vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
+a/long/path/vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
+
+
+*/
 @NonCPS
 def getPackageId(packageFile) {
 	println "PackageFile is; ${packageFile}"
-    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z\.]+)(?:(?=\.\d\..*))\.(.*)\.zip/)
+    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z_\.]+)(?:(?=\.\d+\..*))\.(.*)\.zip/)
 	def packageId=match[0][1]
 	def packageString=match[0][2]
 
