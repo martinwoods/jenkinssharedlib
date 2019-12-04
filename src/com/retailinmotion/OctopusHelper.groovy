@@ -162,13 +162,15 @@ some\long\path\artifacts\VectorReports.2.1911.0-develop.174-Branch.develop.Sha.b
 artifacts\vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 a/long/path/vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
+a-package.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
+some.other.package-version_something.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 
 
 */
 @NonCPS
 def getPackageId(packageFile) {
 	println "PackageFile is; ${packageFile}"
-    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z_\.]+)(?:(?=\.\d+\..*))\.(.*)\.zip/)
+    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z_\-\.]+)(?:(?=\.\d+\..*))\.(.*)\.zip/)
 	def packageId=match[0][1]
 	def packageString=match[0][2]
 
