@@ -161,16 +161,28 @@ artifacts\VectorReports.2.1911.0-develop.174-Branch.develop.Sha.b150104015.zip
 some\long\path\artifacts\VectorReports.2.1911.0-develop.174-Branch.develop.Sha.b150104015.zip
 artifacts\vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
+vRec.Jobs.2.1910.0-CATHAY-Stage.9-Branch.feature-2.1910-CATHAY-Stage.Sha.cc2dd4e.zip
+vRec.Jobs.2.1907.1-VECTWO-33804.27-Branch.feature.Sha.355ad14.zip
+vRec.Jobs.2.1907.0-vesb-release-version-fix.0-Branch.feature-2.1907-vesb-release-version-fix.Sha.a1c4b5a.zip
 a/long/path/vRec.Jobs.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 a-package.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 some.other.package-version_something.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
+vPack2Codebase.2.1910.1.387-DEVOPS-141.17-Branch.feature-DEVOPS-141.Sha.6627710ba.zip
+vPack2Codebase.2.1909.1.309-14.Branch.master.Sha.2e37ef5ef.zip
+SQLSVN.1.0.0.19-branch+Branch.develop.Sha.6ae7de4.zip
+v3WM.1.0.0.404-feature+Branch.VECTWO-18544.Sha.830267e.zip
+RiM.Vector.Bezier.Services.Storage.1.0.2.6-branch+Branch.master.Sha.1df53b1.zip
+EposWebService.2.1909.1-VECTWO-33227.2-Branch.VECTWO-33227.Sha.4a54a04.zip
+EposWebService.2.1909.1-PullRequest0032.2-Branch.PR-32.Sha.4a54a04.zip
+A.Package.With.Dots.1.2.3-abc123.zip
+package_with_underscores.3.1.2.zip
 
 
 */
 @NonCPS
 def getPackageId(packageFile) {
 	println "PackageFile is; ${packageFile}"
-    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z_\-\.]+)(?:(?=\.\d+\..*))\.(.*)\.zip/)
+    def match = (packageFile  =~ /(?:.*[\\\/])*([a-zA-Z0-9_\-\.]+)(?:(?=\.\d+\.\d+\.\d(?:\.|-).*))\.(.*)\.zip/)
 	def packageId=match[0][1]
 	def packageString=match[0][2]
 
