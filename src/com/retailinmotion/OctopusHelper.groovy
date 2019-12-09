@@ -178,13 +178,13 @@ EposWebService.2.1909.1-VECTWO-33227.2-Branch.VECTWO-33227.Sha.4a54a04.zip
 EposWebService.2.1909.1-PullRequest0032.2-Branch.PR-32.Sha.4a54a04.zip
 A.Package.With.Dots.1.2.3-abc123.zip
 package_with_underscores.3.1.2.zip
-
+artifacts/vPosAndroid.3.0.5077-ICE-release+Branch.-2.Sha.b0085cded.zip
 
 */
 @NonCPS
 def getPackageId(packageFile) {
 	println "PackageFile is; ${packageFile}"
-    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z0-9_\-\.]+)(?:(?=\.\d+\.\d+\.\d(?:\.|-).*))\.(.*)\.zip/)
+    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z0-9_\-\.]+?)(?:(?=\.\d+\.\d+\.\d+(?:\.|-).*))\.(.*)\.zip/)
 	def packageId=match[0][1]
 	def packageString=match[0][2]
 
