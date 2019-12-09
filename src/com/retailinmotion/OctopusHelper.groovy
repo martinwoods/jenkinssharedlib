@@ -169,6 +169,8 @@ a-package.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 some.other.package-version_something.2.1910.1-develop.0-Branch.develop.Sha.45f4ee4.zip
 vPack2Codebase.2.1910.1.387-DEVOPS-141.17-Branch.feature-DEVOPS-141.Sha.6627710ba.zip
 vPack2Codebase.2.1909.1.309-14.Branch.master.Sha.2e37ef5ef.zip
+artifacts\vPack2Codebase.2.1910.1.411-VECTWO-31420-vpack-weak-pwd-management.2-Branch.feature-VECTWO-31420-vpack-weak-pwd-management.Sha.0a8476cb8.zip
+artifacts\vPack2Codebase.2.1911.0.410-beta.0-Branch.release-2.1911.Sha.80525e546.zip
 SQLSVN.1.0.0.19-branch+Branch.develop.Sha.6ae7de4.zip
 v3WM.1.0.0.404-feature+Branch.VECTWO-18544.Sha.830267e.zip
 RiM.Vector.Bezier.Services.Storage.1.0.2.6-branch+Branch.master.Sha.1df53b1.zip
@@ -182,7 +184,7 @@ package_with_underscores.3.1.2.zip
 @NonCPS
 def getPackageId(packageFile) {
 	println "PackageFile is; ${packageFile}"
-    def match = (packageFile  =~ /(?:.*[\\\/])*([a-zA-Z0-9_\-\.]+)(?:(?=\.\d+\.\d+\.\d(?:\.|-).*))\.(.*)\.zip/)
+    def match = (packageFile  =~ /^(?:.*[\\\/])*([a-zA-Z0-9_\-\.]+)(?:(?=\.\d+\.\d+\.\d(?:\.|-).*))\.(.*)\.zip/)
 	def packageId=match[0][1]
 	def packageString=match[0][2]
 
