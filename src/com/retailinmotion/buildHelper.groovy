@@ -315,11 +315,18 @@ def getPackageName (assemblyInfo, buildInfo, gitHashes, buildNumber ){
 	return packageString
 }
 
+// Generate a package suffix using buildInfo and git hashes
 def getPackageSuffix (buildInfo, gitHashes){
-	def packageSuffix="-${buildInfo.buildType}+Branch.${buildInfo.featureName}.Sha.${gitHashes.short}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
+	def packageSuffix
+	if ( buildInfo.buildType == 'release') {
+		packageSuffix="-${buildInfo.buildType}+Branch.${buildInfo.longFeatureName}.Sha.${gitHashes.short}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
+	} else {
+		packageSuffix="-${buildInfo.buildType}+Branch.${buildInfo.featureName}.Sha.${gitHashes.short}".replaceAll(/[^0-9A-Za-z-\.\+]/, "");
+	}
 	
 	return packageSuffix
 }
+
 
 
 /*
