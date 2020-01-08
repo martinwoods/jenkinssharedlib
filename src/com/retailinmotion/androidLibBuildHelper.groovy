@@ -14,6 +14,7 @@ TO DO
 
 def androidLibBuild(test){
     println "androidLibBuild Test value: --${test}--"
-    def jkurl = getServer(env.JENKINS_URL)
+    def OctopusHelper = new com.retailinmotion.OctopusHelper()
+    def jkurl = OctopusHelper.getServer(env.JENKINS_URL)
     println "Jenkins: --${jkurl}--"
 }
