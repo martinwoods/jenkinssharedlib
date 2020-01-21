@@ -39,21 +39,26 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	def useTool=false
 	def useDocker=false
 	
-
-	if(dockerContext != null){
+	def osType=checkOs()
+	
+	if (dockerContext != null){
 		useTool=false
 		useDocker=true
-		echo "Using gitversion docker image ${dockerImageOrToolPath}"
+		echo "Using gitversion docker image ${dockerImageOrToolPath} on ${osType}"
 	} else {
 		useTool=true
 		useDocker=false
 		// Check the path if we are using the tool
-		if (!dockerImageOrToolPath.toString().endsWith(".exe")){
+		if (osType == "windows" && !dockerImageOrToolPath.toString().endsWith(".exe")){
 			gitVersionExe=new File(dockerImageOrToolPath, "GitVersion.exe") 
+		} else if (osType == "macos"){
+			gitVersionExe=new File(dockerImageOrToolPath, "GitVersion") 
+			// Need to make sure it's a unix path separator due to https://issues.jenkins-ci.org/browse/JENKINS-36791
+			gitVersionExe=gitVersionExe.toString().replaceAll("\\\\", "/")
 		} else {
 			gitVersionExe= new File(dockerImageOrToolPath)
 		}
-		echo "Using gitversionexe at ${gitVersionExe}"
+		echo "Using gitversionexe at ${gitVersionExe} for ${osType}"
 	}
 		
 	// Parse the subPath argument
@@ -70,19 +75,29 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		// call the tool directly (intended for use on windows systems)
 		// set flag to prevent git tools error
 		env.IGNORE_NORMALISATION_GIT_HEAD_MOVE=1
-		withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}"]) {
-			powershell '''
-			&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force
-			If($LASTEXITCODE -ne 0){ 
-				Get-Content gitversion.txt
+		if (osType == "windows"){
+			withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}"]) {
+				powershell '''
+				&"$($env:gitVersionExe)" "$($env:WORKSPACE)$($env:subPath)" | Out-File gitversion.txt -Encoding ASCII -Force
+				If($LASTEXITCODE -ne 0){ 
+					Get-Content gitversion.txt
+				}
+				'''
 			}
-			'''
+		} else {
+			withEnv(["gitVersionExe=${gitVersionExe}", "subPath=${subPath}"]) {
+				sh '''
+				"${gitVersionExe}" "${WORKSPACE}${subPath}" > gitversion.txt
+				if [ $? -ne 0 ]; then cat gitversion.txt; fi
+				'''
+			}
 		}
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
 		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\" -e IGNORE_NORMALISATION_GIT_HEAD_MOVE=1"){
 			sh '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt 
+				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
+				if [ $? -ne 0 ]; then cat gitversion.txt; fi
 			'''
 		}
 	} else {
@@ -146,6 +161,25 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	
 	return json
 	
+}
+
+/*
+* Check what OS the script is executing on
+*/
+def checkOs(){
+    if (isUnix()) {
+        def uname = sh script: 'uname', returnStdout: true
+        if (uname.startsWith("Darwin")) {
+            return "macos"
+        }
+        // Optionally add 'else if' for other Unix OS  
+        else {
+            return "linux"
+        }
+    }
+    else {
+        return "windows"
+    }
 }
 
 /*
@@ -594,6 +628,30 @@ def commitHashForBuild( build ) {
 def getChangeString() {
   	echo "getChangeString no longer returns data, configure release notes template in Octopus instead."
 	return ""
+}
+
+/*
+* Get changes as a string, re-implements original functionality of getChangeString for use with builds that are not using octopus metadata (e.g. helm charts)
+*/
+def getChanges() {
+	def changeString=""
+	def changeLogSets = currentBuild.changeSets
+	for (int i = 0; i < changeLogSets.size(); i++) {
+		def entries = changeLogSets[i].items
+		for (int j = 0; j < entries.length; j++) {
+			def entry = entries[j]
+			echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+			changeString+=entry.msg + "\n"
+		}
+	}
+	
+	if (!changeString) {
+		changeString = " - Jenkins was unable to read changes"
+	}
+	
+	changeString =""
+
+	return changeString
 }
 
 /*
