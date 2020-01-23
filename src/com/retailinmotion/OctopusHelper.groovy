@@ -279,7 +279,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	def octopusServer=getServer(jenkinsURL)
 	def optionString=""
 	if ( packageArg && packageArg != "" ){
-		optionString = " --package \"$packageArg\""
+		optionString = " --package=$packageArg"
 	} else {
 		optionString = " --packageversion \"$releaseVersion\""
 	}
