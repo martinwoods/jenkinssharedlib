@@ -94,9 +94,16 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		}
 	} else if (useDocker){
 		// Execute the command inside the given docker image (intended for use on linux systems)
+		// when using gitversion4, this was done using Mono to call the .exe file
+		// In gitversion5, dotnet core is used instead
 		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\" -e IGNORE_NORMALISATION_GIT_HEAD_MOVE=1"){
 			sh '''
-				mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
+				if [ -e /usr/lib/GitVersion/tools/GitVersion.exe ]; 
+				then 
+					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
+				else
+					dotnet /app/GitVersion.dll /src${subPath} > gitversion.txt
+				fi
 				if [ $? -ne 0 ]; then cat gitversion.txt; fi
 			'''
 		}
