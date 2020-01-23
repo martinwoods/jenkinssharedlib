@@ -75,7 +75,7 @@ def checkOs(){
 def execOcto(octopusServer, commandOptions){
 	def output
 	def os=checkOs()
-	println "Octo command is; ${commandOptions}"
+	//println "Octo command is; ${commandOptions}"
 	if(os == "linux"){
 		output=sh returnStdout: true, script: "docker run --rm -v \"\$(pwd)\":/src octopusdeploy/octo ${commandOptions}"
 	} else if (os == "macos"){
