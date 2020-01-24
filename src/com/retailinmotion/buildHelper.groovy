@@ -57,6 +57,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 			gitVersionExe=gitVersionExe.toString().replaceAll("\\\\", "/")
 		} else {
 			gitVersionExe= new File(dockerImageOrToolPath)
+			// Need to make sure it's a unix path separator due to https://issues.jenkins-ci.org/browse/JENKINS-36791
+			gitVersionExe=gitVersionExe.toString().replaceAll("\\\\", "/")
 		}
 		echo "Using gitversionexe at ${gitVersionExe} for ${osType}"
 	}
