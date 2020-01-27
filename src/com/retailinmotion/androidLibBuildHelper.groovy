@@ -19,7 +19,9 @@ def androidLibBuild(){
 
     def buildHelper = new com.retailinmotion.buildHelper()
     def versionInfo
-    println "CRT Build result: " + currentBuild.result
+    println "Git Commit: " + GIT_COMMIT
+    println "Git URL: " + GIT_URL
+    println "Git Branch: " + GIT_BRANCH
 
     pipeline {
         agent any
