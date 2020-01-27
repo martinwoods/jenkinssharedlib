@@ -11,7 +11,7 @@ TO DO
 - Jenkinsfile in repo should just import the lib "andriodLibBuildHelper@feature/DEVOPS-316" and call androidLibBuild(params) function defined in the lib
 */
 
-def androidLibBuild(test){
+def androidLibBuild(){
 /*     println "androidLibBuild Test value: --${test}--"
     def OctopusHelper = new com.retailinmotion.OctopusHelper()
     def jkurl = OctopusHelper.getServer(env.JENKINS_URL)
