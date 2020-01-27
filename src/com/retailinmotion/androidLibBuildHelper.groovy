@@ -19,6 +19,7 @@ def androidLibBuild(){
 
     def buildHelper = new com.retailinmotion.buildHelper()
     def versionInfo
+    println "CRT Build result: " + currentBuild.result
 
     pipeline {
         agent any
