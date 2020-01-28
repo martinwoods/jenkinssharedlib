@@ -20,10 +20,11 @@ def androidLibBuild(BUILD_NUMBER){
     def buildHelper = new com.retailinmotion.buildHelper()
     def versionInfo
     println "Jenkins build: " + BUILD_NUMBER
+    println "Jenkins job url: " + JOB_URL
 
 
     pipeline {
-        agent any
+        //agent any
         options { skipDefaultCheckout() }
         stages {
             stage('Clean'){
