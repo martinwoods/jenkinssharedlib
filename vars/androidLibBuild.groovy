@@ -38,9 +38,8 @@ def call () {
             stage('Build'){
                 steps {
                     bat './gradlew.bat cleanBuildCache'
-                    bat './gradlew.bat build'
+                    bat './gradlew.bat assembleRelease'
                 }
-        
             }
 
             stage('Clean Workspace'){
