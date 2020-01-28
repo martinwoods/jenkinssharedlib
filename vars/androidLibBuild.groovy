@@ -1,8 +1,8 @@
-def call (body) {
-	def config = [:]
+def call () {
+/* 	def config = [:]
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = config
-    body()
+    body() */
 
     def buildHelper = new com.retailinmotion.buildHelper()
     def versionInfo
