@@ -25,7 +25,7 @@ def androidLibBuild(BUILD_NUMBER){
 
     pipeline {
         //agent any
-        options { skipDefaultCheckout() }
+        //options { skipDefaultCheckout() }
         stages {
             stage('Clean'){
                 steps {
