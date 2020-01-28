@@ -6,9 +6,6 @@ def call () {
 
     def buildHelper = new com.retailinmotion.buildHelper()
     def versionInfo
-    println "Jenkins build: " + BUILD_NUMBER
-    println "Jenkins job url: " + JOB_URL
-
 
     pipeline {
         agent any
@@ -37,6 +34,13 @@ def call () {
                         currentBuild.description = "${versionInfo.InformationalVersion}"
                     }
                 }
+            }
+            stage('Build'){
+                steps {
+                    bat './gradlew.bat cleanBuildCache'
+                    bat './gradlew.bat build'
+                }
+        
             }
 
             stage('Clean Workspace'){
