@@ -27,12 +27,12 @@ def androidLibBuildSrc(BUILD_NUMBER){
         agent any
         options { skipDefaultCheckout() }
         stages {
-            stage('Clean'){
+/*             stage('Clean'){
                 steps {
                     cleanWs()
                     checkout scm
                 }
-            }
+            } */
             stage('Get Version'){
                 steps {
                     script {
@@ -48,6 +48,13 @@ def androidLibBuildSrc(BUILD_NUMBER){
                         // Update jenkins build name
                         currentBuild.displayName = "#${versionInfo.FullSemVer}"
                         currentBuild.description = "${versionInfo.InformationalVersion}"
+                    }
+                }
+            }
+            stage('Test'){
+                steps {
+                    script {
+                        println "Teeeest"
                     }
                 }
             }
