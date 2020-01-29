@@ -52,11 +52,11 @@ def androidLibBuildSrc(BUILD_NUMBER){
                 }
             }
 
-            stage('Clean Workspace'){
+/*             stage('Clean Workspace'){
                 steps {
                     cleanWs()
                 }
-            }
+            } */
         }
     }
 }
