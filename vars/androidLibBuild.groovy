@@ -42,11 +42,11 @@ def call () {
                 }
             }
 
-            stage('Clean Workspace'){
+/*             stage('Clean Workspace'){
                 steps {
                     cleanWs()
                 }
-            }
+            } */
         }
     }
 
