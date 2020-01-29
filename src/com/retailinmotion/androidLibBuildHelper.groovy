@@ -27,12 +27,12 @@ def androidLibBuildSrc(BUILD_NUMBER){
         agent any
         options { skipDefaultCheckout() }
         stages {
-/*             stage('Clean'){
+            stage('Clean'){
                 steps {
-                    cleanWs()
+                    //cleanWs()
                     checkout scm
                 }
-            } */
+            }
             stage('Get Version'){
                 steps {
                     script {
