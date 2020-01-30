@@ -21,7 +21,7 @@ def call () {
             }
             stage('Get Version'){
                 steps {
-                    script {
+                    node {
                         def gitVersionTool=tool name: 'GitVersion-5', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
                         versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
                         echo "Version Info:"
