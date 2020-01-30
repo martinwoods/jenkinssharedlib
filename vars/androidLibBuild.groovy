@@ -58,7 +58,7 @@ def call () {
                         echo "Library name: ${libraryName}"
                         def uploadStatus
                         def filePath = "${libraryName}/build/outputs/aar/${libraryName}-release.aar"
-                        if (!(fileExists filePath)){
+                        if (!(fileExists (filePath))){
                             error("Could not locate the build output at '${filePath}'")
                         }
                         def nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
