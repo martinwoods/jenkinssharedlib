@@ -21,7 +21,7 @@ def call () {
             }
             stage('Get Version'){
                 steps {
-                    node {
+                    script {
                         def gitVersionTool=tool name: 'GitVersion-5', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
                         versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
                         echo "Version Info:"
@@ -59,7 +59,10 @@ def call () {
                         def uploadStatus
                         def filePath = "${libraryName}/build/outputs/aar/${libraryName}-release.aar"
                         def exists = fileExists filePath
-                        if (! exists){
+                        if (exists){
+                            echo "Build artifact: ${filePath}"
+                        }
+                        else{
                             error("Could not locate the build output at '${filePath}'")
                         }
                         def nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
