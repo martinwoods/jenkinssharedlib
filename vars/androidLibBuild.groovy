@@ -73,18 +73,20 @@ def call () {
             stage('Upload to Nexus'){
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        def uploadStatus
-                        if (os == 'linux' || os == 'macos'){
-                            uploadStatus = sh "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}"
-                        }
-                        else if (os == 'windows'){
-                            uploadStatus = powershell(returnStatus: true, script: "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
-                        }
-                        if (uploadStatus != 0) {
-                            error("Could not upload library to Nexus: ${uploadStatus}")
-                        }
-                        else{
-                            echo "Nexus upload successful"
+                        script{
+                            def uploadStatus
+                            if (os == 'linux' || os == 'macos'){
+                                uploadStatus = sh "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}"
+                            }
+                            else if (os == 'windows'){
+                                uploadStatus = powershell(returnStatus: true, script: "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                            }
+                            if (uploadStatus != 0) {
+                                error("Could not upload library to Nexus: ${uploadStatus}")
+                            }
+                            else{
+                                echo "Nexus upload successful"
+                            }
                         }
                     }
                 }
