@@ -8,6 +8,9 @@ def call () {
     def OctopusHelper = new com.retailinmotion.OctopusHelper()
     def os = OctopusHelper.checkOs()
     def versionInfo
+    def libraryName
+    def filePath
+    def nexusUploadUrl
 
     pipeline {
         agent {label 'androidsdk'}
@@ -44,11 +47,9 @@ def call () {
                 }
             }
 
-            stage('Upload to Nexus') {
+            stage('Prep Nexus upload') {
                 steps {
                     script{
-                        //bluetooth\build\outputs\aar\bluetooth-release.aar
-                        def libraryName
                         if (os == 'linux' || os == 'macos'){
                             libraryName = sh 'basename `git remote get-url origin` .git'
                         }
@@ -56,8 +57,7 @@ def call () {
                             libraryName = powershell(returnStatus: true, script: '(Split-Path (& git remote get-url origin) -Leaf).replace(".git","")') 
                         }
                         echo "Library name: ${libraryName}"
-                        def uploadStatus
-                        def filePath = "${libraryName}/build/outputs/aar/${libraryName}-release.aar"
+                        filepath = "${libraryName}/build/outputs/aar/${libraryName}-release.aar"
                         def exists = fileExists filePath
                         if (exists){
                             echo "Build artifact: ${filePath}"
@@ -65,21 +65,26 @@ def call () {
                         else{
                             error("Could not locate the build output at '${filePath}'")
                         }
-                        def nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                        nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
                         echo "Uploading library to Nexus at ${nexusUploadUrl}"
-                        withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                            if (os == 'linux' || os == 'macos'){
-                                uploadStatus = sh "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}"
-                            }
-                            else if (os == 'windows'){
-                                uploadStatus = powershell(returnStatus: true, script: "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
-                            }
-                            if (uploadStatus != 0) {
-                                error("Could not upload library to Nexus: ${uploadStatus}")
-                            }
-                            else{
-                                echo "Nexus upload successful"
-                            }
+                    }
+                }
+            }
+            stage('Upload to Nexus'){
+                steps{
+                    withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        def uploadStatus
+                        if (os == 'linux' || os == 'macos'){
+                            uploadStatus = sh "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}"
+                        }
+                        else if (os == 'windows'){
+                            uploadStatus = powershell(returnStatus: true, script: "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                        }
+                        if (uploadStatus != 0) {
+                            error("Could not upload library to Nexus: ${uploadStatus}")
+                        }
+                        else{
+                            echo "Nexus upload successful"
                         }
                     }
                 }
