@@ -5,10 +5,12 @@ def call () {
     body() */
 
     def buildHelper = new com.retailinmotion.buildHelper()
+    def OctopusHelper = new com.retailinmotion.OctopusHelper()
+    def os = OctopusHelper.checkOs()
     def versionInfo
 
     pipeline {
-        agent any
+        agent {label 'androidsdk'}
         options { skipDefaultCheckout() }
         stages {
             stage('Clean'){
@@ -39,6 +41,43 @@ def call () {
                 steps {
                     bat './gradlew.bat cleanBuildCache'
                     bat './gradlew.bat assembleRelease'
+                }
+            }
+
+            stage('Upload to Nexus') {
+                steps {
+                    script{
+                        //bluetooth\build\outputs\aar\bluetooth-release.aar
+                        def libraryName
+                        if (os == 'linux' || os == 'macos'){
+                            libraryName = sh 'basename `git remote get-url origin` .git'
+                        }
+                        else if (os == 'windows'){
+                            libraryName = powershell(returnStatus: true, script: '(Split-Path (& git remote get-url origin) -Leaf).replace(".git","")') 
+                        }
+                        echo "Library name: ${libraryName}"
+                        def uploadStatus
+                        def filePath = "${libraryName}/build/outputs/aar/${libraryName}-release.aar"
+                        if (!(fileExists filePath)){
+                            error("Could not locate the build output at '${filePath}'")
+                        }
+                        def nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                        echo "Uploading library to Nexus at ${nexusUploadUrl}"
+                        withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                            if (os == 'linux' || os == 'macos'){
+                                uploadStatus = sh "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}"
+                            }
+                            else if (os == 'windows'){
+                                uploadStatus = powershell(returnStatus: true, script: "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                            }
+                            if (uploadStatus != 0) {
+                                error("Could not upload library to Nexus: ${uploadStatus}")
+                            }
+                            else{
+                                echo "Nexus upload successful"
+                            }
+                        }
+                    }
                 }
             }
 
