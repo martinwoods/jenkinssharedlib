@@ -5,7 +5,7 @@ def call () {
     body() */
 
     def buildHelper = new com.retailinmotion.buildHelper()
-    def octopusHelper = new com.retailinmotion.OctopusHelper()
+    def octopusHelper = new com.retailinmotion.octopusHelper()
     def os = octopusHelper.checkOs()
     def versionInfo
     def libraryName
