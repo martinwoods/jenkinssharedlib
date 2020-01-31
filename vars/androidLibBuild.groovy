@@ -72,14 +72,15 @@ def call () {
                             }
                             else if (os == 'windows'){
                                 def psScript = """
-                                \$base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $USERNAME,$PASSWORD)))
-                                Invoke-RestMethod -Method Put -Headers @{Authorization=("Basic {0}" -f \$base64AuthInfo)} -Uri ${nexusUploadUrl} -InFile ${filePath} -ContentType "application/java-archive"
+                                \$secpasswd = ConvertTo-SecureString '$PASSWORD' -AsPlainText -Force
+                                \$mycreds = New-Object System.Management.Automation.PSCredential ('$USERNAME', \$secpasswd)
+                                Invoke-RestMethod -Method Put -Uri ${nexusUploadUrl} -InFile ${filePath} -Credential \$myCreds -ContentType "application/java-archive"
                                 """
-                                //curl does not reliably return errors when running in PS
+                                //not using curl because it does not reliably return errors when running in PS
                                 uploadStatus = powershell(returnStatus: true, script: psScript)
                             }
                             echo "Status: ${uploadStatus}"
-                            echo "Output: ${uploadOutput}"
+
                             if (uploadStatus != 0) {
                                 error("Could not upload library to Nexus - see above curl error!")
                             }
