@@ -35,12 +35,12 @@ def call () {
                     }
                 }
             }
-            stage('Build'){
+/*             stage('Build'){
                 steps {
                     bat './gradlew.bat cleanBuildCache'
                     bat './gradlew.bat assembleRelease'
                 }
-            }
+            } */
 
             stage('Upload to Nexus'){
                 steps{
@@ -72,7 +72,12 @@ def call () {
                             }
                             else if (os == 'windows'){
                                 uploadStatus = powershell(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                                uploadOutput = powershell(returnStdout: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                                uploadErr = powershell(returnStderr: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
                             }
+                            echo "Status: ${uploadStatus}"
+                            echo "Output: ${uploadOutput}"
+                            echo "Error: ${uploadErr}"
                             if (uploadStatus != 0) {
                                 error("Could not upload library to Nexus - see above curl error!")
                             }
