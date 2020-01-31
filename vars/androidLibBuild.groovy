@@ -59,7 +59,7 @@ def call () {
                         }
                         libraryName = libraryName.replace('libraryandroid','')
                         echo "Library name: ${libraryName}"
-                        filepath = "./${libraryName}/build/outputs/aar/${libraryName}-release.aar"
+                        filePath = "./${libraryName}/build/outputs/aar/${libraryName}-release.aar"
                         echo "Filepath: ${filePath}"
                         def exists = fileExists filePath
                         if (exists){
