@@ -57,8 +57,10 @@ def call () {
                         else if (os == 'windows'){
                             libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
                         }
+                        libraryName = libraryName.replace('libraryandroid','')
                         echo "Library name: ${libraryName}"
-                        filepath = "${libraryName}/build/outputs/aar/${libraryName}-release.aar"
+                        filepath = "./${libraryName}/build/outputs/aar/${libraryName}-release.aar"
+                        echo "Filepath: ${filePath}"
                         def exists = fileExists filePath
                         if (exists){
                             echo "Build artifact: ${filePath}"
