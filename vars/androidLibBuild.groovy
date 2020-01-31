@@ -10,6 +10,7 @@ def call () {
     def libraryName
     def filePath
     def nexusUploadUrl
+    def os
 
     pipeline {
         agent {label 'androidsdk'}
@@ -49,12 +50,12 @@ def call () {
             stage('Prep Nexus upload') {
                 steps {
                     script{
-                        def os = octopusHelper.checkOs()
+                        os = octopusHelper.checkOs()
                         if (os == 'linux' || os == 'macos'){
-                            libraryName = sh 'basename `git remote get-url origin` .git'
+                            libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
                         }
                         else if (os == 'windows'){
-                            libraryName = powershell(returnStatus: true, script: '(Split-Path (& git remote get-url origin) -Leaf).replace(".git","")') 
+                            libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
                         }
                         echo "Library name: ${libraryName}"
                         filepath = "${libraryName}/build/outputs/aar/${libraryName}-release.aar"
@@ -74,7 +75,7 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            def os = octopusHelper.checkOs()
+                            os = octopusHelper.checkOs()
                             def uploadStatus
                             if (os == 'linux' || os == 'macos'){
                                 uploadStatus = sh "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}"
