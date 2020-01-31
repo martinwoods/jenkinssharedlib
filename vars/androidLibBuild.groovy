@@ -5,8 +5,8 @@ def call () {
     body() */
 
     def buildHelper = new com.retailinmotion.buildHelper()
-    def OctopusHelper = new com.retailinmotion.OctopusHelper()
-    def os = OctopusHelper.checkOs()
+    //def OctopusHelper = new com.retailinmotion.OctopusHelper()
+    //def os = OctopusHelper.checkOs()
     def versionInfo
     def libraryName
     def filePath
