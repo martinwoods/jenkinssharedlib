@@ -71,12 +71,15 @@ def call () {
                                 uploadStatus = sh(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
                             }
                             else if (os == 'windows'){
-                                //uploadStatus = powershell(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
-                                uploadOutput = powershell(returnStdout: true, script: "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                                def psScript = """
+                                \$base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $USERNAME,$PASSWORD)))
+                                Invoke-RestMethod -Method Put -Headers @{Authorization=("Basic {0}" -f \$base64AuthInfo)} -Uri ${nexusUploadUrl} -InFile ${filePath} -ContentType "application/java-archive"
+                                """
+                                //curl does not reliably return errors when running in PS
+                                uploadStatus = powershell(returnStatus: true, script: psScript)
                             }
                             echo "Status: ${uploadStatus}"
                             echo "Output: ${uploadOutput}"
-                            echo "Error: ${uploadErr}"
                             if (uploadStatus != 0) {
                                 error("Could not upload library to Nexus - see above curl error!")
                             }
