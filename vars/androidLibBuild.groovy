@@ -72,6 +72,7 @@ def call () {
                             }
                             else if (os == 'windows'){
                                 def psScript = """
+                                \$ErrorActionPreference = 'Stop'
                                 \$secpasswd = ConvertTo-SecureString '$PASSWORD' -AsPlainText -Force
                                 \$mycreds = New-Object System.Management.Automation.PSCredential ('$USERNAME', \$secpasswd)
                                 Invoke-RestMethod -Method Put -Uri ${nexusUploadUrl} -InFile ${filePath} -Credential \$myCreds -ContentType "application/java-archive"
