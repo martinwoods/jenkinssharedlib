@@ -5,8 +5,7 @@ def call () {
     body() */
 
     def buildHelper = new com.retailinmotion.buildHelper()
-    def octopusHelper = new com.retailinmotion.octopusHelper()
-    def os = octopusHelper.checkOs()
+    def octopusHelper = new com.retailinmotion.OctopusHelper()
     def versionInfo
     def libraryName
     def filePath
@@ -50,6 +49,7 @@ def call () {
             stage('Prep Nexus upload') {
                 steps {
                     script{
+                        def os = octopusHelper.checkOs()
                         if (os == 'linux' || os == 'macos'){
                             libraryName = sh 'basename `git remote get-url origin` .git'
                         }
@@ -74,6 +74,7 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
+                            def os = octopusHelper.checkOs()
                             def uploadStatus
                             if (os == 'linux' || os == 'macos'){
                                 uploadStatus = sh "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}"
