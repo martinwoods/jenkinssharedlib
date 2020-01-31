@@ -80,13 +80,13 @@ def call () {
                             os = octopusHelper.checkOs()
                             def uploadStatus
                             if (os == 'linux' || os == 'macos'){
-                                uploadStatus = sh(returnStatus: true, script: "curl.exe -s -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                                uploadStatus = sh(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
                             }
                             else if (os == 'windows'){
-                                uploadStatus = powershell(returnStatus: true, script: "curl.exe -s -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                                uploadStatus = powershell(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
                             }
                             if (uploadStatus != 0) {
-                                error("Could not upload library to Nexus: ${uploadStatus}")
+                                error("Could not upload library to Nexus - see above curl error!")
                             }
                             else{
                                 echo "Nexus upload successful"
