@@ -1,9 +1,4 @@
 def call () {
-/* 	def config = [:]
-    body.resolveStrategy = Closure.DELEGATE_FIRST
-    body.delegate = config
-    body() */
-
     def buildHelper = new com.retailinmotion.buildHelper()
     def octopusHelper = new com.retailinmotion.OctopusHelper()
     def versionInfo
@@ -47,37 +42,30 @@ def call () {
                 }
             }
 
-            stage('Prep Nexus upload') {
-                steps {
-                    script{
-                        os = octopusHelper.checkOs()
-                        if (os == 'linux' || os == 'macos'){
-                            libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
-                        }
-                        else if (os == 'windows'){
-                            libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
-                        }
-                        libraryName = libraryName.replace('libraryandroid','')
-                        echo "Library name: ${libraryName}"
-                        filePath = "./${libraryName}/build/outputs/aar/${libraryName}-release.aar"
-                        echo "Filepath: ${filePath}"
-                        def exists = fileExists filePath
-                        if (exists){
-                            echo "Build artifact: ${filePath}"
-                        }
-                        else{
-                            error("Could not locate the build output at '${filePath}'")
-                        }
-                        nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
-                        echo "Uploading library to Nexus at ${nexusUploadUrl}"
-                    }
-                }
-            }
             stage('Upload to Nexus'){
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
                             os = octopusHelper.checkOs()
+                            if (os == 'linux' || os == 'macos'){
+                                libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
+                            }
+                            else if (os == 'windows'){
+                                libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
+                            }
+                            libraryName = libraryName.replace('libraryandroid','')
+                            echo "Library name: ${libraryName}"
+                            filePath = "./${libraryName}/build/outputs/aar/${libraryName}-release.aar"
+                            def exists = fileExists filePath
+                            if (exists){
+                                echo "Build artifact: ${filePath}"
+                            }
+                            else{
+                                error("Could not locate the build output at '${filePath}'")
+                            }
+                            //nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            echo "Uploading library to Nexus at ${nexusUploadUrl}"
                             def uploadStatus
                             if (os == 'linux' || os == 'macos'){
                                 uploadStatus = sh(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
