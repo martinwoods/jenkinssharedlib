@@ -63,8 +63,8 @@ def call () {
                             else{
                                 error("Could not locate the build output at '${filePath}'")
                             }
-                            //nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
-                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            //nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
                             echo "Uploading library to Nexus at ${nexusUploadUrl}"
                             def uploadStatus
                             if (os == 'linux' || os == 'macos'){
