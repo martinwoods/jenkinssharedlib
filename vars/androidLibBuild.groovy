@@ -71,9 +71,8 @@ def call () {
                                 uploadStatus = sh(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
                             }
                             else if (os == 'windows'){
-                                uploadStatus = powershell(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
-                                uploadOutput = powershell(returnStdout: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
-                                uploadErr = powershell(returnStderr: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                                //uploadStatus = powershell(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
+                                uploadOutput = powershell(returnStdout: true, script: "curl.exe -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
                             }
                             echo "Status: ${uploadStatus}"
                             echo "Output: ${uploadOutput}"
