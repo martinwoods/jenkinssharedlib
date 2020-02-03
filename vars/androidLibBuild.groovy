@@ -44,14 +44,10 @@ def call () {
             stage('Build'){
                 steps {
                     withSonarQubeEnv('SonarQubeServer') {
-                        bat './gradlew sonarqube'
+                        bat './gradlew.bat cleanBuildCache'
+                        bat './gradlew.bat sonarqube assembleRelease'
                     }
                 }
-
-/*                 steps {
-                    bat './gradlew.bat cleanBuildCache'
-                    bat './gradlew.bat assembleRelease'
-                } */
             }
 
             stage('Upload to Nexus'){
