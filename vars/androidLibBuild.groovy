@@ -53,6 +53,7 @@ def call () {
                 steps {
                     script {
                         scannerHome = tool 'SonarScannerRiM'
+                        sonar.projectKey = libraryName
                     }
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
