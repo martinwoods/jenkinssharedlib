@@ -6,6 +6,7 @@ def call () {
     def filePath
     def nexusUploadUrl
     def os
+    def originalBranchName
 
     pipeline {
         agent {label 'androidsdk'}
@@ -35,7 +36,7 @@ def call () {
                     }
                 }
             }
-            stage('Get library name'){
+            stage('Get repo info'){
                 steps{
                     script{
                         os = octopusHelper.checkOs()
@@ -46,6 +47,7 @@ def call () {
                             libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
                         }
                         echo "Detected library name: ${libraryName}"
+                        originalBranchName = "$env.CHANGE_BRANCH" != "null" ? "$env.CHANGE_BRANCH" : "$env.BRANCH_NAME"
                     }
                 }
             }
@@ -56,7 +58,8 @@ def call () {
                     }
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
-                        bat "./gradlew.bat sonarqube assembleRelease -Dsonar.projectKey=${libraryName}"
+                        bat "./gradlew.bat sonarqube assembleRelease -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName}"
+                        //sonar.branch.name	; sonar.branch.target
                     }
                 }
             }
