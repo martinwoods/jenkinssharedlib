@@ -56,7 +56,7 @@ def call () {
                     }
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
-                        bat "./gradlew.bat sonarqube assembleRelease ${libraryName}:sonarqube"
+                        bat "./gradlew.bat sonarqube assembleRelease"
                     }
                 }
             }
