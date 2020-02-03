@@ -11,12 +11,12 @@ def call () {
         agent {label 'androidsdk'}
         options { skipDefaultCheckout() }
         stages {
-/*             stage('Clean'){
+            stage('Clean'){
                 steps {
                     cleanWs()
                     checkout scm
                 }
-            } */
+            }
             stage('Get Version'){
                 steps {
                     script {
@@ -35,12 +35,21 @@ def call () {
                     }
                 }
             }
-/*             stage('Build'){
-                steps {
+            /*
+            SonarQube
+
+            https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-gradle/
+            
+            */
+            stage('Build'){
+                withSonarQubeEnv() {
+                    bat './gradlew sonarqube'
+                }
+/*                 steps {
                     bat './gradlew.bat cleanBuildCache'
                     bat './gradlew.bat assembleRelease'
-                }
-            } */
+                } */
+            }
 
             stage('Upload to Nexus'){
                 steps{
@@ -93,11 +102,11 @@ def call () {
                 }
             }
 
-/*             stage('Clean Workspace'){
+            stage('Clean Workspace'){
                 steps {
                     cleanWs()
                 }
-            } */
+            }
         }
     }
 
