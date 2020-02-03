@@ -37,14 +37,16 @@ def call () {
             }
             stage('Get library name'){
                 steps{
-                    os = octopusHelper.checkOs()
-                    if (os == 'linux' || os == 'macos'){
-                        libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
+                    script{
+                        os = octopusHelper.checkOs()
+                        if (os == 'linux' || os == 'macos'){
+                            libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
+                        }
+                        else if (os == 'windows'){
+                            libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
+                        }
+                        echo "Detected library name: ${libraryName}"
                     }
-                    else if (os == 'windows'){
-                        libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
-                    }
-                    echo "Detected library name: ${libraryName}"
                 }
             }
             stage('Build'){
