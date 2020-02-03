@@ -51,9 +51,12 @@ def call () {
             }
             stage('Build'){
                 steps {
+                    script {
+                        scannerHome = tool 'SonarScannerRiM'
+                    }
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
-                        bat "./gradlew.bat sonarqube assembleRelease ${shortLibraryName}:sonarqube"
+                        bat "./gradlew.bat sonarqube assembleRelease ${libraryName}:sonarqube"
                     }
                 }
             }
