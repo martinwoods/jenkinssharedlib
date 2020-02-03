@@ -35,17 +35,23 @@ def call () {
                     }
                 }
             }
-            /*
-            SonarQube
-
-            https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-gradle/
-            
-            */
+            stage('Get library name'){
+                steps{
+                    os = octopusHelper.checkOs()
+                    if (os == 'linux' || os == 'macos'){
+                        libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
+                    }
+                    else if (os == 'windows'){
+                        libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
+                    }
+                    echo "Detected library name: ${libraryName}"
+                }
+            }
             stage('Build'){
                 steps {
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
-                        bat './gradlew.bat sonarqube assembleRelease'
+                        bat "./gradlew.bat sonarqube assembleRelease ${shortLibraryName}:sonarqube"
                     }
                 }
             }
@@ -54,16 +60,9 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            os = octopusHelper.checkOs()
-                            if (os == 'linux' || os == 'macos'){
-                                libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
-                            }
-                            else if (os == 'windows'){
-                                libraryName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
-                            }
-                            libraryName = libraryName.replace('libraryandroid','')
-                            echo "Library name: ${libraryName}"
-                            filePath = "./${libraryName}/build/outputs/aar/${libraryName}-release.aar"
+                            def shortLibraryName = libraryName.replace('libraryandroid','')
+                            echo "Short library name: ${shortLibraryName}"
+                            filePath = "./${shortLibraryName}/build/outputs/aar/${shortLibraryName}-release.aar"
                             def exists = fileExists filePath
                             if (exists){
                                 echo "Build artifact: ${filePath}"
@@ -71,7 +70,7 @@ def call () {
                             else{
                                 error("Could not locate the build output at '${filePath}'")
                             }
-                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${shortLibraryName}/${versionInfo.SafeInformationalVersion}/${shortLibraryName}-${versionInfo.SafeInformationalVersion}.aar"
                             echo "Uploading library to Nexus at ${nexusUploadUrl}"
                             def uploadStatus
                             if (os == 'linux' || os == 'macos'){
