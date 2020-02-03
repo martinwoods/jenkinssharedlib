@@ -44,7 +44,7 @@ def call () {
             stage('Build'){
                 steps {
                     script {
-                        installationName = "SonarScannerRiM"
+                        scannerHome = tool 'SonarScannerRiM'
                     }
                     withSonarQubeEnv() {
                         bat './gradlew sonarqube'
