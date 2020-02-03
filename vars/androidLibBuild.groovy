@@ -44,7 +44,7 @@ def call () {
             stage('Build'){
                 steps {
                     script {
-                        installationName = "SonarQubeServer"
+                        installationName = "SonarScannerRiM"
                     }
                     withSonarQubeEnv() {
                         bat './gradlew sonarqube'
