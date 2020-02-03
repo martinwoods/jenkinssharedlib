@@ -43,10 +43,7 @@ def call () {
             */
             stage('Build'){
                 steps {
-                    script {
-                        scannerHome = tool 'SonarScannerRiM'
-                    }
-                    withSonarQubeEnv() {
+                    withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew sonarqube'
                     }
                 }
