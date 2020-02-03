@@ -25,11 +25,6 @@ def call () {
                         versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
                         echo "Version Info:"
                         echo versionInfo.toString()
-                        
-                        // get the short and long git hashes
-                        gitHashes=buildHelper.getGitHashes()
-                        // Use the informational version for the package name, but replace the full git hash with the short version for display purposes
-                        packageString=versionInfo.SafeInformationalVersion.toString().replace(gitHashes.full, gitHashes.short);
                         // Update jenkins build name
                         currentBuild.displayName = "#${versionInfo.FullSemVer}"
                         currentBuild.description = "${versionInfo.InformationalVersion}"
@@ -59,7 +54,7 @@ def call () {
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
                         bat """./gradlew.bat sonarqube assembleRelease ^
-                                -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
+                                -Dsonar.projectKey=${libraryName} ^
                                 -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
                             """
                     }
