@@ -14,7 +14,7 @@ def call () {
         stages {
             stage('Clean'){
                 steps {
-                    cleanWs()
+                    //cleanWs()
                     checkout scm
                 }
             }
@@ -116,7 +116,7 @@ def call () {
 
             stage('Clean Workspace'){
                 steps {
-                    cleanWs()
+                    //cleanWs()
                 }
             }
         }
