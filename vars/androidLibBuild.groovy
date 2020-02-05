@@ -65,9 +65,7 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            def shortLibraryName = libraryName.replace('libraryandroid','')
-                            echo "Short library name: ${shortLibraryName}"
-                            filePath = "./${shortLibraryName}/build/outputs/aar/${shortLibraryName}-release.aar"
+                            filePath = (findFiles(glob: '*.aar'))[0].toString()
                             def exists = fileExists filePath
                             if (exists){
                                 echo "Build artifact: ${filePath}"
@@ -75,7 +73,7 @@ def call () {
                             else{
                                 error("Could not locate the build output at '${filePath}'")
                             }
-                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${shortLibraryName}/${versionInfo.SafeInformationalVersion}/${shortLibraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
                             echo "Preparing Nexus upload at ${nexusUploadUrl}"
                             def uploadStatus
                             if (os == 'linux' || os == 'macos'){
