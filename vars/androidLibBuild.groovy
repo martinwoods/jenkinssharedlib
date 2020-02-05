@@ -65,8 +65,9 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            aarFiles = findFiles(glob: '*.aar')
-                            filePath = aarFiles[0].toString()
+                            def aarFiles = findFiles(glob: '*.aar')
+                            echo "AarFiles: ${aarFiles}"
+                            filePath = aarFiles[0].path
                             def exists = fileExists filePath
                             if (exists){
                                 echo "Build artifact: ${filePath}"
