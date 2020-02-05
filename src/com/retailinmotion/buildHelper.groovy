@@ -115,6 +115,15 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	}
 	
 	def output = readFile(file:'gitversion.txt')
+	
+	return parseGitVersionInfo(output)
+}
+
+/*
+* Parse the output from gitversion
+* This is mainly used by getGitVersionInfo but can optionally be called separately if needed
+*/
+def parseGitVersionInfo(output){
 	def json = new JsonSlurperClassic().parseText(output)
 	
 	// If this was a Pull Request branch, we lose a lot of information in the version string
@@ -169,9 +178,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	
 	
 	return json
-	
 }
-
 /*
 * Check what OS the script is executing on
 */
