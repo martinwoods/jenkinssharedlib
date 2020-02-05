@@ -12,12 +12,12 @@ def call () {
         agent {label 'androidsdk'}
         options { skipDefaultCheckout() }
         stages {
-/*             stage('Clean'){
+            stage('Clean and checkout'){
                 steps {
-                    //cleanWs()
+                    cleanWs()
                     checkout scm
                 }
-            } */
+            }
             stage('Get Version'){
                 steps {
                     script {
@@ -113,12 +113,11 @@ def call () {
                     }
                 }
             }
-
-/*             stage('Clean Workspace'){
+            stage('Clean Workspace'){
                 steps {
                     cleanWs()
                 }
-            } */
+            }
         }
     }
 
