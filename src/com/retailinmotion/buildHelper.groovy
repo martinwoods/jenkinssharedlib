@@ -104,7 +104,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 				then 
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
 				else
-					dotnet /app/GitVersion.dll /src${subPath} > gitversion.txt
+					/usr/bin/dotnet /app/GitVersion.dll /src${subPath} > gitversion.txt
 				fi
 				if [ $? -ne 0 ]; then cat gitversion.txt; fi
 			'''
@@ -116,14 +116,14 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	
 	def output = readFile(file:'gitversion.txt')
 	
-	return parseGitVersionInfo(output)
+	return parseGitVersionInfo(output, changeBranch)
 }
 
 /*
 * Parse the output from gitversion
 * This is mainly used by getGitVersionInfo but can optionally be called separately if needed
 */
-def parseGitVersionInfo(output){
+def parseGitVersionInfo(output, changeBranch=null){
 	def json = new JsonSlurperClassic().parseText(output)
 	
 	// If this was a Pull Request branch, we lose a lot of information in the version string
