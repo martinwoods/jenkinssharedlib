@@ -67,7 +67,7 @@ def call () {
                         script{
                             def aarFiles = findFiles(glob: '**/*.aar')
                             echo "AarFiles: ${aarFiles}"
-                            filePath = aarFiles[0].path
+                            /* filePath = aarFiles[0].path
                             def exists = fileExists filePath
                             if (exists){
                                 echo "Build artifact: ${filePath}"
@@ -108,16 +108,16 @@ def call () {
                             }
                             else{
                                 echo "Nexus upload successful"
-                            }
+                            } */
                         }
                     }
                 }
             }
-            stage('Clean Workspace'){
+/*             stage('Clean Workspace'){
                 steps {
                     cleanWs()
                 }
-            }
+            } */
         }
     }
 
