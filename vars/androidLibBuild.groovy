@@ -10,7 +10,10 @@ def call () {
 
     pipeline {
         agent {label 'androidsdk'}
-        options { skipDefaultCheckout() }
+        options {
+            skipDefaultCheckout()
+            timestamps()
+        }
         stages {
             stage('Clean and checkout'){
                 steps {
