@@ -56,8 +56,8 @@ def call () {
                     }
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
-                        bat './gradlew testRelease'
-                        bat './gradlew jacocoRelease'
+                        bat './gradlew testDebug'
+                        bat './gradlew jacocoDebug'
                         bat """./gradlew.bat --info sonarqube assembleRelease ^
                                 -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName}^
                                 -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
