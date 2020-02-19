@@ -58,8 +58,12 @@ def call () {
                         bat './gradlew.bat cleanBuildCache'
                         bat './gradlew codeCoverageReport'
                         bat """./gradlew.bat --info sonarqube assembleRelease ^
-                                -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName}^
-                                -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
+                                -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
+                                -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName} ^
+                                -Dsonar.junit.reportPaths=build/test-results/testDebugUnitTest/ ^
+                                -Dsonar.jacoco.reportPaths=build/jacoco/testDebugUnitTest.exec ^
+                                -Dsonar.java.source=1.7 ^
+                                -Dsonar.java.binaries=build/tmp/kotlin-classes/debug
                             """
                     }
                 }
