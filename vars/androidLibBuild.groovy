@@ -59,7 +59,7 @@ def call () {
                         bat './gradlew codeCoverageReport'
                         bat """./gradlew.bat --info sonarqube assembleRelease ^
                                 -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
-                                -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
+                                -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName} -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml
                             """
                     }
                 }
