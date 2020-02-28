@@ -8,7 +8,6 @@ def call () {
     def os
     def originalBranchName
     def pomPath = 'build.pom'
-    File pomFile = new File(pomPath)
     def pomContent = "<project>\n\t<modelVersion>4.0.0</modelVersion>\n\t<groupId>com.retailinmotion</groupId>\n\t<artifactId>LIBNAME_HERE</artifactId>\n\t<version>LIBVER_HERE</version>\n\t<type>aar</type>\n</project>"
 
     pipeline {
@@ -73,7 +72,7 @@ def call () {
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
                             pomContent = pomContent.replace('LIBNAME_HERE', "${libraryName}").replace('LIBVER_HERE', "${versionInfo.FullSemVer}")
-                            pomFile.write(pomContent)
+                            writeFile(file: pomPath, text: pomContent)
                             def aarFiles = findFiles(glob: '**/*.aar')
                             echo "AarFiles: ${aarFiles}"
                             filePath = aarFiles[0].path
