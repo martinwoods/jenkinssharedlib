@@ -71,7 +71,7 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            pomContent = pomContent.replace('LIBNAME_HERE', "${libraryName}").replace('LIBVER_HERE', "${versionInfo.FullSemVer}")
+                            pomContent = pomContent.replace('LIBNAME_HERE', "${libraryName}").replace('LIBVER_HERE', "${versionInfo.SafeInformationalVersion}")
                             writeFile(file: pomPath, text: pomContent)
                             def aarFiles = findFiles(glob: '**/*.aar')
                             echo "AarFiles: ${aarFiles}"
