@@ -7,6 +7,9 @@ def call () {
     def nexusUploadUrl
     def os
     def originalBranchName
+    def pomPath = 'build.pom'
+    File pomFile = new File(pomPath)
+    def pomContent = "<project>\n\t<modelVersion>4.0.0</modelVersion>\n\t<groupId>com.retailinmotion</groupId>\n\t<artifactId>LIBNAME_HERE</artifactId>\n\t<version>LIBVER_HERE</version>\n\t<type>aar</type>\n</project>"
 
     pipeline {
         agent {label 'androidsdk'}
@@ -69,50 +72,16 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
+                            pomContent = pomContent.replace('LIBNAME_HERE', "${libraryName}").replace('LIBVER_HERE', "${versionInfo.FullSemVer}")
+                            pomFile.write(pomContent)
                             def aarFiles = findFiles(glob: '**/*.aar')
                             echo "AarFiles: ${aarFiles}"
-                            /* filePath = aarFiles[0].path
-                            def exists = fileExists filePath
-                            if (exists){
-                                echo "Build artifact: ${filePath}"
-                            }
-                            else{
-                                error("Could not locate the build output at '${filePath}'")
-                            }
-                            nexusUploadUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
-                            echo "Preparing Nexus upload at ${nexusUploadUrl}"
-                            def uploadStatus
-                            if (os == 'linux' || os == 'macos'){
-                                uploadStatus = sh(returnStatus: true, script: "curl.exe -s -S -u $USERNAME:$PASSWORD --upload-file ${filePath} ${nexusUploadUrl}")
-                            }
-                            else if (os == 'windows'){
-                                def psScript = """
-                                \$ErrorActionPreference = 'Stop'
-                                \$secpasswd = ConvertTo-SecureString '$PASSWORD' -AsPlainText -Force
-                                \$mycreds = New-Object System.Management.Automation.PSCredential ('$USERNAME', \$secpasswd)
-                                #Check if artifact already exists#
-                                try{
-                                    \$result = Invoke-RestMethod -Method Head -Uri ${nexusUploadUrl} -Credential \$myCreds
-                                }
-                                catch{
-                                    Write-Host "File does not exist, will upload"
-                                }
-                                if (\$null -ne \$result -or \$result.StatusCode -eq 200){
-                                    Write-Error "An artifact already exists at ${nexusUploadUrl} , will not overwrite it."
-                                }
-                                Invoke-RestMethod -Method Put -Uri ${nexusUploadUrl} -InFile ${filePath} -Credential \$myCreds -ContentType "application/java-archive"
-                                """
-                                //not using curl because it does not reliably return errors when running in PS
-                                uploadStatus = powershell(returnStatus: true, script: psScript)
-                            }
-                            echo "Status: ${uploadStatus}"
-
-                            if (uploadStatus != 0) {
-                                error("Could not upload library to Nexus - see above curl error!")
-                            }
-                            else{
-                                echo "Nexus upload successful"
-                            } */
+                            filePath = aarFiles[0].path
+                            nexusAarUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            nexusPomUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.pom"
+	                        
+                            buildHelper.uploadFileToNexus(filePath, 'application/java-archive', nexusAarUrl, $USERNAME, $PASSWORD, os)
+                            buildHelper.uploadFileToNexus(pomPath, 'application/xml', nexusUrl, $USERNAME, $PASSWORD, os)
                         }
                     }
                 }
