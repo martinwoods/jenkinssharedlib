@@ -7,8 +7,6 @@ def call () {
     def nexusUploadUrl
     def os
     def originalBranchName
-    //def pomPath = 'build.pom'
-    //def pomContent = "<project>\n\t<modelVersion>4.0.0</modelVersion>\n\t<groupId>com.retailinmotion</groupId>\n\t<artifactId>LIBNAME_HERE</artifactId>\n\t<version>LIBVER_HERE</version>\n\t<type>aar</type>\n</project>"
 
     pipeline {
         agent {label 'androidsdk'}
@@ -72,9 +70,6 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            //pomContent = pomContent.replace('LIBNAME_HERE', "${libraryName}").replace('LIBVER_HERE', "${versionInfo.SafeInformationalVersion}")
-                            //writeFile(file: pomPath, text: pomContent)
-
                             def aarFiles = findFiles(glob: '**/*.aar')
                             echo "AarFiles: ${aarFiles}"
                             aarFilePath = aarFiles[0].path
@@ -92,11 +87,11 @@ def call () {
                     }
                 }
             }
-/*             stage('Clean Workspace'){
+            stage('Clean Workspace'){
                 steps {
                     cleanWs()
                 }
-            } */
+            }
         }
     }
 
