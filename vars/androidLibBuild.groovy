@@ -7,8 +7,8 @@ def call () {
     def nexusUploadUrl
     def os
     def originalBranchName
-    def pomPath = 'build.pom'
-    def pomContent = "<project>\n\t<modelVersion>4.0.0</modelVersion>\n\t<groupId>com.retailinmotion</groupId>\n\t<artifactId>LIBNAME_HERE</artifactId>\n\t<version>LIBVER_HERE</version>\n\t<type>aar</type>\n</project>"
+    //def pomPath = 'build.pom'
+    //def pomContent = "<project>\n\t<modelVersion>4.0.0</modelVersion>\n\t<groupId>com.retailinmotion</groupId>\n\t<artifactId>LIBNAME_HERE</artifactId>\n\t<version>LIBVER_HERE</version>\n\t<type>aar</type>\n</project>"
 
     pipeline {
         agent {label 'androidsdk'}
@@ -59,6 +59,7 @@ def call () {
                     withSonarQubeEnv('SonarQubeServer') {
                         bat './gradlew.bat cleanBuildCache'
                         bat './gradlew jacocoTestReport'
+                        bat "./gradlew createPom -DversionName=${versionInfo.SafeInformationalVersion}"
                         bat """./gradlew.bat --info sonarqube assembleRelease ^
                                 -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
                                 -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
@@ -71,17 +72,22 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            pomContent = pomContent.replace('LIBNAME_HERE', "${libraryName}").replace('LIBVER_HERE', "${versionInfo.SafeInformationalVersion}")
-                            writeFile(file: pomPath, text: pomContent)
+                            //pomContent = pomContent.replace('LIBNAME_HERE', "${libraryName}").replace('LIBVER_HERE', "${versionInfo.SafeInformationalVersion}")
+                            //writeFile(file: pomPath, text: pomContent)
+
                             def aarFiles = findFiles(glob: '**/*.aar')
                             echo "AarFiles: ${aarFiles}"
-                            filePath = aarFiles[0].path
+                            aarFilePath = aarFiles[0].path
+                            
+                            def pomFiles = findFiles(glob: "**/${libraryName}-${versionInfo.SafeInformationalVersion}.xml")
+                            echo "pomFiles: ${pomFiles}"
+                            pomFilePath = pomFiles[0].path
 
                             nexusAarUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
-                            buildHelper.uploadFileToNexus(filePath, 'application/java-archive', nexusAarUrl, "$USERNAME", "$PASSWORD", os)
+                            buildHelper.uploadFileToNexus(aarFilePath, 'application/java-archive', nexusAarUrl, "$USERNAME", "$PASSWORD", os)
 
                             nexusPomUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.pom"
-                            buildHelper.uploadFileToNexus(pomPath, 'application/xml', nexusPomUrl, "$USERNAME", "$PASSWORD", os)
+                            buildHelper.uploadFileToNexus(pomFilePath, 'application/xml', nexusPomUrl, "$USERNAME", "$PASSWORD", os)
                         }
                     }
                 }
