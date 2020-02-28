@@ -77,11 +77,12 @@ def call () {
                             def aarFiles = findFiles(glob: '**/*.aar')
                             echo "AarFiles: ${aarFiles}"
                             filePath = aarFiles[0].path
+
                             nexusAarUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.aar"
+                            buildHelper.uploadFileToNexus(filePath, 'application/java-archive', nexusAarUrl, "$USERNAME", "$PASSWORD", os)
+
                             nexusPomUrl = "${env.RiMMavenRelease}com/retailinmotion/${libraryName}/${versionInfo.SafeInformationalVersion}/${libraryName}-${versionInfo.SafeInformationalVersion}.pom"
-	                        
-                            buildHelper.uploadFileToNexus(filePath, 'application/java-archive', nexusAarUrl, $USERNAME, $PASSWORD, os)
-                            buildHelper.uploadFileToNexus(pomPath, 'application/xml', nexusUrl, $USERNAME, $PASSWORD, os)
+                            buildHelper.uploadFileToNexus(pomPath, 'application/xml', nexusPomUrl, "$USERNAME", "$PASSWORD", os)
                         }
                     }
                 }
