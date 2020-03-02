@@ -75,6 +75,7 @@ def checkOs(){
 def execOcto(octopusServer, commandOptions){
 	def output
 	def os=checkOs()
+	//println "Octo command is; ${commandOptions}"
 	if(os == "linux"){
 		output=sh returnStdout: true, script: "docker run --rm -v \"\$(pwd)\":/src octopusdeploy/octo ${commandOptions}"
 	} else if (os == "macos"){
@@ -278,7 +279,7 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	def octopusServer=getServer(jenkinsURL)
 	def optionString=""
 	if ( packageArg && packageArg != "" ){
-		optionString = " --package \"$packageArg\""
+		optionString = " --package=\"$packageArg\""
 	} else {
 		optionString = " --packageversion \"$releaseVersion\""
 	}
