@@ -746,3 +746,62 @@ def generateSlackAttachments(fields){
 	
 	return attachments;
 }
+
+/*
+* Upload file to Nexus repository
+* Purpose: 	Upload file to Nexus repository from jenkins pipelines
+*	Parameters:
+* 				filePath - String containing the path to the file
+* 				contentType - content type for the file being uploaded 
+*							- eg application/xml for plain xml or pom, application/java-archive for .aar or .jar files
+*				nexusUrl - String representing the final url of the file that will be uploaded
+*				nexusUsername - String containing the Nexus username
+*				nexusPassword - String containing the corresponding Nexus password
+* 				os - String, should be linux, macos or windows
+*/
+def uploadFileToNexus(filePath, contentType, nexusUrl, nexusUsername, nexusPassword, os){
+	def exists = fileExists filePath
+	if (exists){
+		echo "File to upload: ${filePath}"
+	}
+	else{
+		error("Could not locate the requested file at '${filePath}'")
+	}
+	echo "Preparing Nexus upload at ${nexusUrl}"
+	def uploadStatus
+	os = os.toLowerCase()
+	if (os == 'linux' || os == 'macos'){
+		uploadStatus = sh(returnStatus: true, script: "curl.exe -s -S -u ${nexusUsername}:${nexusPassword} --upload-file ${filePath} ${nexusUploadUrl}")
+	}
+	else if (os == 'windows'){
+		def psScript = """
+		\$ErrorActionPreference = 'Stop'
+		\$secpasswd = ConvertTo-SecureString '${nexusPassword}' -AsPlainText -Force
+		\$mycreds = New-Object System.Management.Automation.PSCredential ('${nexusUsername}', \$secpasswd)
+		#Check if artifact already exists#
+		try{
+			\$result = Invoke-RestMethod -Method Head -Uri ${nexusUrl} -Credential \$myCreds
+		}
+		catch{
+			Write-Host "File does not exist, will upload"
+		}
+		if (\$null -ne \$result -or \$result.StatusCode -eq 200){
+			Write-Error "An artifact already exists at ${nexusUrl} , will not overwrite it."
+		}
+		Invoke-RestMethod -Method Put -Uri ${nexusUrl} -InFile ${filePath} -Credential \$myCreds -ContentType "${contentType}"
+		"""
+		//not using curl because it does not reliably return errors when running in PS
+		uploadStatus = powershell(returnStatus: true, script: psScript)
+	}
+	else {
+		error("Unknown OS: ${os}; could not upload the file.")
+	}
+	echo "Upload status: ${uploadStatus}"
+
+	if (uploadStatus != 0) {
+		error("Could not upload file to Nexus - see above error!")
+	}
+	else{
+		echo "Nexus upload successful"
+	}
+}
