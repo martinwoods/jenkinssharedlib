@@ -104,7 +104,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 				then 
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
 				else
-					dotnet /app/GitVersion.dll /src${subPath} > gitversion.txt
+					/usr/bin/dotnet /app/GitVersion.dll /src${subPath} > gitversion.txt
 				fi
 				if [ $? -ne 0 ]; then cat gitversion.txt; fi
 			'''
@@ -115,6 +115,15 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	}
 	
 	def output = readFile(file:'gitversion.txt')
+	
+	return parseGitVersionInfo(output, changeBranch)
+}
+
+/*
+* Parse the output from gitversion
+* This is mainly used by getGitVersionInfo but can optionally be called separately if needed
+*/
+def parseGitVersionInfo(output, changeBranch=null){
 	def json = new JsonSlurperClassic().parseText(output)
 	
 	// If this was a Pull Request branch, we lose a lot of information in the version string
@@ -160,8 +169,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-").replaceAll("_", "-")
 	
 	// Since we are changing the tag in gitversion.yml for some repos, parse the prerelease label from the branchname 
-	if(json.BranchName.contains("/")){
-		json.PackagePreRelease=json.BranchName.substring(0, env.BRANCH_NAME.indexOf("/"))
+	if(json.BranchName.contains("/") && env.BRANCH_NAME.indexOf("/") > 0){
+			json.PackagePreRelease=json.BranchName.substring(0, env.BRANCH_NAME.indexOf("/"))
 	} else {
 		json.PackagePreRelease=json.BranchName
 	}
@@ -169,9 +178,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 	
 	
 	return json
-	
 }
-
 /*
 * Check what OS the script is executing on
 */
