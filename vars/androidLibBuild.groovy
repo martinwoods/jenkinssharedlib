@@ -89,7 +89,7 @@ def call () {
             }
             stage('Clean Workspace'){
                 steps {
-                    cleanWs()
+                    cleanWs notFailBuild: true
                 }
             }
         }
