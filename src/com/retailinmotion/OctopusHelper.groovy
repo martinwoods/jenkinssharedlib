@@ -195,10 +195,6 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	def owner = sh script: 'git remote get-url origin', returnStdout: true
-
-	println owner
-
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
