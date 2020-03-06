@@ -197,20 +197,12 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
 	def ownerName
 	def os=checkOs()
-	if(os == "linux"){
-		println os
-		ownerName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
-		ownerName=ownerName.trim()
-		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
-		projectName=projectName.trim()
-	} else if (os == "macos"){
-		println os
+	if(os == "linux" || os == "macos"){
 		ownerName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
 		ownerName=ownerName.trim()
 		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
 		projectName=projectName.trim()
 	} else if (os == "windows") {
-		println os
 		ownerName=powershell returnStdout: true, script: """
 				Split-Path (Split-Path (& git remote get-url origin)) -Leaf
 			"""
