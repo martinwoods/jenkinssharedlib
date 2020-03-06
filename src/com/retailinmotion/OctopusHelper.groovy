@@ -196,18 +196,22 @@ def getPackageId(packageFile) {
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
 	def owner
+	def repoOwner
 	def os=checkOs()
 	if(os == "linux"){
 		println os
-		owner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		repoOwner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		owner=repoOwner.trim()
 	} else if (os == "macos"){
 		println os
-		owner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		repoOwner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		owner=repoOwner.trim()
 	} else if (os == "windows") {
 		println os
-		owner=powershell returnStdout: true, script: """
+		repoOwner=powershell returnStdout: true, script: """
 				Split-Path (Split-Path (& git remote get-url origin)) -Leaf
 			"""
+		owner=repoOwner.trim()
 	} else {
 		println "Unable to run push Metadata, unrecognised OS $os"
 		exit 1
