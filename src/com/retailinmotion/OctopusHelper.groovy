@@ -199,16 +199,14 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	def os=checkOs()
 	if(os == "linux"){
 		println os
-		owner=sh returnStdout: true, script: "git remote get-url origin ; uname -a"
+		owner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
 	} else if (os == "macos"){
 		println os
-		owner=sh returnStdout: true, script: """
-				git remote get-url origin
-			"""
+		owner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
 	} else if (os == "windows") {
 		println os
 		owner=powershell returnStdout: true, script: """
-				git remote get-url origin
+				Split-Path (Split-Path (& git remote get-url origin)) -Leaf
 			"""
 	} else {
 		println "Unable to run push Metadata, unrecognised OS $os"
