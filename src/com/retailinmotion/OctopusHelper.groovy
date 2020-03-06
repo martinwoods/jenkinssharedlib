@@ -195,28 +195,34 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	def owner
+	def ownerName
 	def repoOwner
 	def os=checkOs()
 	if(os == "linux"){
 		println os
 		repoOwner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
-		owner=repoOwner.trim()
+		ownerName=repoOwner.trim()
+		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
 	} else if (os == "macos"){
 		println os
 		repoOwner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
-		owner=repoOwner.trim()
+		ownerName=repoOwner.trim()
+		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
 	} else if (os == "windows") {
 		println os
 		repoOwner=powershell returnStdout: true, script: """
 				Split-Path (Split-Path (& git remote get-url origin)) -Leaf
 			"""
-		owner=repoOwner.trim()
+		ownerName=repoOwner.trim()
+		projectName=powershell returnStdout: true, script: """
+				(Split-Path (& git remote get-url origin) -Leaf).Replace('.git','')
+		"""
+
 	} else {
 		println "Unable to run push Metadata, unrecognised OS $os"
 		exit 1
 	}
-	println owner
+	println ownerName
 
 	// Define metadata groovy map
 	def map = [
@@ -225,7 +231,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
-		VcsRoot: "http://bitbucket.rim.local:7990/projects/${owner}/repos",
+		VcsRoot: "http://bitbucket.rim.local:7990/projects/${ownerName}/repos/${projectName}",
 		Commits: getCommitDataMap()
 	]
 
