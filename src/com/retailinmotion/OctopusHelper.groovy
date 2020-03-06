@@ -195,6 +195,12 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
+	def owner = sh script: '''
+		gitRemoteGetUrlOrigin=$(git remote get-url origin)
+		gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin})
+		basename ${gitRemoteDirName}
+	''', returnStdout: true
+
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -202,7 +208,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
-		VcsRoot: "http://bitbucket.rim.local:7990",
+		VcsRoot: "http://bitbucket.rim.local:7990projects/${owner}/repos",
 		Commits: getCommitDataMap()
 	]
 
