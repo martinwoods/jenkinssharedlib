@@ -221,7 +221,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
-		VcsRoot: "http://bitbucket.rim.local:7990projects/",
+		VcsRoot: "http://bitbucket.rim.local:7990/projects/${owner}/repos",
 		Commits: getCommitDataMap()
 	]
 
