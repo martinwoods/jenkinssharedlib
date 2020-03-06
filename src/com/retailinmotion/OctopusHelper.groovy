@@ -224,7 +224,6 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		println "Unable to run push Metadata, unrecognised OS $os"
 		exit 1
 	}
-	println ownerName
 
 	// Define metadata groovy map
 	def map = [
