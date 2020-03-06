@@ -196,27 +196,29 @@ def getPackageId(packageFile) {
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
 	def ownerName
-	def repoOwner
 	def os=checkOs()
 	if(os == "linux"){
 		println os
-		repoOwner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
-		ownerName=repoOwner.trim()
+		ownerName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		ownerName=ownerName.trim()
 		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
+		projectName=projectName.trim()
 	} else if (os == "macos"){
 		println os
-		repoOwner=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
-		ownerName=repoOwner.trim()
+		ownerName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		ownerName=ownerName.trim()
 		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
+		projectName=projectName.trim()
 	} else if (os == "windows") {
 		println os
-		repoOwner=powershell returnStdout: true, script: """
+		ownerName=powershell returnStdout: true, script: """
 				Split-Path (Split-Path (& git remote get-url origin)) -Leaf
 			"""
-		ownerName=repoOwner.trim()
+		ownerName=ownerName.trim()
 		projectName=powershell returnStdout: true, script: """
 				(Split-Path (& git remote get-url origin) -Leaf).Replace('.git','')
 		"""
+		projectName=projectName.trim()
 
 	} else {
 		println "Unable to run push Metadata, unrecognised OS $os"
