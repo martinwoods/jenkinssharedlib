@@ -195,10 +195,26 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
-	output=powershell returnStdout: true, script: """
-			git remote get-url origin
+	def owner
+	def os=checkOs()
+	if(os == "linux"){
+		println os
+		owner=sh returnStdout: true, script: "git remote get-url origin ; uname -a"
+	} else if (os == "macos"){
+		println os
+		owner=sh returnStdout: true, script: """
+				git remote get-url origin
 			"""
-	println output
+	} else if (os == "windows") {
+		println os
+		owner=powershell returnStdout: true, script: """
+				git remote get-url origin
+			"""
+	} else {
+		println "Unable to run push Metadata, unrecognised OS $os"
+		exit 1
+	}
+	println owner
 
 	// Define metadata groovy map
 	def map = [
