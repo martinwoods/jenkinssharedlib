@@ -195,6 +195,28 @@ def getPackageId(packageFile) {
 // Push job metadata to Octopus Deploy for given package
 def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	
+	def ownerName
+	def os=checkOs()
+	if(os == "linux" || os == "macos"){
+		ownerName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		ownerName=ownerName.trim()
+		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
+		projectName=projectName.trim()
+	} else if (os == "windows") {
+		ownerName=powershell returnStdout: true, script: """
+				Split-Path (Split-Path (& git remote get-url origin)) -Leaf
+			"""
+		ownerName=ownerName.trim()
+		projectName=powershell returnStdout: true, script: """
+				(Split-Path (& git remote get-url origin) -Leaf).Replace('.git','')
+		"""
+		projectName=projectName.trim()
+
+	} else {
+		println "Unable to run push Metadata, unrecognised OS $os"
+		exit 1
+	}
+
 	// Define metadata groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
@@ -202,7 +224,7 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
-		VcsRoot: "http://bitbucket.rim.local:7990",
+		VcsRoot: "http://bitbucket.rim.local:7990/projects/${ownerName}/repos/${projectName}",
 		Commits: getCommitDataMap()
 	]
 
