@@ -63,6 +63,7 @@ def call () {
                                         -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
                                         -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
                                     """
+                            }
                             else if (os == 'windows'){
                                 bat './gradlew.bat cleanBuildCache'
                                 bat './gradlew.bat jacocoTestReport'
