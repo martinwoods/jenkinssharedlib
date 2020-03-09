@@ -778,7 +778,24 @@ def uploadFileToNexus(filePath, contentType, nexusUrl, nexusUsername, nexusPassw
 	def uploadStatus
 	os = os.toLowerCase()
 	if (os == 'linux' || os == 'macos'){
-		uploadStatus = sh(returnStatus: true, script: "curl.exe -s -S -u ${nexusUsername}:${nexusPassword} --upload-file ${filePath} ${nexusUploadUrl}")
+		def shScript = """
+		if curl -u ${nexusUsername}:${nexusPassword} --output /dev/null --silent --head --fail "${nexusUrl}" ;then
+			echo "ERROR: An artifact already exists at ${nexusUrl} , will not overwrite it."
+			exit 1
+		else
+			echo "File does not exist, uploading"
+			curl -s -S -u ${nexusUsername}:${nexusPassword} --upload-file ${filePath} ${nexusUrl}
+			if curl -u ${nexusUsername}:${nexusPassword} --output /dev/null --silent --head --fail "${nexusUrl}" ;then
+				echo "File uploaded successfully"
+				exit 0
+			else
+				echo "ERROR: File not uploaded"
+				exit 2
+			fi
+		fi
+		"""
+		// Checking if the file exists because Curl does not return upload errors in this case
+		uploadStatus = sh(returnStatus: true, script: shScript)
 	}
 	else if (os == 'windows'){
 		def psScript = """
@@ -790,14 +807,14 @@ def uploadFileToNexus(filePath, contentType, nexusUrl, nexusUsername, nexusPassw
 			\$result = Invoke-RestMethod -Method Head -Uri ${nexusUrl} -Credential \$myCreds
 		}
 		catch{
-			Write-Host "File does not exist, will upload"
+			Write-Host "File does not exist, uploading"
 		}
 		if (\$null -ne \$result -or \$result.StatusCode -eq 200){
-			Write-Error "An artifact already exists at ${nexusUrl} , will not overwrite it."
+			Write-Error "ERROR: An artifact already exists at ${nexusUrl} , will not overwrite it."
 		}
 		Invoke-RestMethod -Method Put -Uri ${nexusUrl} -InFile ${filePath} -Credential \$myCreds -ContentType "${contentType}"
 		"""
-		//not using curl because it does not reliably return errors when running in PS
+		// Not using curl because it does not return errors
 		uploadStatus = powershell(returnStatus: true, script: psScript)
 	}
 	else {

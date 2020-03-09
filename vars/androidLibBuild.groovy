@@ -37,7 +37,7 @@ def call () {
             stage('Get repo info'){
                 steps{
                     script{
-                        os = octopusHelper.checkOs()
+                        os = octopusHelper.checkOs().toLowerCase()
                         if (os == 'linux' || os == 'macos'){
                             libraryName = sh(returnStdout: true, script: 'basename `git remote get-url origin` .git').trim()
                         }
@@ -49,19 +49,31 @@ def call () {
                     }
                 }
             }
+
             stage('Build'){
                 steps {
                     script {
                         scannerHome = tool 'SonarScannerRiM'
-                    }
-                    withSonarQubeEnv('SonarQubeServer') {
-                        bat './gradlew.bat cleanBuildCache'
-                        bat './gradlew jacocoTestReport'
-                        bat "./gradlew createPom -DversionName=${versionInfo.SafeInformationalVersion}"
-                        bat """./gradlew.bat --info sonarqube assembleRelease ^
-                                -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
-                                -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
-                            """
+                        withSonarQubeEnv('SonarQubeServer') {
+                            if (os == 'linux' || os == 'macos'){
+                                sh './gradlew cleanBuildCache'
+                                sh './gradlew jacocoTestReport'
+                                sh "./gradlew createPom -DversionName=${versionInfo.SafeInformationalVersion}"
+                                sh """./gradlew --info sonarqube assembleRelease ^
+                                        -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
+                                        -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
+                                    """
+                            else if (os == 'windows'){
+                                bat './gradlew.bat cleanBuildCache'
+                                bat './gradlew.bat jacocoTestReport'
+                                bat "./gradlew.bat createPom -DversionName=${versionInfo.SafeInformationalVersion}"
+                                bat """./gradlew.bat --info sonarqube assembleRelease ^
+                                        -Dsonar.projectKey=${libraryName} -Dsonar.branch.name=${originalBranchName} ^
+                                        -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${libraryName}
+                                    """
+                            }
+
+                        }
                     }
                 }
             }
