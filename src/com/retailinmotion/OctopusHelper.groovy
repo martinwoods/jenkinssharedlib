@@ -192,8 +192,8 @@ def getPackageId(packageFile) {
 	return [packageId, packageString]
 }
 
-// Push job metadata to Octopus Deploy for given package
-def pushMetadata (jenkinsURL, packageFile, space="Default") {
+// Push job Build Information to Octopus Deploy for given package
+def buildInformation (jenkinsURL, packageFile, space="Default") {
 	
 	def ownerName
 	def os=checkOs()
@@ -213,11 +213,11 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 		projectName=projectName.trim()
 
 	} else {
-		println "Unable to run push Metadata, unrecognised OS $os"
+		println "Unable to run push Build Information, unrecognised OS $os"
 		exit 1
 	}
 
-	// Define metadata groovy map
+	// Define Build Information groovy map
 	def map = [
 		BuildEnvironment: "Jenkins",
 		CommentParser: "Jira",
@@ -237,16 +237,16 @@ def pushMetadata (jenkinsURL, packageFile, space="Default") {
 	println jsonBeauty // ADDING TO TROUBLESHOOT ISSUE
 
 	// Create json file containing pretty json text
-	writeFile(file:'metadata.json', text: jsonBeauty)
+	writeFile(file:'buildinfo.json', text: jsonBeauty)
 	
 	// get packageId and packageString from getPackageId method
 	def (packageId, packageString)  = getPackageId(packageFile)
 
-	// Constuct push-metadata octo command 
+	// Constuct build-information octo command 
 	def octopusServer=getServer(jenkinsURL)
-	println "Pushing package metadata to ${octopusServer.url}"
+	println "Pushing package Build Information to ${octopusServer.url}"
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-     		def commandOptions="push-metadata --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --metadata-file=\"metadata.json\" --space \"$space\"  --logLevel=verbose --overwrite-mode=OverwriteExisting"
+     		def commandOptions="build-information --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --file=\"buildinfo.json\" --space \"$space\"  --logLevel=verbose --overwrite-mode=OverwriteExisting"
     
 			println commandOptions // ADDING TO TROUBLESHOOT ISSUE
 
@@ -261,7 +261,7 @@ def pushPackage (jenkinsURL, packageFile, space="Default"){
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="push --package $packageFile --overwrite-mode=OverwriteExisting --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		
-		pushMetadata(jenkinsURL, packageFile)
+		buildInformation(jenkinsURL, packageFile)
 
 		return execOcto(octopusServer, commandOptions)
 	}
