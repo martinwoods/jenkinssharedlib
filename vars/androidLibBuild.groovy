@@ -83,7 +83,7 @@ def call () {
                 steps{
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus.retailinmotion.com-docker', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         script{
-                            def aarFiles = findFiles(glob: '**/*.aar')
+                            def aarFiles = findFiles(glob: '**/outputs/*/*.aar')
                             echo "AarFiles: ${aarFiles}"
                             aarFilePath = aarFiles[0].path
                             
