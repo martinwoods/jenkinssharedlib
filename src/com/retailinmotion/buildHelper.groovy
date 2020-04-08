@@ -253,7 +253,7 @@ def pushHelmCharts(chartDir, helmRepo, userColonPassword, dockerContext, helmIma
 	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e repoAuth=$userColonPassword -e chartDir=\"$chartDir\"" ) { 
 		lock("${helmRepo}/index.yaml"){
 			sh '''
-				wget -q $HELMREPO/index.yaml
+				wget -O index.yaml -q $HELMREPO/index.yaml
 				helm repo index --url $HELMREPO --merge index.yaml $chartDir
 				curl -s -u $repoAuth --upload-file $chartDir/index.yaml $HELMREPO/index.yaml
 	  
