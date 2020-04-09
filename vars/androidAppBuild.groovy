@@ -9,13 +9,17 @@ def call (buildParamsJson) {
 	println JsonOutput.prettyPrint(buildParamsJson)
 
     def buildParams = jsonSlurper.parseText(buildParamsJson)
-
+    def sonarProjectKeyOverwrite = buildParams.sonarProjectKeyOverwrite
+    def sonarProjectNameOverwrite = buildParams.sonarProjectNameOverwrite
+    
     def buildHelper = new com.retailinmotion.buildHelper()
     def octopusHelper = new com.retailinmotion.OctopusHelper()
     def versionInfo
     def projectName
     def os
     def originalBranchName
+    def sonarProjectKey
+    def sonarProjectName
 
     pipeline {
         agent {label 'androidsdk'}
@@ -56,6 +60,8 @@ def call (buildParamsJson) {
                             projectName = powershell(returnStdout: true, script: 'Write-Output ((Split-Path (& git remote get-url origin) -Leaf).replace(".git",""))').trim()
                         }
                         echo "Detected library name: ${projectName}"
+                        sonarProjectKey = sonarProjectKeyOverwrite ?: projectName
+                        sonarProjectName = sonarProjectNameOverwrite ?: projectName
                         originalBranchName = "$env.CHANGE_BRANCH" != "null" ? "$env.CHANGE_BRANCH" : "$env.BRANCH_NAME"
                     }
                 }
@@ -71,8 +77,8 @@ def call (buildParamsJson) {
                                 sh './gradlew jacocoTestReport'
                                 //sh "./gradlew createPom -DversionName=${versionInfo.SafeInformationalVersion}"
                                 sh """./gradlew --info sonarqube assembleRelease ^
-                                        -Dsonar.projectKey=${projectName} -Dsonar.branch.name=${originalBranchName} ^
-                                        -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${projectName}
+                                        -Dsonar.projectKey=${sonarProjectKey} -Dsonar.branch.name=${originalBranchName} ^
+                                        -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${sonarProjectName}
                                     """
                             }
                             else if (os == 'windows'){
@@ -80,8 +86,8 @@ def call (buildParamsJson) {
                                 bat './gradlew.bat jacocoTestReport'
                                 //bat "./gradlew.bat createPom -DversionName=${versionInfo.SafeInformationalVersion}"
                                 bat """./gradlew.bat --info sonarqube assembleRelease ^
-                                        -Dsonar.projectKey=${projectName} -Dsonar.branch.name=${originalBranchName} ^
-                                        -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${projectName}
+                                        -Dsonar.projectKey=${sonarProjectKey} -Dsonar.branch.name=${originalBranchName} ^
+                                        -Dsonar.projectVersion=${versionInfo.FullSemVer} -Dsonar.projectName=${sonarProjectName}
                                     """
                             }
                         }
