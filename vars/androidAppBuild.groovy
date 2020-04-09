@@ -1,12 +1,5 @@
-import groovy.json.JsonSlurper
+def call (buildParams) {
 
-def call (buildParamsJson) {
-
-    def jsonSlurper = new JsonSlurper()
-	println "Received build parameters:"
-	println buildParamsJson
-
-    def buildParams = jsonSlurper.parseText(buildParamsJson)
     def sonarProjectKeyOverwrite = buildParams.sonarProjectKeyOverwrite
     def sonarProjectNameOverwrite = buildParams.sonarProjectNameOverwrite
     
