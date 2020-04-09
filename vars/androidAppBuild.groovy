@@ -1,12 +1,10 @@
 import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
 
 def call (buildParamsJson) {
 
     def jsonSlurper = new JsonSlurper()
-	def JsonOutput = new JsonOutput()
 	println "Received build parameters:"
-	println JsonOutput.prettyPrint(buildParamsJson)
+	println readJSON text: buildParamsJson
 
     def buildParams = jsonSlurper.parseText(buildParamsJson)
     def sonarProjectKeyOverwrite = buildParams.sonarProjectKeyOverwrite
@@ -91,10 +89,8 @@ def call (buildParamsJson) {
                                     """
                             }
                         }
-                        def apkFiles = findFiles(glob: '**/*.apk')
+                        def apkFiles = findFiles(glob: '**/outputs/**/*.apk')
                         echo "APK Files: ${apkFiles}"
-                        def apkFiles2 = findFiles(glob: '**/outputs/*/*.apk')
-                        echo "APK Files2: ${apkFiles2}"
                     }
                 }
             }
