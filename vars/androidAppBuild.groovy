@@ -4,7 +4,7 @@ def call (buildParamsJson) {
 
     def jsonSlurper = new JsonSlurper()
 	println "Received build parameters:"
-	println readJSON text: buildParamsJson
+	println buildParamsJson
 
     def buildParams = jsonSlurper.parseText(buildParamsJson)
     def sonarProjectKeyOverwrite = buildParams.sonarProjectKeyOverwrite
