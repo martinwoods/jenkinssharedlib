@@ -11,6 +11,8 @@ def call (buildParams) {
     def nexusUploadUrl
     def os
     def originalBranchName
+    def sonarProjectKey
+    def sonarProjectName
 
     pipeline {
         agent {label 'androidsdk'}
