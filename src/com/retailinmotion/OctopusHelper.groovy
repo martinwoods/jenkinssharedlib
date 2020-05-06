@@ -198,17 +198,17 @@ def buildInformation (jenkinsURL, packageFile, space="Default") {
 	def ownerName
 	def os=checkOs()
 	if(os == "linux" || os == "macos"){
-		ownerName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
+		ownerName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git config --get remote.origin.url) ; gitRemoteDirName=$(dirname ${gitRemoteGetUrlOrigin}) ; basename ${gitRemoteDirName}'
 		ownerName=ownerName.trim()
-		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git remote get-url origin) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
+		projectName=sh returnStdout: true, script: 'gitRemoteGetUrlOrigin=$(git config --get remote.origin.url) ; basename ${gitRemoteGetUrlOrigin} |  sed \'s/.git//g\''
 		projectName=projectName.trim()
 	} else if (os == "windows") {
 		ownerName=powershell returnStdout: true, script: """
-				Split-Path (Split-Path (& git remote get-url origin)) -Leaf
+				Split-Path (Split-Path (& git config --get remote.origin.url)) -Leaf
 			"""
 		ownerName=ownerName.trim()
 		projectName=powershell returnStdout: true, script: """
-				(Split-Path (& git remote get-url origin) -Leaf).Replace('.git','')
+				(Split-Path (& git config --get remote.origin.url) -Leaf).Replace('.git','')
 		"""
 		projectName=projectName.trim()
 
