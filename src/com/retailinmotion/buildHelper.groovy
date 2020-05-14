@@ -673,15 +673,19 @@ def getChanges() {
 /*
 *Get Git commit info that is not yet available in jenkins pipeline
  */
-def getLastCommitAuthor( ){
+def getLastCommitAuthor( getEmail = null ){
+	def filter = 'an'
+	if (getEmail) {
+		filter = 'ae'
+	}
 	if(isUnix()){
-		gitCommitter = sh(returnStdout: true, script: '''
-	git show -s --pretty=%an
-	''').trim()
+		gitCommitter = sh(returnStdout: true, script: """
+	git show -s --pretty=%${filter}
+	""").trim()
 	} else {
-		gitCommitter = powershell(returnStdout: true, script: '''
-	git show -s --pretty=%an
-	''').trim()
+		gitCommitter = powershell(returnStdout: true, script: """
+	git show -s --pretty=%${filter}
+	""").trim()
 	}
 	return gitCommitter
 }
