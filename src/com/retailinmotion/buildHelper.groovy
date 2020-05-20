@@ -143,7 +143,7 @@ def parseGitVersionInfo(output, changeBranch=null){
 	// This is due to https://github.com/helm/helm/issues/1698
 	// Not all charts (private and public) are calling replace when referencing .Chart.Version,
 	// so make it available here for use to avoid deploy time issues
-	json.SafeFullSemVer=json.FullSemVer.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-")
+	json.SafeFullSemVer=json.FullSemVer.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-").replaceAll("_", "-")
 	// The default informational version can be very long for feature branches, 
 	// so make a copy of the original as FullInformationalVersion and create a new version with a shorter format	
 	json.FullInformationalVersion=json.InformationalVersion
@@ -165,8 +165,6 @@ def parseGitVersionInfo(output, changeBranch=null){
 		def match=(json.BranchName =~ /(VECTWO\-{1}[0-9]*)(.*)/)
 		json.InformationalVersion=json.InformationalVersion.replaceAll(/(VECTWO\-{1}[0-9]*)([A-Za-z0-9\-\_]*)/, match[0][1])
 	}
-	
-	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-").replaceAll("_", "-")
 	
 	// Since we are changing the tag in gitversion.yml for some repos, parse the prerelease label from the branchname 
 	if(json.BranchName.contains("/") && env.BRANCH_NAME.indexOf("/") > 0){
