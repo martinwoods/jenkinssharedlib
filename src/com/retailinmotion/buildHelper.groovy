@@ -165,6 +165,8 @@ def parseGitVersionInfo(output, changeBranch=null){
 		def match=(json.BranchName =~ /(VECTWO\-{1}[0-9]*)(.*)/)
 		json.InformationalVersion=json.InformationalVersion.replaceAll(/(VECTWO\-{1}[0-9]*)([A-Za-z0-9\-\_]*)/, match[0][1])
 	}
+	// Keep a copy of the informational version with unsafe characters replaced
+	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-").replaceAll("_", "-")
 	
 	// Since we are changing the tag in gitversion.yml for some repos, parse the prerelease label from the branchname 
 	if(json.BranchName.contains("/") && env.BRANCH_NAME.indexOf("/") > 0){
