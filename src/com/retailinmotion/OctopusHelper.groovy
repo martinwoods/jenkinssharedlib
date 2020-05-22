@@ -282,6 +282,7 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Defau
 
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions=" --create-release --ignoreexisting --waitfordeployment --deploymenttimeout=\"00:20:00\" --progress --project \"$project\" $optionString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""		
+		echo commandOptions
 		return execOcto(octopusServer, commandOptions)
 	}
 }
