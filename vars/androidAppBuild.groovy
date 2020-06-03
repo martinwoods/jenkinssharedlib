@@ -2,7 +2,10 @@ def call (buildParams) {
 
     def sonarProjectKeyOverwrite = buildParams.sonarProjectKeyOverwrite
     def sonarProjectNameOverwrite = buildParams.sonarProjectNameOverwrite
-    
+    def networkPublishPath = buildParams.networkPublishPath
+    def signingKeystore = buildParams.signingKeystore.toLowerCase()
+    def deployToOctopusSandbox = buildParams.deployToOctopusSandbox.toString().toBoolean()
+        
     def buildHelper = new com.retailinmotion.buildHelper()
     def octopusHelper = new com.retailinmotion.OctopusHelper()
     def versionInfo
@@ -11,6 +14,14 @@ def call (buildParams) {
     def originalBranchName
     def sonarProjectKey
     def sonarProjectName
+    def apkFiles
+    def packageString
+    def networkPublishRoot = "\\\\rimdub-fs-03\\Builds\\Vector_Systems\\" 
+    def sandbox = ''
+
+    if (deployToOctopusSandbox){
+		sandbox = '-sandbox'
+	}
 
     pipeline {
         agent {label 'androidsdk'}
@@ -36,6 +47,7 @@ def call (buildParams) {
                         currentBuild.displayName = "#${versionInfo.FullSemVer}"
                         currentBuild.description = "${versionInfo.InformationalVersion}"
                         originalBranchName = "$env.CHANGE_BRANCH" != "null" ? "$env.CHANGE_BRANCH" : "$env.BRANCH_NAME"
+                        commitAuthorSlack = buildHelper.getLastCommitAuthor(true).replace("@retailinmotion.com","").toLowerCase()
                     }
                 }
             }
@@ -53,7 +65,6 @@ def call (buildParams) {
                         echo "Detected library name: ${projectName}"
                         sonarProjectKey = sonarProjectKeyOverwrite ?: projectName
                         sonarProjectName = sonarProjectNameOverwrite ?: projectName
-                        originalBranchName = "$env.CHANGE_BRANCH" != "null" ? "$env.CHANGE_BRANCH" : "$env.BRANCH_NAME"
                     }
                 }
             }
@@ -82,8 +93,57 @@ def call (buildParams) {
                                     """
                             }
                         }
-                        def apkFiles = findFiles(glob: '**/outputs/**/*.apk')
-                        echo "APK Files: ${apkFiles}"
+                        apkOutput = findFiles(glob: '**/outputs/**/*.apk')[0]
+                        echo "APK output: ${apkOutput}"
+                    }
+                }
+            }
+
+            stage('Sign and package'){
+                steps{
+                    script {
+                        withCredentials([string(credentialsId: 'android-production-key-password', variable: 'PROD_KEY_PASSWORD'), string(credentialsId: 'android-production-keystore-password', variable: 'PROD_KEYSTORE_PASSWORD'), file(credentialsId: 'android-production-keystore', variable: 'PROD_KEYSTORE_FILE'), file(credentialsId: 'android-test-keystore', variable: 'TEST_KEYSTORE_FILE'), string(credentialsId: 'android-test-key-password', variable: 'TEST_KEY_PASSWORD'), string(credentialsId: 'android-test-keystore-password', variable: 'TEST_KEYSTORE_PASSWORD')]) {
+                            // Copy the keystore files to local directory
+                            fileOperations([fileRenameOperation(destination: 'test.keystore', source: TEST_KEYSTORE_FILE)])
+                            fileOperations([fileRenameOperation(destination: 'prod.keystore', source: PROD_KEYSTORE_FILE)])
+                            // Choose the keystore file to use and sign the APK
+                            def keystoreToUse = (signingKeystore == 'prod') : 'test.keystore' ? 'prod.keystore'
+                            if (os == 'linux' || os == 'macos'){
+                                sh "apksigner sign --ks ${keystoreToUse} ${apkOutput}"
+                            }
+                            else if (os == 'windows'){
+                                bat "apksigner sign --ks ${keystoreToUse} ${apkOutput}"
+                            }
+                        }
+                        // Create an artficats folder and copy the signed APK inside
+                        fileOperations([folderCreateOperation('artifacts')])
+                        fileOperations([fileCopyOperation(excludes: '', flattenFiles: true, includes: apkOutput, targetLocation: 'artifacts/')])
+                        // Prepare the filename for zipping and uploading to Octopus
+                        def S3SafeKeyRegex="[^0-9a-zA-Z\\!\\-_\\.\\*'\\(\\)]+" // based on https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-key-guidelines-safe-characters
+                        packageString = "${versionInfo.InformationalVersion}".replaceAll(S3SafeKeyRegex, "-")
+                        packageZip = "artifacts/AdminAppAndroid.${packageString}.zip"
+                        // package into a zip file
+                        zip archive: false, dir: 'artifacts/', glob: '', zipFile: packageZip
+                        // Make a copy of the artifacts on the network drive for QA Automation
+                        pathBranch="$env.BRANCH_NAME".replace("/", "\\")
+                        networkPublishPath = networkPublishRoot + "\\${pathBranch}\\${versionInfo.MajorMinorPatch}.${versionInfo.ShortSha}"
+                        fileOperations([fileCopyOperation(excludes: '', flattenFiles: true, includes: 'artifacts/', targetLocation: networkPublishPath)])
+                        // Output network path at the end so that it's easy to see in jenkins console output
+                        echo "### INFO: Copied artifact to network path ${networkPublishPath}"
+					}
+                }
+            }
+            /*
+            * Store the build artifacts in Octopus package repository and deploy the apk for test environment
+            */
+            stage ('Deploy to Octopus') {
+                steps {
+                    script {
+                        octopusHelper.pushPackage("${env.JENKINS_URL}", packageZip)
+
+                        // Create a release and deploy it to test, octopus sends the slack message to the user
+                        octopusHelper.createRelease("${env.JENKINS_URL}${sandbox}", "vPos AdminApp Android", packageString)
+                        octopusHelper.deployExisting("${env.JENKINS_URL}${sandbox}", "vPos AdminApp Android", packageString, "Release Test", " --tenant=\"${clientInfo.octopus_tenant}\" --variable=SlackUsername:${commitAuthorSlack}")
                     }
                 }
             }
