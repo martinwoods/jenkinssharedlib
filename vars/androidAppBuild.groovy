@@ -110,7 +110,7 @@ def call (buildParams) {
                             fileOperations([fileRenameOperation(destination: 'test.keystore', source: TEST_KEYSTORE_FILE)])
                             fileOperations([fileRenameOperation(destination: 'prod.keystore', source: PROD_KEYSTORE_FILE)])
                             // Choose the keystore file to use and sign the APK
-                            def keystoreToUse = (signingKeystore == 'prod') : 'test.keystore' ? 'prod.keystore'
+                            def keystoreToUse = (signingKeystore == 'prod') ? 'test.keystore' : 'prod.keystore'
                             if (os == 'linux' || os == 'macos'){
                                 // TODO: get the path for apksigner, see below for Windows
                                 sh "apksigner sign --ks ${keystoreToUse} ${apkOutput}"
