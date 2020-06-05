@@ -111,6 +111,7 @@ def call (buildParams) {
                             fileOperations([fileRenameOperation(destination: 'prod.keystore', source: PROD_KEYSTORE_FILE)])
                             // Choose the keystore file to use and sign the APK
                             def keystoreToUse = (signingKeystore == 'prod') ? 'test.keystore' : 'prod.keystore'
+                            def androidBuildToolsPath
                             if (os == 'linux' || os == 'macos'){
                                 // TODO: get the path for apksigner, see below for Windows
                                 sh "apksigner sign --ks ${keystoreToUse} ${apkOutput}"
@@ -118,7 +119,7 @@ def call (buildParams) {
                             else if (os == 'windows'){
                                 // Get the path for the latest installed version of Build-Tools, then sign using apkSigner
                                 // Could also be extracted from the output of 'sdkmanager --list'
-                                def androidBuildToolsPath = powershell(returnStatus: true, script: '(Get-ChildItem -Path $env:ANDROID_HOME -Directory -Filter "build-tools\\*" | Sort-Object Name -Descending | Select-Object FullName -First 1).FullName')
+                                androidBuildToolsPath = powershell(returnStdout: true, script: '(Get-ChildItem -Path $env:ANDROID_HOME -Directory -Filter "build-tools\\*" | Sort-Object Name -Descending | Select-Object FullName -First 1).FullName')
                                 bat "${androidBuildToolsPath}\\apksigner sign --ks ${keystoreToUse} ${apkOutput}"
                             }
                         }
