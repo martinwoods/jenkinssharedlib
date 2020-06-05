@@ -109,18 +109,28 @@ def call (buildParams) {
                             // Copy the keystore files to local directory
                             fileOperations([fileRenameOperation(destination: 'test.keystore', source: TEST_KEYSTORE_FILE)])
                             fileOperations([fileRenameOperation(destination: 'prod.keystore', source: PROD_KEYSTORE_FILE)])
-                            // Choose the keystore file to use and sign the APK
-                            def keystoreToUse = (signingKeystore == 'prod') ? 'test.keystore' : 'prod.keystore'
+                            // Choose the keystore details to use and sign the APK
+                            def keystoreFile
+                            def keystorePass
+                            if (signingKeystore == 'prod'){
+                                keystoreFile = 'prod.keystore'
+                                keystorePass = PROD_KEYSTORE_PASSWORD
+                            }
+                            else{
+                                keystoreFile = 'test.keystore'
+                                keystorePass = TEST_KEYSTORE_PASSWORD
+                            }
                             def androidBuildToolsPath
                             if (os == 'linux' || os == 'macos'){
                                 // TODO: get the path for apksigner, see below for Windows
-                                sh "apksigner sign --ks ${keystoreToUse} ${apkOutput}"
+                                sh "apksigner sign --ks ${keystoreFile} --ks-pass ${keystorePass} ${apkOutput}"
                             }
                             else if (os == 'windows'){
                                 // Get the path for the latest installed version of Build-Tools, then sign using apkSigner
                                 // Could also be extracted from the output of 'sdkmanager --list'
                                 androidBuildToolsPath = powershell(returnStdout: true, script: '(Get-ChildItem -Path $env:ANDROID_HOME -Directory -Filter "build-tools\\*" | Sort-Object Name -Descending | Select-Object FullName -First 1).FullName')
-                                bat "${androidBuildToolsPath}\\apksigner sign --ks ${keystoreToUse} ${apkOutput}"
+                                def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
+                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass ${keystorePass} ${apkOutput}"
                             }
                         }
                         // Create an artficats folder and copy the signed APK inside
