@@ -131,10 +131,8 @@ def call (buildParams) {
                                 androidBuildToolsPath = powershell(returnStdout: true, script: '(Get-ChildItem -Path $env:ANDROID_HOME -Directory -Filter "build-tools\\*" | Sort-Object Name -Descending | Select-Object FullName -First 1).FullName')
                                 androidBuildToolsPath = androidBuildToolsPath.trim()
                                 def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
-                                echo "apkSigner: --${apkSignerPath}--"
-                                def batCommand = "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass ${keystorePass} ${apkOutput}"
-                                echo "batCommand: --${batCommand}--"
-                                bat batCommand
+                                bat "${keystorePass} > vp.txt"
+                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass ${keystorePass} ${apkOutput}"
                             }
                         }
                         // Create an artficats folder and copy the signed APK inside
