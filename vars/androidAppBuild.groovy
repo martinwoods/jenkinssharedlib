@@ -129,6 +129,7 @@ def call (buildParams) {
                                 // Get the path for the latest installed version of Build-Tools, then sign using apkSigner
                                 // Could also be extracted from the output of 'sdkmanager --list'
                                 androidBuildToolsPath = powershell(returnStdout: true, script: '(Get-ChildItem -Path $env:ANDROID_HOME -Directory -Filter "build-tools\\*" | Sort-Object Name -Descending | Select-Object FullName -First 1).FullName')
+                                androidBuildToolsPath = androidBuildToolsPath.trim()
                                 def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
                                 echo "apkSigner: --${apkSignerPath}--"
                                 def batCommand = "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass ${keystorePass} ${apkOutput}"
