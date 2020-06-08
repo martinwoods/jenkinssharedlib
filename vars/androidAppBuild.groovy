@@ -17,10 +17,11 @@ def call (buildParams) {
     def sonarProjectName
     def apkFiles
     def packageString
-    def networkPublishRoot = "\\\\rimdub-fs-03\\Builds\\Vector_Systems\\" 
+    def networkPublishRoot = "\\\\rimdub-fs-03\\Builds\\Vector_Systems" 
     def sandbox = ''
     def safeBranchName
-    def networkPublishPath = appName
+    def networkPublishPath
+    def packageZip
 
     if (deployToOctopusSandbox){
 		sandbox = '-sandbox'
@@ -143,15 +144,17 @@ def call (buildParams) {
                                 bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --key-pass pass:${keyPass} --out artifacts\\${appName}.${packageString}.apk ${apkOutput}"
                             }
                         }
+                        packageZip = "artifacts/${appName}.${packageString}.zip"
+
                         safeBranchName = "$env.BRANCH_NAME".replaceAll(S3SafeKeyRegex, "-")
-                        // package into a zip file
-                        zip archive: false, dir: 'artifacts/', glob: '', zipFile: "artifacts/${appName}.${packageString}.zip"
-                        // Make a copy of the artifacts on the network drive for QA Automation
+                        // Make a copy of the APK on the network drive for QA Automation
                         pathBranch="$env.BRANCH_NAME".replace("/", "\\")
-                        networkPublishPath = networkPublishRoot + "\\${pathBranch}\\${versionInfo.MajorMinorPatch}.${versionInfo.ShortSha}"
+                        networkPublishPath = networkPublishRoot + "\\${appName}\\${pathBranch}\\${versionInfo.MajorMinorPatch}.${versionInfo.ShortSha}"
                         fileOperations([fileCopyOperation(excludes: '', flattenFiles: true, includes: 'artifacts/', targetLocation: networkPublishPath)])
                         // Output network path at the end so that it's easy to see in jenkins console output
                         echo "### INFO: Copied artifact to network path ${networkPublishPath}"
+                        // package into a zip file
+                        zip archive: false, dir: 'artifacts/', glob: '', zipFile: packageZip
 					}
                 }
             }
