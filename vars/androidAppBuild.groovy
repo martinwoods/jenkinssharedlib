@@ -131,7 +131,7 @@ def call (buildParams) {
                                 androidBuildToolsPath = powershell(returnStdout: true, script: '(Get-ChildItem -Path $env:ANDROID_HOME -Directory -Filter "build-tools\\*" | Sort-Object Name -Descending | Select-Object FullName -First 1).FullName')
                                 androidBuildToolsPath = androidBuildToolsPath.trim()
                                 def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
-                                bat "${keystorePass} > vp.txt"
+                                bat "\"${keystorePass}\" > vp.txt"
                                 bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass ${keystorePass} ${apkOutput}"
                             }
                         }
