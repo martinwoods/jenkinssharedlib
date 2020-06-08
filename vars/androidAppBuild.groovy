@@ -110,7 +110,6 @@ def call (buildParams) {
                         // Prepare filename
                         def S3SafeKeyRegex="[^0-9a-zA-Z\\!\\-_\\.\\*'\\(\\)]+" // based on https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-key-guidelines-safe-characters
                         packageString = "${versionInfo.SafeInformationalVersion}".replaceAll(S3SafeKeyRegex, "-")
-                        def zipName = "${appName}.${packageString}.zip"
                         // Sign build
                         withCredentials([string(credentialsId: 'android-production-key-password', variable: 'PROD_KEY_PASSWORD'), string(credentialsId: 'android-production-keystore-password', variable: 'PROD_KEYSTORE_PASSWORD'), file(credentialsId: 'android-production-keystore', variable: 'PROD_KEYSTORE_FILE'), file(credentialsId: 'android-test-keystore', variable: 'TEST_KEYSTORE_FILE'), string(credentialsId: 'android-test-key-password', variable: 'TEST_KEY_PASSWORD'), string(credentialsId: 'android-test-keystore-password', variable: 'TEST_KEYSTORE_PASSWORD')]) {
                             // Copy the keystore files to local directory
@@ -120,12 +119,12 @@ def call (buildParams) {
                             def keystoreFile
                             def keystorePass
                             if (signingKeystore == 'prod'){
-                                keystoreFile = 'prod.keystore'
+                                keystoreFile = 'prod.jks'
                                 keystorePass = PROD_KEYSTORE_PASSWORD
                                 keyPass = PROD_KEY_PASSWORD
                             }
                             else{
-                                keystoreFile = 'test.keystore'
+                                keystoreFile = 'test.jks'
                                 keystorePass = TEST_KEYSTORE_PASSWORD
                                 keyPass = TEST_KEY_PASSWORD
                             }
@@ -141,12 +140,12 @@ def call (buildParams) {
                                 androidBuildToolsPath = androidBuildToolsPath.trim()
                                 def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
                                 // Sign the APK
-                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --key-pass pass:${keyPass} --out artifacts\\${zipName} ${apkOutput}"
+                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --key-pass pass:${keyPass} --out artifacts\\${appName}.${packageString}.apk ${apkOutput}"
                             }
                         }
                         safeBranchName = "$env.BRANCH_NAME".replaceAll(S3SafeKeyRegex, "-")
                         // package into a zip file
-                        zip archive: false, dir: 'artifacts/', glob: '', zipFile: "artifacts/${zipName}"
+                        zip archive: false, dir: 'artifacts/', glob: '', zipFile: "artifacts/${appName}.${packageString}.zip"
                         // Make a copy of the artifacts on the network drive for QA Automation
                         pathBranch="$env.BRANCH_NAME".replace("/", "\\")
                         networkPublishPath = networkPublishRoot + "\\${pathBranch}\\${versionInfo.MajorMinorPatch}.${versionInfo.ShortSha}"
