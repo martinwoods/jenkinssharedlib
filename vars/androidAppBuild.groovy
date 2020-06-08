@@ -105,6 +105,13 @@ def call (buildParams) {
             stage('Sign and package'){
                 steps{
                     script {
+                        // Create the artifacts folder
+                        fileOperations([folderCreateOperation('artifacts')])
+                        // Prepare filename
+                        def S3SafeKeyRegex="[^0-9a-zA-Z\\!\\-_\\.\\*'\\(\\)]+" // based on https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-key-guidelines-safe-characters
+                        packageString = "${versionInfo.SafeInformationalVersion}".replaceAll(S3SafeKeyRegex, "-")
+                        def zipName = "${appName}.${packageString}.zip"
+                        // Sign build
                         withCredentials([string(credentialsId: 'android-production-key-password', variable: 'PROD_KEY_PASSWORD'), string(credentialsId: 'android-production-keystore-password', variable: 'PROD_KEYSTORE_PASSWORD'), file(credentialsId: 'android-production-keystore', variable: 'PROD_KEYSTORE_FILE'), file(credentialsId: 'android-test-keystore', variable: 'TEST_KEYSTORE_FILE'), string(credentialsId: 'android-test-key-password', variable: 'TEST_KEY_PASSWORD'), string(credentialsId: 'android-test-keystore-password', variable: 'TEST_KEYSTORE_PASSWORD')]) {
                             // Copy the keystore files to local directory
                             fileOperations([fileRenameOperation(destination: 'test.keystore', source: TEST_KEYSTORE_FILE)])
@@ -131,20 +138,13 @@ def call (buildParams) {
                                 androidBuildToolsPath = powershell(returnStdout: true, script: '(Get-ChildItem -Path $env:ANDROID_HOME -Directory -Filter "build-tools\\*" | Sort-Object Name -Descending | Select-Object FullName -First 1).FullName')
                                 androidBuildToolsPath = androidBuildToolsPath.trim()
                                 def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
-                                bat "\"${keystorePass}\" > vp.txt"
-                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass ${keystorePass} ${apkOutput}"
+                                // Sign the APK
+                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --out artifacts\\${zipName} ${apkOutput}"
                             }
                         }
-                        // Create an artficats folder and copy the signed APK inside
-                        fileOperations([folderCreateOperation('artifacts')])
-                        fileOperations([fileCopyOperation(excludes: '', flattenFiles: true, includes: apkOutput, targetLocation: 'artifacts/')])
-                        // Prepare the filename for zipping and uploading to Octopus
-                        def S3SafeKeyRegex="[^0-9a-zA-Z\\!\\-_\\.\\*'\\(\\)]+" // based on https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-key-guidelines-safe-characters
-                        packageString = "${versionInfo.SafeInformationalVersion}".replaceAll(S3SafeKeyRegex, "-")
-                        packageZip = "artifacts/${appName}.${packageString}.zip"
                         safeBranchName = "$env.BRANCH_NAME".replaceAll(S3SafeKeyRegex, "-")
                         // package into a zip file
-                        zip archive: false, dir: 'artifacts/', glob: '', zipFile: packageZip
+                        zip archive: false, dir: 'artifacts/', glob: '', zipFile: "artifacts/${zipName}"
                         // Make a copy of the artifacts on the network drive for QA Automation
                         pathBranch="$env.BRANCH_NAME".replace("/", "\\")
                         networkPublishPath = networkPublishRoot + "\\${pathBranch}\\${versionInfo.MajorMinorPatch}.${versionInfo.ShortSha}"
