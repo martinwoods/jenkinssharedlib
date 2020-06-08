@@ -141,7 +141,7 @@ def call (buildParams) {
                                 androidBuildToolsPath = androidBuildToolsPath.trim()
                                 def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
                                 // Sign the APK
-                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --key-pass pass:${keyPass} --out artifacts\\${appName}.${packageString}.apk ${apkOutput}"
+                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --key-pass pass:${keyPass} --out artifacts\\${appName}.apk ${apkOutput}"
                             }
                         }
                         packageZip = "artifacts/${appName}.${packageString}.zip"
@@ -164,7 +164,7 @@ def call (buildParams) {
             stage ('Deploy to Octopus') {
                 steps {
                     script {
-                        octopusHelper.pushPackage("${env.JENKINS_URL}", packageZip)
+                        octopusHelper.pushPackage("${env.JENKINS_URL}${sandbox}", packageZip)
 
                         // Create a release and deploy it to test, octopus sends the slack message to the user
                         octopusHelper.createRelease("${env.JENKINS_URL}${sandbox}", appName, packageString)
