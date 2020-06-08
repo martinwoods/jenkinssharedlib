@@ -122,10 +122,12 @@ def call (buildParams) {
                             if (signingKeystore == 'prod'){
                                 keystoreFile = 'prod.keystore'
                                 keystorePass = PROD_KEYSTORE_PASSWORD
+                                keyPass = PROD_KEY_PASSWORD
                             }
                             else{
                                 keystoreFile = 'test.keystore'
                                 keystorePass = TEST_KEYSTORE_PASSWORD
+                                keyPass = TEST_KEY_PASSWORD
                             }
                             def androidBuildToolsPath
                             if (os == 'linux' || os == 'macos'){
@@ -139,7 +141,7 @@ def call (buildParams) {
                                 androidBuildToolsPath = androidBuildToolsPath.trim()
                                 def apkSignerPath = "${androidBuildToolsPath}\\apksigner.bat"
                                 // Sign the APK
-                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --out artifacts\\${zipName} ${apkOutput}"
+                                bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --key-pass pass:${keyPass} --out artifacts\\${zipName} ${apkOutput}"
                             }
                         }
                         safeBranchName = "$env.BRANCH_NAME".replaceAll(S3SafeKeyRegex, "-")
