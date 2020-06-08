@@ -113,8 +113,8 @@ def call (buildParams) {
                         // Sign build
                         withCredentials([string(credentialsId: 'android-production-key-password', variable: 'PROD_KEY_PASSWORD'), string(credentialsId: 'android-production-keystore-password', variable: 'PROD_KEYSTORE_PASSWORD'), file(credentialsId: 'android-production-keystore', variable: 'PROD_KEYSTORE_FILE'), file(credentialsId: 'android-test-keystore', variable: 'TEST_KEYSTORE_FILE'), string(credentialsId: 'android-test-key-password', variable: 'TEST_KEY_PASSWORD'), string(credentialsId: 'android-test-keystore-password', variable: 'TEST_KEYSTORE_PASSWORD')]) {
                             // Copy the keystore files to local directory
-                            fileOperations([fileRenameOperation(destination: 'test.keystore', source: TEST_KEYSTORE_FILE)])
-                            fileOperations([fileRenameOperation(destination: 'prod.keystore', source: PROD_KEYSTORE_FILE)])
+                            fileOperations([fileRenameOperation(destination: 'test.jks', source: TEST_KEYSTORE_FILE)])
+                            fileOperations([fileRenameOperation(destination: 'prod.jks', source: PROD_KEYSTORE_FILE)])
                             // Choose the keystore details to use and sign the APK
                             def keystoreFile
                             def keystorePass
