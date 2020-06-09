@@ -6,6 +6,15 @@ def call (buildParams) {
     def sonarProjectKeyOverwrite = buildParams.sonarProjectKeyOverwrite
     def sonarProjectNameOverwrite = buildParams.sonarProjectNameOverwrite
 
+	/*
+	Available parameters to be passed from the app Jenkinsfile
+
+	appName - string, used as the project name for pushing a package to Octopus
+	deployToOctopusSandbox - string (use true, 1 or y), controls targeting the Octopus Sandbox server for pushing packages
+    signingKeystore - string - use "test" or "prod" to select the appropriate keystore
+	sonarProjectKeyOverwrite - string, only use if you need to override the default value (the Bitbucket repo name)
+	sonarProjectNameOverwrite - string, only use if you need to override the default value (the Bitbucket repo name)
+	*/
 
     def buildHelper = new com.retailinmotion.buildHelper()
     def octopusHelper = new com.retailinmotion.OctopusHelper()
@@ -17,7 +26,6 @@ def call (buildParams) {
     def sonarProjectName
     def apkFiles
     def packageString
-    def networkPublishRoot = "\\\\rimdub-fs-03\\Builds\\Vector_Systems" 
     def sandbox = ''
     def safeBranchName
     def networkPublishPath
@@ -111,6 +119,8 @@ def call (buildParams) {
                         // Prepare filename
                         def S3SafeKeyRegex="[^0-9a-zA-Z\\!\\-_\\.\\*'\\(\\)]+" // based on https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-key-guidelines-safe-characters
                         packageString = "${versionInfo.SafeInformationalVersion}".replaceAll(S3SafeKeyRegex, "-")
+                        safeBranchName = "$env.BRANCH_NAME".replaceAll(S3SafeKeyRegex, "-")
+                        packageZip = "artifacts/${appName}.${packageString}.zip"
                         // Sign build
                         withCredentials([string(credentialsId: 'android-production-key-password', variable: 'PROD_KEY_PASSWORD'), string(credentialsId: 'android-production-keystore-password', variable: 'PROD_KEYSTORE_PASSWORD'), file(credentialsId: 'android-production-keystore', variable: 'PROD_KEYSTORE_FILE'), file(credentialsId: 'android-test-keystore', variable: 'TEST_KEYSTORE_FILE'), string(credentialsId: 'android-test-key-password', variable: 'TEST_KEY_PASSWORD'), string(credentialsId: 'android-test-keystore-password', variable: 'TEST_KEYSTORE_PASSWORD')]) {
                             // Copy the keystore files to local directory
@@ -144,15 +154,7 @@ def call (buildParams) {
                                 bat "${apkSignerPath} sign --ks ${keystoreFile} --ks-pass pass:${keystorePass} --key-pass pass:${keyPass} --out artifacts\\${appName}.apk ${apkOutput}"
                             }
                         }
-                        packageZip = "artifacts/${appName}.${packageString}.zip"
 
-                        safeBranchName = "$env.BRANCH_NAME".replaceAll(S3SafeKeyRegex, "-")
-                        // Make a copy of the APK on the network drive for QA Automation
-                        pathBranch="$env.BRANCH_NAME".replace("/", "\\")
-                        networkPublishPath = networkPublishRoot + "\\${appName}\\${pathBranch}\\${versionInfo.MajorMinorPatch}.${versionInfo.ShortSha}"
-                        fileOperations([fileCopyOperation(excludes: '', flattenFiles: true, includes: 'artifacts/', targetLocation: networkPublishPath)])
-                        // Output network path at the end so that it's easy to see in jenkins console output
-                        echo "### INFO: Copied artifact to network path ${networkPublishPath}"
                         // package into a zip file
                         zip archive: false, dir: 'artifacts/', glob: '', zipFile: packageZip
 					}
