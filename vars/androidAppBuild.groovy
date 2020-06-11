@@ -24,7 +24,7 @@ def call (buildParams) {
     def originalBranchName
     def sonarProjectKey
     def sonarProjectName
-    def apkFiles
+    def apkOutput
     def packageString
     def sandbox = ''
     def safeBranchName
@@ -129,6 +129,7 @@ def call (buildParams) {
                             // Choose the keystore details to use and sign the APK
                             def keystoreFile
                             def keystorePass
+                            def keyPass
                             if (signingKeystore == 'prod'){
                                 keystoreFile = 'prod.jks'
                                 keystorePass = PROD_KEYSTORE_PASSWORD
