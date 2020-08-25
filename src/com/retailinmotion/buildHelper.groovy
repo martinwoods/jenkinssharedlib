@@ -253,7 +253,7 @@ def fetchHelmChart(helmRepo, chartName, targetDir, newChartName, valuesFile, doc
 	echo "Fetching $chartName from $helmRepo"
 	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e targetDir=\"$targetDir\" -e chartName=\"$chartName\" -e newChartName=\"$newChartName\" -e valuesFile=\"$valuesFile\"" ) { 
 		sh '''
-			helm repo add nexus $helmRepo
+			helm repo add nexus $HELMREPO
 			helm fetch nexus/$chartName --untar --untardir $targetDir
 			mv $targetDir/$chartName $targetDir/$newChartName
 			sed -i s/name: $chartName/name: $newChartName/ig "$targetDir/$newChartName/Chart.yaml"
