@@ -257,6 +257,7 @@ def fetchHelmChart(helmRepo, chartName, targetDir, newChartName, valuesFile, doc
 			helm fetch nexus/$chartName --untar --untardir $targetDir
 			mv $targetDir/$chartName $targetDir/$newChartName
 			sed -i 's/name: $chartName/name: $newChartName/ig' "$targetDir/$newChartName/Chart.yaml"
+			cat $targetDir/$newChartName/Chart.yaml
 			cp $valuesFile "$targetDir/$newChartName/values.yaml"
 		'''		
 	}
