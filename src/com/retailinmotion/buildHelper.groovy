@@ -237,6 +237,33 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
 }
 
 /*
+*	Name: 		fetchHelmChart
+*	Purpose: 	Uses helm builder docker image to fetch a given helm chart locally and rename it with the given name
+*	
+*	Parameters:
+				helmRepo		- URL for target helm repository
+				chartName		- Name of chart to fetch
+				targetDir		- Where to output downloaded chart content
+				newChartName	- New name of chart - used to rename it
+				valueFile		- Path of values file to copy in the newly fetched package
+				dockerContext	- docker variable from jenkins pipeline
+				helmImage		- Name of docker image to use containing helm and kubectl executables
+*/
+def fetchHelmChart(helmRepo, chartName, targetDir, newChartName, valuesFile, dockerContext, helmImage){
+	echo "Fetching $chartName from $helmRepo"
+	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e targetDir=\"$targetDir\" -e chartName=\"$chartName\" -e newChartName=\"$newChartName\" -e valuesFile=\"$valuesFile\"" ) { 
+		sh '''
+			helm repo add nexus $HELMREPO
+			helm fetch nexus/$chartName --untar --untardir $targetDir
+			mv $targetDir/$chartName $targetDir/$newChartName
+			sed -i "s/name: $chartName/name: $newChartName/ig" "$targetDir/$newChartName/Chart.yaml"
+			cat $targetDir/$newChartName/Chart.yaml
+			cp $valuesFile "$targetDir/$newChartName/values.yaml"
+		'''		
+	}
+}
+
+/*
 *	Name: 		pushHelmCharts
 *	Purpose:	Update helm repository with new charts in the specified directory
 *	
