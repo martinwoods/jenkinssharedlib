@@ -324,13 +324,17 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 
 
 /*
-* Create an octopus release, reading the package versions from the packages found in the given folder
+* Create an octopus release, feeding required packages from the given folder
+* The version is forced by default with the --packageversion switch, but can be overwritten
+* To overwrite the default version, call individual packages in the $extraArgs in this format:
+* --package=StepName:Version (more info on https://octopus.com/docs/octopus-rest-api/octopus-cli/create-release)
+* Forcing the version is to prevent releases being created with other packages (see DEVOPS-738)
 */
 def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder, extraArgs = "", space="Default"){
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {		
-		def commandOptions="--create-release --ignoreexisting --project \"$project\" --packagesFolder \"$packagesFolder\" --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" "
+		def commandOptions="--create-release --ignoreexisting --project \"$project\" --packagesFolder \"$packagesFolder\" --packageversion $releaseVersion --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" "
 		return execOcto(octopusServer, commandOptions)
 	}
 }
