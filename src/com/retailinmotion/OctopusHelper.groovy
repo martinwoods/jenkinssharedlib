@@ -4,6 +4,7 @@ package com.retailinmotion;
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import groovy.json.JsonSlurperClassic
+import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 import java.io.File
 import java.io.FileWriter
@@ -104,6 +105,36 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 		def commandOptions="list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
+}
+
+/*
+*	List the release versions for a given project
+*/
+
+def listReleases (jenkinsURL, project, space="Default"){	
+	def octopusServer=getServer(jenkinsURL)
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
+		def commandOptions="list-releases --project=\"${project}\" --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" --outputFormat=Json"
+		return execOcto(octopusServer, commandOptions)
+	}
+}
+
+/*
+*	Get the latest release version for a given project
+*/
+
+def getLatestReleaseVersion(jenkinsURL, project) {
+    def listReleasesJson = listReleases (jenkinsURL, project)
+	// remove text pre-json
+    listReleasesJson = listReleasesJson.toString().substring(listReleasesJson.indexOf('[')).trim()
+    def jsonSlurperObject = new JsonSlurper().parseText(listReleasesJson)      
+    def listVersions = jsonSlurperObject.Releases.Version[0]
+    def latestReleaseVersion = listVersions[0]
+    if (latestReleaseVersion == null)
+    {
+        return null
+    }
+    return latestReleaseVersion
 }
 
 // Get Commit Ids and Comments from Current Build Change Log
