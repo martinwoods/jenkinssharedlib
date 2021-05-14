@@ -108,33 +108,32 @@ def listDeployments (jenkinsURL, tenant, environment, space="Default"){
 }
 
 /*
-*	List the release versions for a given project
+*	Get the latest release version for a given project slug
 */
 
-def listReleases (jenkinsURL, project, space="Default"){	
-	def octopusServer=getServer(jenkinsURL)
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions="list-releases --project=\"${project}\" --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" --outputFormat=Json"
-		return execOcto(octopusServer, commandOptions)
+def getLatestReleaseVersion(jenkinsURL, slugName, space="Default") {
+    def octopusServer=getServer(jenkinsURL)
+	def os=checkOs()
+	if (os == "windows") {
+		withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+			def latestReleaseVersion = powershell(returnStdout: true, script: """
+        	\$header = @{ "X-Octopus-ApiKey" = \"${APIKey}\" }
+    		try {
+        		\$releasesUri = "${octopusServer.url}/api/projects/" + (Invoke-RestMethod -Method Get -Uri '${octopusServer.url}/api/projects/${slugName}' -Headers \$header).Id + "/releases"
+        		return (Invoke-RestMethod -Method Get -Uri \$releasesUri -Headers \$header).Items[0].Version
+    		}
+    		catch {
+        		Write-Error \$_.Exception.Message
+    		}
+			return \$null
+        	""")
+			return latestReleaseVersion
+		}
 	}
-}
-
-/*
-*	Get the latest release version for a given project
-*/
-
-def getLatestReleaseVersion(jenkinsURL, project) {
-    def listReleasesJson = listReleases (jenkinsURL, project)
-	// remove text pre-json
-    listReleasesJson = listReleasesJson.toString().substring(listReleasesJson.indexOf('[')).trim()
-    def jsonSlurperObject = new JsonSlurper().parseText(listReleasesJson)      
-    def listVersions = jsonSlurperObject.Releases.Version[0]
-    def latestReleaseVersion = listVersions[0]
-    if (latestReleaseVersion == null)
-    {
-        return null
-    }
-    return latestReleaseVersion
+    else {
+		println "Can only execute Powershell script on Windows. Exiting."
+		exit 1
+	}
 }
 
 // Get Commit Ids and Comments from Current Build Change Log
