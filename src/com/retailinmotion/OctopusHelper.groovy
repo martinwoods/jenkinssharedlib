@@ -127,7 +127,7 @@ def getLatestReleaseVersion(jenkinsURL, slugName, space="Default") {
     		}
 			return \$null
         	""")
-			return latestReleaseVersion
+			return latestReleaseVersion.trim()
 		}
 	}
     else {
