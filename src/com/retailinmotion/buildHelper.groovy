@@ -151,6 +151,9 @@ def parseGitVersionInfo(output, changeBranch=null){
 	// Replace the long git hash with the short version, and if the build metadata portion repeats the prereleaselabel, remove it
 	def gitHashes=getGitHashes()
 	def preReleaseLabel=json.PreReleaseLabel
+	if (gitHashes.short =~ /^0\d+$/){
+		error("The short SHA for this git commit has a leading zero followed only by digits (${gitHashes.short}) - this will error later when pushing to Octopus due to failing the semver check. \nTo fix this, do another commit so that the SHA changes. More details under DEVOPS-452")
+	}
 	json.InformationalVersion=json.InformationalVersion.replace(gitHashes.full, gitHashes.short).replaceAll("_", "-").replace("/${preReleaseLabel}", "")
 	
 	// If the full branch name is too long, it can cause issues when octopus unpacks the archive due to path length restrictions in windows
