@@ -867,7 +867,7 @@ def uploadFileToNexus(filePath, contentType, nexusUrl, nexusUsername, nexusPassw
 */
 def runTfsec(pathToScan, dockerImage, tfsecArgs = "--soft-fail --no-colour"){
 	tfsecArgs = tfsecArgs.trim()
-	if (tfsecArgs != null and tfsecArgs != ""){
+	if (tfsecArgs != null && tfsecArgs != ""){
 		tfsecArgs = " " + tfsecArgs.trim()
 	}
 	def tfsecOut = sh(returnStdout: true, script: "docker run --rm -v ${pathToScan}:/src -w /src ${dockerImage} .${tfsecArgs}").trim()
