@@ -854,3 +854,28 @@ def uploadFileToNexus(filePath, contentType, nexusUrl, nexusUsername, nexusPassw
 		echo "Nexus upload successful"
 	}
 }
+
+/*
+* Scan a Terraform repo with TFSec
+* Output handling assumes the default human readable output with --no-colour
+* If --soft-fail is not specified, finding any vulnerabilities will result in an immediate build fail
+* Built using TFSec docker image version 0.58.6
+* Parameters:
+* 		pathToScan - String containing the path to the Terraform repo you want to scan (most likely env.WORKSPACE)
+*		dockerImage - String containing full repo path and version for the docker image (eg ${dockerPullRim}/tfsec/tfsec:latest)
+*		tfsecArgs - String containing additional space-separated TFSec arguments to pass
+*/
+def runTfsec(pathToScan, dockerImage, tfsecArgs = "--soft-fail --no-colour"){
+	tfsecArgs = tfsecArgs.trim()
+	if (tfsecArgs != null && tfsecArgs != ""){
+		tfsecArgs = " " + tfsecArgs.trim()
+	}
+	def tfsecOut = sh(returnStdout: true, script: "docker run --rm -v ${pathToScan}:/src -w /src ${dockerImage} .${tfsecArgs}").trim()
+	echo "---- TFSec results ----"
+	echo tfsecOut
+	def tfsecIssues = tfsecOut.substring(tfsecOut.lastIndexOf("\n")).trim()
+	if (tfsecIssues.indexOf("No problems detected!") == -1){
+		tfsecIssues = tfsecIssues.replace(" potential problems detected.","").trim()
+		error("Tfsec detected ${tfsecIssues} vulnerabilities - check the above output and fix them!")
+	}
+}
