@@ -319,11 +319,11 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Defau
 /*
 * Deploy an existing release
 */
-def deployExisting(jenkinsURL, project, releaseVersion, deployTo, extraArgs, space="Default"){
+def deployExisting(jenkinsURL, project, releaseVersion, deployTo, extraArgs, space="Default", timeout="00:20:00" ){
 
 	def octopusServer=getServer(jenkinsURL)
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions=" --deploy-release --deploymenttimeout=\"00:20:00\" --progress --project \"$project\" --version $releaseVersion --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
+		def commandOptions=" --deploy-release --deploymenttimeout=\"$timeout\" --progress --project \"$project\" --version $releaseVersion --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		
 		return execOcto(octopusServer, commandOptions)
 	}
