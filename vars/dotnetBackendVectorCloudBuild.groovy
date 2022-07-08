@@ -102,13 +102,7 @@ def call (buildParams) {
 						bat "dir"
 						
 						bat "dotnet restore -s ${$nugetSource}"
-						bat """
-							dotnet publish src/${projectName}/${projectName}.csproj --no-restore --self-contained \
-							-c Release \ 
-							-r win-x64 \
-							-p:PublishProfile=FolderProfile \
-							-p:PublishDir=../../codebase"
-						"""
+						bat "dotnet publish src/${projectName}/${projectName}.csproj --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase"
 
 						bat "dir"
 					}
