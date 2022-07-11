@@ -19,13 +19,14 @@ def call (buildParams) {
 	def slackTokenId = buildParams.slackTokenId
 	def shouldCleanWorkspace = buildParams.shouldCleanWorkspace != null ? buildParams.shouldCleanWorkspace.toString().toBoolean() : true
 	def deployToOctopusSandbox = buildParams.deployToOctopusSandbox.toString().toBoolean()
+	def enableValidation = buildParams.enableValidation.toString().toBoolean()
 
 	def buildHelper = new com.retailinmotion.buildHelper()
 	def octopusHelper = new com.retailinmotion.OctopusHelper()
 
 	def branchName = "$env.BRANCH_NAME" // Branch name being build (i.e. PR-01)
 	def originalBranchName = "$env.CHANGE_BRANCH" != "null" ? "$env.CHANGE_BRANCH" : "$env.BRANCH_NAME" // Original Branch where the changes were made (in the case of a PR it will be the feature branch i.e. feature\SYS-000)
-	def validationFullImageName
+	
 		
 	def nugetSource = env.NuGetPullRIM
 	def sonarUrl = env.SonarUrl
@@ -62,12 +63,17 @@ def call (buildParams) {
 			stage("Gather version info"){
 				steps {
 					script {
-						def gitHashes=buildHelper.getGitHashes()
 						def gitVersionTool=tool name: 'GitVersion', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
 						versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
+						echo "Version Info:"
+						echo versionInfo.toString()
+						
+						gitHashes=buildHelper.getGitHashes()
+						packageString=versionInfo.SafeInformationalVersion.toString().replace(gitHashes.full, gitHashes.short);
 
-						packageString = versionInfo.SafeInformationalVersion.toString().replace(gitHashes.full, gitHashes.short)
-						currentBuild.displayName = "${versionInfo.FullSemVer}"
+						currentBuild.displayName = "#${versionInfo.FullSemVer}"
+						currentBuild.description = "${versionInfo.InformationalVersion}"		
+
 						commitAuthor = buildHelper.getLastCommitAuthor()
 						commitAuthorSlack = buildHelper.getLastCommitAuthor(true).replace("@retailinmotion.com","").toLowerCase()
 					}
@@ -77,14 +83,11 @@ def call (buildParams) {
 			stage("Run unit tests and get quality metrics") {
 				when {
 					expression { 
-						return buildParams.validationImageName != '' && !(noTestsOnBranches.contains(branchName))
+						return buildParams.enableValidation != '' && !(noTestsOnBranches.contains(branchName))
 					}  
 				}
 				steps {
-					script {
-						validationFullImageName = "${validationImageName}:${versionInfo.SafeFullSemVer}"
-					}
-					
+					//when enableValidation
 					// TODO: include sonnarqube scan once the support for dotnet 6 is available 
 					// https://support.retailinmotion.com/browse/DEVOPSREQ-76
 
@@ -159,7 +162,7 @@ def call (buildParams) {
 		post {
  			failure {
 				script {
-					buildHelper.sendNotifications(currentBuild.result, slackTokenId, commitAuthor, "@${commitAuthorSlack}: ${appName} version ${versionInfo.SafeFullSemVer} build failed for branch: ${branchName}")
+					buildHelper.sendNotifications(currentBuild.result, slackTokenId, commitAuthor, "@${commitAuthorSlack}: ${appName} version ${versionInfo.FullSemVer} build failed for branch: ${branchName}")
 				}
 			}
 			success {
@@ -176,7 +179,7 @@ def call (buildParams) {
 						output.value=parsedOutput.info.status.notes
 						fields.add(output)
 						
-						buildHelper.sendNotifications(currentBuild.result, slackTokenId, commitAuthor, "${appName} version ${versionInfo.SafeFullSemVer} has been deployed for branch: ${branchName}", buildHelper.generateSlackAttachments(fields))
+						buildHelper.sendNotifications(currentBuild.result, slackTokenId, commitAuthor, "${appName} version ${versionInfo.FullSemVer} has been deployed for branch: ${branchName}", buildHelper.generateSlackAttachments(fields))
 					}
 				}
 			}
