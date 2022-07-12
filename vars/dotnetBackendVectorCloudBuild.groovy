@@ -5,6 +5,7 @@ def call (buildParams) {
 
 	appName - string, used as the project name for pushing a package to Octopus and for Slack build updates
 	projectName - string, used as the file used for building the package
+	unitTestPath - string, unit test project path 
 	enableValidation - string
 	noTestsOnBranches - list of strings, prevents running tests when the build takes place on these branches (usually master)
 	slackTokenId - string, the Jenkins credential ID for the channel token that will receive build notifications
@@ -13,6 +14,7 @@ def call (buildParams) {
 
 	def appName = buildParams.appName.toLowerCase()
 	def projectName = buildParams.projectName
+	def unitTestPath = buildParams.unitTestPath
 	def validationImageName = buildParams.validationImageName
 	def noTestsOnBranches = buildParams.noTestsOnBranches
 	def slackTokenId = buildParams.slackTokenId
@@ -96,7 +98,7 @@ def call (buildParams) {
 							bat "dotnet restore -s ${nugetSource}"
 							bat "${scannerHome}\\SonarScanner.MSBuild.exe begin /key:${appName} /version:${versionInfo.FullSemVer} /d:sonar.branch.name=\"${branchName}\""
 							bat "dotnet build --no-restore"
-							bat "dotnet test tests/Tests.Unit/Tests.Unit.csproj"
+							bat "dotnet test ${unitTestPath}"
 							bat "${scannerHome}\\SonarScanner.MSBuild.exe end"
 						}
 					}
