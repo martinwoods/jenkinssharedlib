@@ -4,7 +4,7 @@ def call (buildParams) {
 	Available parameters to be passed from the app Jenkinsfile
 
 	appName - string, used as the project name for pushing a package to Octopus and for Slack build updates
-	projectName - string, used as the file used for building the package
+	projectBuildPath - string, used as the file used for building the package
 	unitTestPath - string, unit test project path 
 	enableValidation - string
 	noTestsOnBranches - list of strings, prevents running tests when the build takes place on these branches (usually master)
@@ -13,7 +13,7 @@ def call (buildParams) {
 	*/
 
 	def appName = buildParams.appName.toLowerCase()
-	def projectName = buildParams.projectName
+	def projectBuildPath = buildParams.projectBuildPath
 	def unitTestPath = buildParams.unitTestPath
 	def validationImageName = buildParams.validationImageName
 	def noTestsOnBranches = buildParams.noTestsOnBranches
@@ -110,7 +110,7 @@ def call (buildParams) {
 					script {
 						
 						bat "dotnet restore -s ${nugetSource}"
-						bat "dotnet publish src/${projectName}/${projectName}.csproj --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase"
+						bat "dotnet publish ${projectBuildPath} --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase"
 					}
 				}
 			}
