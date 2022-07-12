@@ -71,7 +71,7 @@ def call (buildParams) {
 						gitHashes=buildHelper.getGitHashes()
 						packageString=versionInfo.SafeInformationalVersion.toString().replace(gitHashes.full, gitHashes.short);
 
-						currentBuild.displayName = "#${versionInfo.FullSemVer}"
+						currentBuild.displayName = "${versionInfo.FullSemVer}"
 						currentBuild.description = "${versionInfo.InformationalVersion}"		
 
 						commitAuthor = buildHelper.getLastCommitAuthor()
@@ -82,9 +82,16 @@ def call (buildParams) {
 
 			stage("Run unit tests and get quality metrics") {
 				when {
-					expression { 
-						return buildParams.enableValidation && !(noTestsOnBranches.contains(branchName))
-					}  
+					expression {
+						
+						if(enableValidation){
+							return true
+						}										
+
+						if(!noTestsOnBranches.contains(branchName)){
+							return false
+						}										
+					}
 				}
 				steps {
 					script {
@@ -94,7 +101,6 @@ def call (buildParams) {
 
 					withEnv(["JAVA_HOME=\"${javaTool}\""]) {
 						withSonarQubeEnv('SonarQubeServer') {
-							
 							bat "dotnet restore -s ${nugetSource}"
 							bat "${scannerHome}\\SonarScanner.MSBuild.exe begin /key:${appName} /version:${versionInfo.FullSemVer} /d:sonar.branch.name=\"${branchName}\""
 							bat "dotnet build --no-restore"
