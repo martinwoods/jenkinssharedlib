@@ -117,7 +117,7 @@ def call (buildParams) {
                 steps {
                     script {
 
-						vectorCloudZip="artifacts\\vector-cloud-migration.${packageString}.zip"
+						vectorCloudZip="artifacts\\${appName}.${packageString}.zip"
                     }
 					zip archive: false, dir: "codebase\\" , glob: '', zipFile: vectorCloudZip
                 }
