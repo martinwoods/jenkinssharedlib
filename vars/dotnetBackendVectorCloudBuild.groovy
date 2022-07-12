@@ -5,15 +5,14 @@ def call (buildParams) {
 
 	appName - string, used as the project name for pushing a package to Octopus and for Slack build updates
 	projectName - string, used as the file used for building the package
-
-	validationImageName - string
+	enableValidation - string
 	noTestsOnBranches - list of strings, prevents running tests when the build takes place on these branches (usually master)
 	slackTokenId - string, the Jenkins credential ID for the channel token that will receive build notifications
 	shouldCleanWorkspace - string (use true, 1 or y). Set to false if build artifacts need to be retained in Jenkins.
 	*/
 
 	def appName = buildParams.appName.toLowerCase()
-	def projectName = buildParams.projecyName
+	def projectName = buildParams.projectName
 	def validationImageName = buildParams.validationImageName
 	def noTestsOnBranches = buildParams.noTestsOnBranches
 	def slackTokenId = buildParams.slackTokenId
@@ -27,7 +26,6 @@ def call (buildParams) {
 	def branchName = "$env.BRANCH_NAME" // Branch name being build (i.e. PR-01)
 	def originalBranchName = "$env.CHANGE_BRANCH" != "null" ? "$env.CHANGE_BRANCH" : "$env.BRANCH_NAME" // Original Branch where the changes were made (in the case of a PR it will be the feature branch i.e. feature\SYS-000)
 	
-		
 	def nugetSource = env.NuGetPullRIM
 	def sonarUrl = env.SonarUrl
 	def reportPortalUrl = env.ReportPortalUrl
@@ -64,7 +62,7 @@ def call (buildParams) {
 				steps {
 					script {
 						def gitVersionTool=tool name: 'GitVersion', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-						versionInfo=buildHelper.getGitVersionInfo(gitVersionTool)
+						versionInfo=buildHelper.getGitVersionInfo(gitVersionTool, null, null, env.CHANGE_BRANCH)
 						echo "Version Info:"
 						echo versionInfo.toString()
 						
@@ -83,31 +81,34 @@ def call (buildParams) {
 			stage("Run unit tests and get quality metrics") {
 				when {
 					expression { 
-						return buildParams.enableValidation != '' && !(noTestsOnBranches.contains(branchName))
+						return buildParams.enableValidation && !(noTestsOnBranches.contains(branchName))
 					}  
 				}
 				steps {
-					//when enableValidation
-					// TODO: include sonnarqube scan once the support for dotnet 6 is available 
-					// https://support.retailinmotion.com/browse/DEVOPSREQ-76
+					script {
+						scannerHome = tool 'SonarScannerMSBuild'
+						javaTool =  tool 'JDK8'
+					}
 
-					bat """
-						dotnet restore -s ${nugetSource} \
-						RUN dotnet build --no-restore \
-						dotnet test tests/Tests.Unit/Tests.Unit.csproj 
-					"""
+					withEnv(["JAVA_HOME=\"${javaTool}\""]) {
+						withSonarQubeEnv('SonarQubeServer') {
+							
+							bat "dotnet restore -s ${nugetSource}"
+							bat "${scannerHome}\\SonarScanner.MSBuild.exe begin /key:${appName} /version:${versionInfo.FullSemVer} /d:sonar.branch.name=\"${branchName}\""
+							bat "dotnet build --no-restore"
+							bat "dotnet test tests/Tests.Unit/Tests.Unit.csproj"
+							bat "${scannerHome}\\SonarScanner.MSBuild.exe end"
+						}
+					}
 				}
 			}
+
 			stage("Build") {
-				
 				steps {
 					script {
-						bat "dir"
 						
-						bat "dotnet restore -s ${$nugetSource}"
+						bat "dotnet restore -s ${nugetSource}"
 						bat "dotnet publish src/${projectName}/${projectName}.csproj --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase"
-
-						bat "dir"
 					}
 				}
 			}
@@ -116,11 +117,22 @@ def call (buildParams) {
                 steps {
                     script {
 
-						vectorCloudZip="artifacts\\Vector.Cloud.Migration.${packageString}"
+						vectorCloudZip="artifacts\\vector-cloud-migration.${packageString}.zip"
                     }
 					zip archive: false, dir: "codebase\\" , glob: '', zipFile: vectorCloudZip
                 }
             }
+
+			stage ('Send to Octopus'){
+				steps {
+					script {
+						
+						octopusHelper.pushPackage("${env.JENKINS_URL}${sandbox}", vectorCloudZip)
+						echo "Creating releases"
+						octopusHelper.createReleaseFromFolder("${env.JENKINS_URL}${sandbox}", "${appName}", packageString, "${env.WORKSPACE}\\artifacts")
+					}
+				}
+			}
 
 			stage ('Tag build'){
 				agent { label 'linux' }
@@ -133,17 +145,6 @@ def call (buildParams) {
 							sh	"git tag -a ${versionInfo.FullSemVer} -m \"Release ${versionInfo.FullSemVer}\" "
 							sh	"git push --tags"
 						}
-					}
-				}
-			}
-
-			stage ('Send to Octopus'){	
-				steps {
-					script {
-						
-						octopusHelper.pushPackage("${env.JENKINS_URL}${sandbox}", vectorCloudZip)
-						echo "Creating releases"
-						octopusHelper.createRelease("${env.JENKINS_URL}${sandbox}", "${appName}", packageString)
 					}
 				}
 			}
@@ -162,7 +163,8 @@ def call (buildParams) {
 		post {
  			failure {
 				script {
-					buildHelper.sendNotifications(currentBuild.result, slackTokenId, commitAuthor, "@${commitAuthorSlack}: ${appName} version ${versionInfo.FullSemVer} build failed for branch: ${branchName}")
+					def message = "@${commitAuthorSlack}: ${appName} version ${versionInfo.FullSemVer} build failed for branch: ${branchName}"
+					buildHelper.sendNotifications(currentBuild.result, slackTokenId, commitAuthor, message);
 				}
 			}
 			success {
