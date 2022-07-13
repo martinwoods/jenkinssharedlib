@@ -85,6 +85,11 @@ def call (buildParams) {
 					expression {
 						
 						if(enableValidation){
+							if(unitTestPath == '')
+							{
+								error("unitTestPath cannot be empty when the validation is enabled.")
+							}
+							
 							return true
 						}										
 
