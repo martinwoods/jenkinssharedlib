@@ -11,3 +11,6 @@ Information on using Jenkins shared libraries can be found in the [Jenkins Docs]
 
 Examples on loading and using these libraries can be seen in many Jenkinsfile's used across Retail inMotion projects, e.g. Backoffice components such as [vEsb](http://bitbucket.rim.local:7990/projects/VESB/repos/vectoresb/browse/Jenkinsfile#3,36,49,56,151-154,156,168) or Microservices projects like [DutyPlan](http://bitbucket.rim.local:7990/projects/MCAB/repos/dutyplan/browse/build/Jenkinsfile#3-4,90,95,129,138,148,178)
 
+## How to Set up a migrated vector cloud API jenkins pipeline
+
+[Jenkins pipeline for migrated vector cloud Apis](https://knowledge.retailinmotion.com/display/VX/Jenkins+pipeline+for+migrated+vector+cloud+Apis)
