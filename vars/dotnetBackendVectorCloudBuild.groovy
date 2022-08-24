@@ -121,7 +121,9 @@ def call (buildParams) {
 					script {
 						
 						bat "dotnet restore -s ${nugetSource}"
-						bat "dotnet publish ${projectBuildPath} --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase"
+						bat """
+							dotnet publish ${projectBuildPath} --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase -p:EnvironmentName="#{EnvironmentName}"
+						"""
 					}
 				}
 			}
