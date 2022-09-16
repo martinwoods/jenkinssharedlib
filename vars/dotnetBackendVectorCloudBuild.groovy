@@ -15,6 +15,9 @@ def call (buildParams) {
 	def appName = buildParams.appName.toLowerCase()
 	def projectBuildPath = buildParams.projectBuildPath
 	def unitTestPath = buildParams.unitTestPath
+	def unitTestRootFolder = buildParams.unitTestRootFolder
+	def sonarExclusions = buildParams.sonarExclusions
+	def sonarCoverageExclusions = buildParams.sonarCoverageExclusions
 	def validationImageName = buildParams.validationImageName
 	def noTestsOnBranches = buildParams.noTestsOnBranches
 	def slackTokenId = buildParams.slackTokenId
@@ -101,15 +104,15 @@ def call (buildParams) {
 				steps {
 					script {
 						scannerHome = tool 'SonarScannerMSBuild'
-						javaTool =  tool 'JDK8'
+						javaTool =  tool 'JDK11'
 					}
 
 					withEnv(["JAVA_HOME=\"${javaTool}\""]) {
 						withSonarQubeEnv('SonarQubeServer') {
 							bat "dotnet restore -s ${nugetSource}"
-							bat "${scannerHome}\\SonarScanner.MSBuild.exe begin /key:${appName} /version:${versionInfo.FullSemVer} /d:sonar.branch.name=\"${branchName}\""
+							bat "${scannerHome}\\SonarScanner.MSBuild.exe begin /key:${appName} /version:${versionInfo.FullSemVer} /d:sonar.branch.name=\"${branchName}\"  /d:sonar.exclusions=\"${sonarExclusions}\" /d:sonar.coverage.exclusions=\"${sonarCoverageExclusions}\" /d:sonar.cs.opencover.reportsPaths=\"${unitTestRootFolder}/coverage.opencover.xml\" /d:sonar.cs.vstest.reportsPaths=\"${unitTestRootFolder}/TestResults/TestResults.trx\""
 							bat "dotnet build --no-restore"
-							bat "dotnet test ${unitTestPath}"
+							bat "dotnet test ${unitTestPath} /p:CollectCoverage=true /p:Exclude=\"[xunit.*]*\" /p:CoverletOutputFormat=\"opencover\" /p:CoverletOutputDirectory=\"./\" --logger \"trx;LogFileName=TestResults.trx\""
 							bat "${scannerHome}\\SonarScanner.MSBuild.exe end"
 						}
 					}
