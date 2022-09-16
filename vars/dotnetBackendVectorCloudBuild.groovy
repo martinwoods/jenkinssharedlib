@@ -155,7 +155,10 @@ def call (buildParams) {
 				steps {
 					script {
 						sshagent(['jenkins-bitbucket.rim.local']) {
-                            sh script: "git config --global user.name \"jenkins.svn\"", label: "Setting git user.name"
+							
+							checkout scm
+
+							sh script: "git config --global user.name \"jenkins.svn\"", label: "Setting git user.name"
                         	sh script: "git config --global user.email \"devops@retailinmotion.com\"", label: "Setting git user.email"
 							sh	"git tag -a ${versionInfo.FullSemVer} -m \"Release ${versionInfo.FullSemVer}\" "
 							sh	"git push --tags"
