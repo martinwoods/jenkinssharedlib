@@ -22,21 +22,21 @@ import java.io.FileWriter
 * Lookup the correct Octopus Deploy server to use for this Jenkins server
 * Parameters:
 			jenkinsURL - URL of the jenkins server, typically env.JENKINS_URL
-  Returns:
+  Returns: 
   Hashmap containing;
 			url
 			credentialsId
 			toolName
-
-*/
+			
+*/ 
 def getServer(jenkinsURL){
 	def octopus=[:]
-
+	
 	if ( jenkinsURL.contains("rimdub-jen-01") &&  jenkinsURL.contains("sandbox") ){	 // allow manual override to the 'sandbox' octopus server
 		octopus['url']="http://rim-build-05.rim.local"
 		octopus['credentialsId']="OctopusSandboxAPIKey"
 		octopus['toolName']="Octo CLI"
-	} else if ( jenkinsURL.contains("rimdub-jen-01") ){
+	} else if ( jenkinsURL.contains("rimdub-jen-01") ){	
 		octopus['url']="http://octopus.rim.local"
 		octopus['credentialsId']="OctopusRimLocalAPIKey"
 		octopus['toolName']="Octo CLI"
@@ -44,7 +44,7 @@ def getServer(jenkinsURL){
 		octopus['url']="http://rim-build-05.rim.local"
 		octopus['credentialsId']="OctopusAPIKey"
 		octopus['toolName']="Octo CLI"
-	} else if ( jenkinsURL.contains("rimdev-build-06") ){
+	} else if ( jenkinsURL.contains("rimdev-build-06") ){	
 		octopus['url']="http://octopus.rim.local"
 		octopus['credentialsId']="OctopusRimLocalAPIKey"
 		octopus['toolName']="Octo CLI"
@@ -63,7 +63,7 @@ def checkOs(){
         if (uname.startsWith("Darwin")) {
             return "macos"
         }
-        // Optionally add 'else if' for other Unix OS
+        // Optionally add 'else if' for other Unix OS  
         else {
             return "linux"
         }
@@ -99,9 +99,9 @@ def execOcto(octopusServer, commandOptions){
 */
 
 def listDeployments (jenkinsURL, tenant, environment, space="Default"){
-
+	
 	def octopusServer=getServer(jenkinsURL)
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="list-deployments --tenant=${tenant} --environment=${environment} --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
@@ -165,7 +165,7 @@ def getCommitDataMap() {
 	]
 
 	def commitList = []
-
+	
 	for (int i = 0; i < commitId.size(); i++) {
 
 		commit = [
@@ -183,7 +183,7 @@ def getCommitDataMap() {
 
 // Regex to filter packageId & packageString from packageFile name
 /*
-Example package paths that will be parsed as expected;
+Example package paths that will be parsed as expected; 
 
 terraform_eks.261.1.1-DEVOPS-73.PR-86.97-Branch.PR-86.Sha.4a8b226.zip
 artifacts/KubisiOS.0.13.0-KUBIS-538-AircraftInfoBookingGrouping.PR-273.10-Branch.PR-273.Sha.0d8a4bd.zip
@@ -224,7 +224,7 @@ def getPackageId(packageFile) {
 
 // Push job Build Information to Octopus Deploy for given package
 def buildInformation (jenkinsURL, packageFile, space="Default") {
-
+	
 	def ownerName
 	def os=checkOs()
 	if(os == "linux" || os == "macos"){
@@ -263,21 +263,21 @@ def buildInformation (jenkinsURL, packageFile, space="Default") {
 
 	// Make json pretty
 	def jsonBeauty = JsonOutput.prettyPrint(jsonStr)
-
+	
 	println jsonBeauty // ADDING TO TROUBLESHOOT ISSUE
 
 	// Create json file containing pretty json text
 	writeFile(file:'buildinfo.json', text: jsonBeauty)
-
+	
 	// get packageId and packageString from getPackageId method
 	def (packageId, packageString)  = getPackageId(packageFile)
 
-	// Constuct build-information octo command
+	// Constuct build-information octo command 
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package Build Information to ${octopusServer.url}"
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
      		def commandOptions="build-information --server=${octopusServer.url} --apiKey=${APIKey} --package-id=$packageId --version=$packageString --file=\"buildinfo.json\" --space \"$space\"  --logLevel=verbose --overwrite-mode=OverwriteExisting"
-
+    
 			println commandOptions // ADDING TO TROUBLESHOOT ISSUE
 
 	return execOcto(octopusServer, commandOptions)
@@ -285,12 +285,12 @@ def buildInformation (jenkinsURL, packageFile, space="Default") {
 }
 
 def pushPackage (jenkinsURL, packageFile, space="Default"){
-
+	
 	def octopusServer=getServer(jenkinsURL)
 	println "Pushing package $packageFile to ${octopusServer.url}"
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="push --package $packageFile --overwrite-mode=OverwriteExisting --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
-
+		
 		buildInformation(jenkinsURL, packageFile)
 
 		return execOcto(octopusServer, commandOptions)
@@ -298,11 +298,11 @@ def pushPackage (jenkinsURL, packageFile, space="Default"){
 }
 
 /*
-* Create a release and deploy it
+* Create a release and deploy it 
 */
-def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Default", packageArg = "", timeout = "00:20:00" ){
+def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Default", packageArg = "", timeout="00:20:00"){
 	def octopusServer=getServer(jenkinsURL)
-
+	
 	def optionString=""
 	if ( packageArg && packageArg != "" ){
 		optionString = " --package=\"$packageArg\""
@@ -310,7 +310,7 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Defau
 		optionString = " --packageversion \"$packageString\""
 	}
 
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions=" --create-release --ignoreexisting --waitfordeployment --deploymenttimeout=\"$timeout\" --progress --project \"$project\" $optionString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
@@ -322,9 +322,9 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Defau
 def deployExisting(jenkinsURL, project, releaseVersion, deployTo, extraArgs, space="Default", timeout="00:20:00" ){
 
 	def octopusServer=getServer(jenkinsURL)
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions=" --deploy-release --deploymenttimeout=\"$timeout\" --progress --project \"$project\" --version $releaseVersion --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
-
+		
 		return execOcto(octopusServer, commandOptions)
 	}
 }
@@ -341,12 +341,12 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 	} else {
 		optionString = " --packageversion \"$releaseVersion\""
 	}
-
+	
 	if ( channel && channel != "" ){
 		optionString += " --channel \"$channel\""
 	}
-
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+	
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
 		def commandOptions="--create-release --ignoreexisting --project \"$project\" $optionString --force --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
@@ -363,15 +363,15 @@ def createRelease(jenkinsURL, project, releaseVersion, packageArg = "", channel=
 def createReleaseFromFolder(jenkinsURL, project, releaseVersion, packagesFolder, extraArgs = "", space="Default"){
 
 	def octopusServer=getServer(jenkinsURL)
-	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {
+	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {		
 		def commandOptions="--create-release --ignoreexisting --project \"$project\" --packagesFolder \"$packagesFolder\" --packageversion $releaseVersion --version $releaseVersion $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\" "
 		return execOcto(octopusServer, commandOptions)
 	}
 }
 
 /*
-* Parse the output from a deployment to extract only relevant info
-* by removing the line wrapping adding by octo.exe
+* Parse the output from a deployment to extract only relevant info 
+* by removing the line wrapping adding by octo.exe 
 * and extracting the JSON which follows the string '### Deployment Status JSON:'
 */
 def parseDeployInfo(deployOutput){
@@ -379,7 +379,7 @@ def parseDeployInfo(deployOutput){
 	output=deployOutput.replaceAll(/\n             /, "").replaceAll(/\n/, "\\\\n")
 	Pattern urlPattern = Pattern.compile("(### Deployment Status JSON: )(\\{(.*)\\})",Pattern.CASE_INSENSITIVE);
 	Matcher matcher = urlPattern.matcher(output);
-
+	
   def data
   if(matcher.getCount() > 0){
     // Return the helm notes json object if we matched the pattern
