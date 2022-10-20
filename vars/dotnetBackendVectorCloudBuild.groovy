@@ -125,7 +125,7 @@ def call (buildParams) {
 						
 						bat "dotnet restore -s ${nugetSource}"
 						bat """
-							dotnet publish ${projectBuildPath} --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase -p:EnvironmentName="#{EnvironmentName} -p:AspNetCoreHostingModel="OutOfProcess"
+							dotnet publish ${projectBuildPath} --no-restore --self-contained -c Release -r win-x64 -p:PublishProfile=FolderProfile -p:PublishDir=../../codebase -p:EnvironmentName="#{EnvironmentName}" -p:AspNetCoreHostingModel="OutOfProcess"
 						"""
 					}
 				}
