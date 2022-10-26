@@ -300,7 +300,7 @@ def pushPackage (jenkinsURL, packageFile, space="Default"){
 /*
 * Create a release and deploy it 
 */
-def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Default", packageArg = ""){
+def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Default", packageArg = "", timeout="00:20:00"){
 	def octopusServer=getServer(jenkinsURL)
 	
 	def optionString=""
@@ -311,7 +311,7 @@ def deploy(jenkinsURL, project, packageString, deployTo, extraArgs, space="Defau
 	}
 
 	withCredentials([string(credentialsId: octopusServer.credentialsId, variable: 'APIKey')]) {			
-		def commandOptions=" --create-release --ignoreexisting --waitfordeployment --deploymenttimeout=\"00:20:00\" --progress --project \"$project\" $optionString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
+		def commandOptions=" --create-release --ignoreexisting --waitfordeployment --deploymenttimeout=\"$timeout\" --progress --project \"$project\" $optionString --version $packageString --deployTo \"$deployTo\" $extraArgs --server ${octopusServer.url} --apiKey ${APIKey} --space \"$space\""
 		return execOcto(octopusServer, commandOptions)
 	}
 }
