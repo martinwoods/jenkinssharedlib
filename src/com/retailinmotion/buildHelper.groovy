@@ -158,16 +158,25 @@ def parseGitVersionInfo(output, changeBranch=null){
 	
 	// If the full branch name is too long, it can cause issues when octopus unpacks the archive due to path length restrictions in windows
 	// If this is a branch which references a JIRA VECTWO ticket, shorten the prereleaselabel to just the ticket number without any other decoration to keep the package name short
-	if( preReleaseLabel.contains("VECTWO")) {
-		def jiraRef=(preReleaseLabel =~ /(VECTWO\-{1}[0-9]*)(.*)/)		
-		json.InformationalVersion=json.InformationalVersion.replace(preReleaseLabel, jiraRef[0][1])
+
+	// DEVOPSREQ-394 : Refactoring to include JIRA POSCON and VREC tickets
+	def issueType = ["VECTWO","POSCON","VREC"]
+	for (issueTypeItem in issueType){
+  		if (preReleaseLabel.contains(issueTypeItem)) {
+			def jiraRef=(preReleaseLabel =~ /($issueTypeItem\-{1}[0-9]*)(.*)/)
+			json.InformationalVersion=json.InformationalVersion.replace(preReleaseLabel, jiraRef[0][1])
+		}
 	}
 	
 	// and if the branchname contains a VECTWO reference with a long name, shorten it to just the ticket number in the informational version
-	if (json.BranchName.contains("VECTWO")){
-		def match=(json.BranchName =~ /(VECTWO\-{1}[0-9]*)(.*)/)
-		json.InformationalVersion=json.InformationalVersion.replaceAll(/(VECTWO\-{1}[0-9]*)([A-Za-z0-9\-\_]*)/, match[0][1])
+	// DEVOPSREQ-394 : Refactoring to include JIRA POSCON and VREC tickets
+	for (issueTypeItem in issueType){
+  		if (json.BranchName.contains(issueTypeItem)) {
+			def match=(json.BranchName =~ /($issueTypeItem\-{1}[0-9]*)(.*)/)
+			json.InformationalVersion=json.InformationalVersion.replaceAll(/($issueTypeItem\-{1}[0-9]*)([A-Za-z0-9\-\_]*)/, match[0][1])
+		}
 	}
+
 	// Keep a copy of the informational version with unsafe characters replaced
 	json.SafeInformationalVersion=json.InformationalVersion.toString().replaceAll("\\+", "-").replaceAll("/", "-").replaceAll("\\\\", "-").replaceAll("_", "-")
 	
@@ -177,9 +186,7 @@ def parseGitVersionInfo(output, changeBranch=null){
 	} else {
 		json.PackagePreRelease=json.BranchName
 	}
-	
-	
-	
+
 	return json
 }
 /*
