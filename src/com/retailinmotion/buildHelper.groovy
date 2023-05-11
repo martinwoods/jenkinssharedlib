@@ -263,7 +263,7 @@ def packageHelmChart(chartName, srcDir, targetDir, version, dockerContext, helmI
 def fetchHelmChart(helmRepo, chartName, targetDir, newChartName, valuesFile, dockerContext, helmImage, chartVersion=""){
 	echo "Fetching $chartName from $helmRepo"
 	def version=""
-	if ( chartVersion ) {
+	if ( chartVersion != "" ) {
 	  version="--version $chartVersion"
 	}
 	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e targetDir=\"$targetDir\" -e chartName=\"$chartName\" -e newChartName=\"$newChartName\" -e valuesFile=\"$valuesFile\"" ) { 
