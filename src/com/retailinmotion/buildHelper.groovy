@@ -266,7 +266,7 @@ def fetchHelmChart(helmRepo, chartName, targetDir, newChartName, valuesFile, doc
 	if ( chartVersion != "" ) {
 	  version="--version $chartVersion"
 	}
-	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e targetDir=\"$targetDir\" -e chartName=\"$chartName\" -e newChartName=\"$newChartName\" -e valuesFile=\"$valuesFile\"" ) { 
+	dockerContext.image(helmImage).inside("-e HELMREPO=$helmRepo -e targetDir=\"$targetDir\" -e chartName=\"$chartName\" -e newChartName=\"$newChartName\" -e valuesFile=\"$valuesFile\" -e version=\"$version\"" ) { 
 		sh '''
 			helm repo add nexus $HELMREPO
 			helm fetch nexus/$chartName --untar --untardir $targetDir $version
