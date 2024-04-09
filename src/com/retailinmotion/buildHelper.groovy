@@ -160,7 +160,8 @@ def parseGitVersionInfo(output, changeBranch=null){
 	// If this is a branch which references a JIRA VECTWO ticket, shorten the prereleaselabel to just the ticket number without any other decoration to keep the package name short
 
 	// DEVOPSREQ-394 : Refactoring to include JIRA POSCON and VREC tickets
-	def issueType = ["VECTWO","POSCON","VREC"]
+	// DEVOPSREQ-1764 : Refactoring to include JIRA SYS tickets
+	def issueType = ["VECTWO","POSCON","VREC","SYS"]
 	for (issueTypeItem in issueType){
   		if (preReleaseLabel.contains(issueTypeItem)) {
 			def jiraRef=(preReleaseLabel =~ /($issueTypeItem\-{1}[0-9]*)(.*)/)
