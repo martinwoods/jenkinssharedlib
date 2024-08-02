@@ -258,7 +258,7 @@ def buildInformation (jenkinsURL, packageFile, space="Default") {
 		BuildNumber: "${env.BUILD_NUMBER}",
 		BuildUrl: "${env.BUILD_URL}",
 		VcsType: "Git",
-		VcsRoot: "http://bitbucket.rim.local:7990/projects/${ownerName}/repos/${projectName}",
+		VcsRoot: "https://bitbucket.org/retailinmotion/${projectName}",
 		Commits: getCommitDataMap()
 	]
 
