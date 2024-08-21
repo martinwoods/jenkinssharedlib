@@ -105,10 +105,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 				then 
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
 				elif [ -e /usr/local/bin/gitversion ]; 
-				then 
-					ls -ltr /src
-					/usr/local/bin/gitversion /src${subPath}
-					ls -ltr /src
+				then
+					/usr/local/bin/gitversion /src${subPath} > gitversion.txt
 				else
 					/usr/bin/dotnet /app/GitVersion.dll /src${subPath} > gitversion.txt
 				fi
