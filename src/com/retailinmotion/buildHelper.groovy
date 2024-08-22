@@ -101,7 +101,8 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\" -e IGNORE_NORMALISATION_GIT_HEAD_MOVE=1"){
 			sh '''
 				if [ -e /usr/lib/GitVersion/tools/GitVersion.exe ]; 
-				then 
+				then
+					whoami
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
 				elif [ -e /gitversion/gitversion ]; 
 				then
