@@ -103,10 +103,12 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 				if [ -e /usr/lib/GitVersion/tools/GitVersion.exe ]; 
 				then 
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
+				elif [ -e /gitversion/gitversion ]; 
+				then
+				    ls -ltr /gitversion
+					bash /gitversion/gitversion /src${subPath} > gitversion.txt
 				else
-					ls -ltr /gitversion
-					export DOTNET_BUNDLE_EXTRACT_BASE_DIR = "/gitversion"
-					/gitversion/gitversion /src${subPath} > gitversion.txt
+					/usr/bin/dotnet /app/GitVersion.dll /src${subPath} > gitversion.txt
 				fi
 				if [ $? -ne 0 ]; then cat gitversion.txt; fi
 			'''
