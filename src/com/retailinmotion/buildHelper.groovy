@@ -105,7 +105,6 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 					mono /usr/lib/GitVersion/tools/GitVersion.exe /src${subPath} > gitversion.txt
 				elif [ -e /gitversion/gitversion ]; 
 				then
-					whoami
 					cat /etc/default/jenkins
 				    ls -ltr /gitversion
 					/gitversion/gitversion help
