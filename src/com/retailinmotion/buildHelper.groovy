@@ -98,7 +98,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 		// Execute the command inside the given docker image (intended for use on linux systems)
 		// when using gitversion4, this was done using Mono to call the .exe file
 		// In gitversion5, dotnet core is used instead
-		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args -u root\" -e IGNORE_NORMALISATION_GIT_HEAD_MOVE=1"){
+		dockerContext.image(dockerImageOrToolPath).inside("-v \"$WORKSPACE:/src\" -e subPath=\"$subPath\" -e args=\"$args\" -e IGNORE_NORMALISATION_GIT_HEAD_MOVE=1"){
 			sh '''
 				if [ -e /usr/lib/GitVersion/tools/GitVersion.exe ]; 
 				then 
@@ -106,6 +106,7 @@ def getGitVersionInfo(dockerImageOrToolPath, dockerContext=null, subPath =null, 
 				elif [ -e /gitversion/gitversion ]; 
 				then
 					whoami
+					cat /etc/default/jenkins
 				    ls -ltr /gitversion
 					/gitversion/gitversion help
 				else
